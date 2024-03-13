@@ -1,0 +1,22 @@
+<strong>documentos.php</strong>
+. Alteração para recebimento de informações da classe do cloudinary
+
+<strong>modelos/Documentos.php</strong>
+. Desenvolvimento de alterações para que quando o arquivo que está sendo alterado ou cadastrado ter menos de 9,5 megas ele salva na classe do cloudinary e se passar desse tamanho salva na pasta local.
+
+<strong>Classes/bancoDeDados.php</strong>
+. Importação da classe do cloudinary.
+
+<strong>Classes/UserFunctions.php</strong>
+. Alteração na função de ler arquivo de configuração para receber informações do cloudinary.
+
+<strong>BANCO DE DADOS</strong>
+. Na tabela documentos foi acrescentado o campo do cloudinary onde quando é salvo no cloudinary recebe a informação de qual endereço foi utilizado de forma que fica mais fácil a localização depois.
+
+<strong>ARQUIVOS CONFiGURAÇÂO</strong>
+. Adicionar informações do cloudinary
+
+[ARQUIVOS]
+dns_arquivos_1 = "cloudinary://553346733577561:KZcRLgJyqU7UtPv_h5aMpNcFKi8@dw5jerbyf?secure=true"
+dns_arquivos_2 = "cloudinary://266345532352813:HgYJP-tuYqUVBk-i9Eo9LBrPi2c@dptzzccb6?secure=true"
+usar = "1"
