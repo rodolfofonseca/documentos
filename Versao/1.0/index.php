@@ -90,11 +90,12 @@ router_add('index', function(){
         // $atualizacao->executar_atualizacao();
         $atualizacao->exibir_mensagem('Começando a atualização do sistema');
         
-        $atualizacao->criar_tabela_banco_dados('tipo_despesa', (array) ['id_tipo_despesa' => (int) 0, 'descricao_tipo_despesa' => (string) '']);
-        $atualizacao->exibir_mensagem('Tabela tipo_despesa criada com sucesso!');
+        $atualizacao->criar_tabela_banco_dados('usuario');
+        // $atualizacao->criar_tabela_banco_dados('tipo_despesa', (array) ['id_tipo_despesa' => (int) 0, 'descricao_tipo_despesa' => (string) '']);
+        // $atualizacao->exibir_mensagem('Tabela tipo_despesa criada com sucesso!');
         
-        $atualizacao->criar_tabela_banco_dados('tipo_conta', (array) ['id_tipo_conta' => (int) 0, 'id_tipo_despesa' => (int) 0, 'descricao_tipo_conta' => (string) '']);
-        $atualizacao->exibir_mensagem('Tabela tipo_conta criada com sucesso!');
+        // $atualizacao->criar_tabela_banco_dados('tipo_conta', (array) ['id_tipo_conta' => (int) 0, 'id_tipo_despesa' => (int) 0, 'descricao_tipo_conta' => (string) '']);
+        // $atualizacao->exibir_mensagem('Tabela tipo_conta criada com sucesso!');
 
         // $atualizacao->copiar_arquivos();
         
