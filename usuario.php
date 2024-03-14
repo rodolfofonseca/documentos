@@ -5,6 +5,13 @@ require_once 'modelos/Usuario.php';
 //@note index
 router_add('index', function(){
     require_once 'includes/head.php';
+
+    $read_only = (string) 'true';
+
+    if($tipo_usuario == 'ADMINISTRADOR'){
+        $read_only = (string) 'false';
+    }
+
     ?>
     <script>
         function pesquisar_informacoes_usuario(){
@@ -41,11 +48,11 @@ router_add('index', function(){
                         <div class="row">
                             <div class="col-6 text-ceter">
                                 <label class="text">Nome Usuário</label>
-                                <input type="text" class="form-control custom-radius" id="nome_usuario" placeholder="Nome Usuário" readonly = "true"/>
+                                <input type="text" class="form-control custom-radius text-uppercase" id="nome_usuario" placeholder="Nome Usuário" <?php if($read_only == 'true'){echo "readonly = 'true'";} ?>/>
                             </div>
                             <div class="col-6 text-center">
                                 <label class="text">Login</label>
-                                <input type="text" class="form-control custom-radius" id="login" placeholder="Login Usuário" readonly="true"/>
+                                <input type="text" class="form-control custom-radius" id="login" placeholder="Login Usuário" <?php if($read_only == 'true'){echo "readonly = 'true'";} ?>/>
                             </div>
                         </div>
                         <br/>

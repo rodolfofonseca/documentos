@@ -1,8 +1,2 @@
-    <strong>includes/head.php</strong>
-    . Adicionado novo menu Tipo Despesa
-
-        <strong>dist/sistema.js</strong>
-    . Correção da classe date_create para retornar o mês correto
-
-    <strong>contas.php</strong>
-    . Alteração da ordem, para sempre abrir carregado as contas atrasadas.
+    <strong>Instalação concluída com sucesso!</strong>
+    . Sucesso no processo de instalação, agora você pode realizar logins no sistema.

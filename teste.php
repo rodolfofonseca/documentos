@@ -1,4 +1,4 @@
-<html>
+<!-- <html>
 <head>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
@@ -34,4 +34,8 @@
 <body>
     <div id="graficoPizza"></div>
 </body>
-</html>
+</html> -->
+
+<?php
+require_once 'Classes/bancoDeDados.php';
+?>

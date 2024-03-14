@@ -29,7 +29,7 @@ class Documentos{
     }
 
     private function modelo(){
-        return (array) ['id_documento' => (int) 0, 'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0];
+        return (array) ['id_documento' => (int) 0, 'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_usuario' => (int) 0,'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date'];
     }
 
     private function colocar_dados($dados){

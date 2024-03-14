@@ -94,7 +94,7 @@ router_add('index', function(){
 				</div>
 			</div>
 		</div>
-		<div class="row">
+		<!-- <div class="row">
 			<div class="col-2">
 				<div class="card">
 					<div class="card-body">
@@ -145,7 +145,7 @@ router_add('index', function(){
 					</div>
 				</div>
 			</div>
-		</div>
+		</div> -->
 	<?php
 	require_once 'includes/footer.php';
 	exit;

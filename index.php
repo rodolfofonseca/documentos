@@ -30,14 +30,15 @@ router_add('index', function(){
 });
 
 router_add('validar_login', function(){
-  $objeo_usuario = new Usuario();
-  $id_usuario = (int) $objeo_usuario->login_sistema($_REQUEST);
+  $objeto_usuario = new Usuario();
+  $usuario = (array) $objeto_usuario->login_sistema($_REQUEST);
 
-  if($id_usuario != 0){
+  if($usuario != []){
     session_start();
-    $_SESSION['id_usuario'] = (int) $id_usuario;
-    $_SESSION['login'] = (string) $_REQUEST['login'];
-    $_SESSION['senha'] = (string) $_REQUEST['senha_usuario'];
+    $_SESSION['id_usuario'] = (int) $usuario['id_usuario'];
+    $_SESSION['login'] = (string) $usuario['login'];
+    $_SESSION['senha'] = (string) $usuario['senha_usuario'];
+    $_SESSION['tipo_usuario'] = (string) $usuario['tipo'];
     $_SESSION['versao_sistema'] = (string) 'v0.0';
 
     $retorno = (array) model_one('sistema', ['id_sistema', '===', (int) 1]);

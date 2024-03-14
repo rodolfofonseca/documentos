@@ -54,8 +54,9 @@ class Usuario{
         if($checar_existencia == true){
             $retorno_usuario = (array) model_one($this->tabela(), ['id_usuario', '===', (int) $this->id_usuario]);
 
-            $retorno_usuario['senha'] = (string) $this->senha_usuario;
+            $retorno_usuario['senha_usuario'] = (string) $this->senha_usuario;
             $retorno_usuario['nome_usuario'] = (string) $this->nome_usuario;
+            $retorno_usuario['login'] = (string) $this->login;
 
             return (bool) model_update($this->tabela(), ['id_usuario', '===', (int) $this->id_usuario], model_parse($this->modelo(), $retorno_usuario));
         }else{
@@ -83,12 +84,12 @@ class Usuario{
             $retorno_senha =  (bool) password_verify($dados['senha_usuario'], $retorno_usuario['senha_usuario']);
 
             if($retorno_senha == true){
-                return (int) intval($retorno_usuario['id_usuario'], 10);
+                return (array) $retorno_usuario;
             }else{
-                return (int) 0;
+                return (array) [];
             }
         }else{
-            return (int) 0;
+            return (array) [];
         }
     }
 

@@ -1,21 +1,23 @@
 <?php
 session_start();
 date_default_timezone_set('America/Sao_Paulo');
-if((!isset ($_SESSION['login']) == true) && (!isset ($_SESSION['senha']) == true)){
+if ((!isset($_SESSION['login']) == true) && (!isset($_SESSION['senha']) == true)) {
     header('location:index.php');
-}else{
+} else {
     $vari = (string) 'tem sessão';
 }
 
-//Rua joão inacio de santos, 52 em frente com a magia eventos
 // $quantidade_notificacao = (int) contar_notificaoes();
 $quantidade_notificacao = (int) 50001;
 $versao_sistema = (string) $_SESSION['versao_sistema'];
 $retorno = (bool) false;
 $nome_usuario = (string) strtoupper($_SESSION['login']);
+$tipo_usuario = (string) $_SESSION['tipo_usuario'];
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -27,8 +29,8 @@ $nome_usuario = (string) strtoupper($_SESSION['login']);
     <link href="assets/extra-libs/c3/c3.min.css" rel="stylesheet">
     <link href="assets/extra-libs/jvector/jquery-jvectormap-2.0.2.css" rel="stylesheet" />
     <link href="dist/css/style.min.css" rel="stylesheet">
-	<link href="css/alerta_css.css" rel="stylesheet">
-	<script type="text/javascript" src="js/alerta.js"></script>
+    <link href="css/alerta_css.css" rel="stylesheet">
+    <script type="text/javascript" src="js/alerta.js"></script>
     <script type="text/javascript" src="dist/js/sistema.js?v=<?php echo filemtime('dist/js/sistema.js'); ?>"></script>
     <script type="text/javascript" src="dist/js/padrao.js"></script>
     <script type="text/javascript" src="js/basics.js?v=<?php echo filemtime('js/basics.js'); ?>"></script>
@@ -73,20 +75,20 @@ $nome_usuario = (string) strtoupper($_SESSION['login']);
                                 <span class="badge badge-primary notify-no rounded-circle">0</span>
                             </a>
                             <?php
-                             if ($quantidade_notificacao > 50000) {
+                            if ($quantidade_notificacao > 50000) {
                             ?>
                                 <div class="dropdown-menu dropdown-menu-left mailbox animated bounceInDown">
                                     <ul class="list-style-none">
                                         <li>
                                             <div class="message-center notifications position-relative">
-                                                    <a href="notificacao.php?rota=Visualizar&id_notificacao=1" class="message-item d-flex align-items-center border-bottom px-3 py-2">
-                                                        <div class="btn btn-danger rounded-circle btn-circle"><i data-feather="activity" class="text-white"></i></div>
-                                                        <div class="w-75 d-inline-block v-middle pl-2">
-                                                            <h6 class="message-title mb-0 mt-1">Atualização de Sistema</h6>
-                                                            <span class="font-12 text-nowrap d-block text-muted">Atualização realizada para a versão 1.0</span>
-                                                            <span class="font-12 text-nowrap d-block text-muted">10:25</span>
-                                                        </div>
-                                                    </a>
+                                                <a href="notificacao.php?rota=Visualizar&id_notificacao=1" class="message-item d-flex align-items-center border-bottom px-3 py-2">
+                                                    <div class="btn btn-danger rounded-circle btn-circle"><i data-feather="activity" class="text-white"></i></div>
+                                                    <div class="w-75 d-inline-block v-middle pl-2">
+                                                        <h6 class="message-title mb-0 mt-1">Atualização de Sistema</h6>
+                                                        <span class="font-12 text-nowrap d-block text-muted">Atualização realizada para a versão 1.0</span>
+                                                        <span class="font-12 text-nowrap d-block text-muted">10:25</span>
+                                                    </div>
+                                                </a>
                                             </div>
                                         </li>
                                     </ul>
@@ -142,36 +144,44 @@ $nome_usuario = (string) strtoupper($_SESSION['login']);
                                 </li>
                             </ul>
                         </li>
-                        <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="file-text" class="feather-icon"></i><span class="hide-menu">Cadastros</span></a>
-                            <ul aria-expanded="false" class="collapse  first-level base-level-line">
-                                <li class="sidebar-item"><a href="organizacao.php" class="sidebar-link"><span class="hide-menu">Organização</span></a></li>
-                                <li class="sidebar-item"><a href="armario.php" class="sidebar-link"><span class="hide-menu">Armário</span></a></li>
-                                <li class="sidebar-item"><a href="prateleira.php" class="sidebar-link"><span class="hide-menu">Prateleira</span></a></li>
-                                <li class="sidebar-item"><a href="caixa.php" class="sidebar-link"><span class="hide-menu">caixa</span></a></li>
-                                <li class="sidebar-item"><a href="contas_bancarias.php" class="sidebar-link"><span class="hide-menu">Contas Bancárias</span></a></li>
-                                <li class="sidebar-item"><a href="tipo_despesa.php" class="sidebar-link"><span class="hide-menu">Tipo Despesa / tipo Contas</span></a></li>
-                            </ul>
-                        </li>
-                        <!-- <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="truck" class="feather-icon"></i><span class="hide-menu">Pedidos</span></a>
-                            <ul aria-expanded="false" class="collapse first-level base-level-line">
-                                <li class="sidebar-item"><a href="pedido.php" class="sidebar-link"><span class="hide-menu">Pedido</span></a></li>
-                            </ul>
-                        </li> -->
-                        <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="book-open" class="feather-icon"></i><span class="hide-menu">Contas</span></a>
-                            <ul aria-expanded="false" class="collapse first-level base-level-line">
-                                <li class="sidebar-item"><a href="contas.php" class="sidebar-link"><span class="hide-menu">Contas</span></a></li>
-                            </ul>
-                        </li>
-                        <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="airplay" class="feather-icon"></i><span class="hide-menu">Lançamentos</span></a>
-                        <ul aria-expanded="false" class="collapse first-level base-level-line">
-                            <li class="sidebar-item"><a href="lancamentos.php" class="sidebar-link"><span class="hide-menu">Corrigir Lançamentos</span></a></li>
-                        </ul>
-                        <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="book-open" class="feather-icon"></i><span class="hide-menu">Relatórios</span></a>
-                            <ul aria-expanded="false" class="collapse first-level base-level-line">
-                                <li class="sidebar-item"><a href="relatorios_contabeis.php" class="sidebar-link"><span class="hide-menu">Relatórios Contábeis</span></a></li>
-                            </ul>
-                        </li>
-                    </li>
+
+                        <?php
+                        if ($tipo_usuario == 'ADMINISTRADOR') {
+                        ?>
+
+                            <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="file-text" class="feather-icon"></i><span class="hide-menu">Cadastros</span></a>
+                                <ul aria-expanded="false" class="collapse  first-level base-level-line">
+                                    <li class="sidebar-item"><a href="organizacao.php" class="sidebar-link"><span class="hide-menu">Organização</span></a></li>
+                                    <li class="sidebar-item"><a href="armario.php" class="sidebar-link"><span class="hide-menu">Armário</span></a></li>
+                                    <li class="sidebar-item"><a href="prateleira.php" class="sidebar-link"><span class="hide-menu">Prateleira</span></a></li>
+                                    <!-- <li class="sidebar-item"><a href="caixa.php" class="sidebar-link"><span class="hide-menu">caixa</span></a></li>
+                                    <li class="sidebar-item"><a href="contas_bancarias.php" class="sidebar-link"><span class="hide-menu">Contas Bancárias</span></a></li>
+                                    <li class="sidebar-item"><a href="tipo_despesa.php" class="sidebar-link"><span class="hide-menu">Tipo Despesa / tipo Contas</span></a></li> -->
+                                </ul>
+                            </li>
+                            <!-- <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="truck" class="feather-icon"></i><span class="hide-menu">Pedidos</span></a>
+                                <ul aria-expanded="false" class="collapse first-level base-level-line">
+                                    <li class="sidebar-item"><a href="pedido.php" class="sidebar-link"><span class="hide-menu">Pedido</span></a></li>
+                                </ul>
+                            </li> -->
+                            <!-- <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="book-open" class="feather-icon"></i><span class="hide-menu">Contas</span></a>
+                                <ul aria-expanded="false" class="collapse first-level base-level-line">
+                                    <li class="sidebar-item"><a href="contas.php" class="sidebar-link"><span class="hide-menu">Contas</span></a></li>
+                                </ul>
+                            </li>
+                            <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="airplay" class="feather-icon"></i><span class="hide-menu">Lançamentos</span></a>
+                                <ul aria-expanded="false" class="collapse first-level base-level-line">
+                                    <li class="sidebar-item"><a href="lancamentos.php" class="sidebar-link"><span class="hide-menu">Corrigir Lançamentos</span></a></li>
+                                </ul>
+                            <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="book-open" class="feather-icon"></i><span class="hide-menu">Relatórios</span></a>
+                                <ul aria-expanded="false" class="collapse first-level base-level-line">
+                                    <li class="sidebar-item"><a href="relatorios_contabeis.php" class="sidebar-link"><span class="hide-menu">Relatórios Contábeis</span></a></li>
+                                </ul>
+                            </li> -->
+                            </li>
+                        <?php
+                        }
+                        ?>
                     </ul>
                 </nav>
             </div>
