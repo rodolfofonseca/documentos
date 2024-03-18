@@ -53,7 +53,7 @@ class Prateleira{
     }
 
     /**
-     * Função responsável por retornar as informações de apenas um armário, de acordo com os parâmetros de filtros passados
+     * Função responsável por retornar as informações de apenas uma prateleira, de acordo com os parâmetros de filtros passados
      * @param array informações para pesquisadas ['filtro'];
      * @return array com as informações pesquisadas
      */

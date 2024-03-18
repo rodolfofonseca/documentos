@@ -304,6 +304,14 @@ var sistema = (function (window) {
     
             return option;
         }),
+        gerar_checkbox:(function(name, identificador){
+            let checkbox = document.createElement('input');
+            checkbox.setAttribute('type', 'checkbox');
+            checkbox.setAttribute('name', name);
+            checkbox.setAttribute('id', identificador);
+            checkbox.setAttribute('class', 'form-control custom-radius');
+            return checkbox;
+        }),
         remover_option:(function(select){
             let tamanho_select = select.length;
 
@@ -796,7 +804,7 @@ var sistema = (function (window) {
                 }
                 return true;
             },
-            telefone: function (e) {
+            telefone: function(e) {
                 var telefone = this.value.match(/[0-9]/g) || [];
                 var mascara = '';
                 if (telefone.length === 10) {

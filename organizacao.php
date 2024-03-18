@@ -44,7 +44,7 @@ router_add('index', function(){
                         tabela.appendChild(linha);
                     });
                 }
-            });
+            }, false);
         }
     </script>
     <div class="container-fluid">
@@ -62,11 +62,11 @@ router_add('index', function(){
                         <div class="row">
                             <div class="col-2 text-center">
                                 <label class="text">Código</label>
-                                <input type="text" sistema-mask="codigo" class="form-control custom-radius" id="codigo_organizacao" placeholder="Código"/>
+                                <input type="text" sistema-mask="codigo" class="form-control custom-radius" id="codigo_organizacao" placeholder="Código" onkeyup="pesquisar_organizacao();"/>
                             </div>
                             <div class="col-8 text-center">
                                 <label class="text">Descrição Organização</label>
-                                <input type="text" class="form-control custom-radius" id="descricao_organizacao" placeholder="Descrição Organização"/>
+                                <input type="text" class="form-control custom-radius" id="descricao_organizacao" placeholder="Descrição Organização" onkeyup="pesquisar_organizacao();"/>
                             </div>
                             <div class="col-2">
                                 <button class="btn btn-info botao_vertical_linha" onclick="pesquisar_organizacao();">Pesquisar</button>
@@ -94,6 +94,11 @@ router_add('index', function(){
             </div>
         </div>
     </div>
+    <script>
+        window.onload = function(){
+            pesquisar_organizacao();
+        }
+    </script>
     <?php
     require_once 'includes/footer.php';
 });

@@ -22,7 +22,7 @@ $tipo_usuario = (string) $_SESSION['tipo_usuario'];
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Sistema de sex shop">
+    <meta name="description" content="Sistema de Controle de documentos físicos e digitais">
     <meta name="author" content="Rodolfo Fonseca">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon.png">
     <title>Admin Smart</title>

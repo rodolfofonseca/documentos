@@ -1,7 +1,7 @@
-<footer class="footer text-center text-muted">
+<!-- <footer class="footer text-center text-muted">
     Todos os direitos reservados por Souza Informática.<br/>
     <?php echo $versao_sistema; ?>
-</footer>
+</footer> -->
 </div>
 </div>
 <script src="assets/libs/jquery/dist/jquery.min.js"></script>

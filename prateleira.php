@@ -2,7 +2,7 @@
 require_once 'Classes/bancoDeDados.php';
 require_once 'Modelos/Prateleira.php';
 
-//@note index
+//Rota index
 router_add('index', function(){
     require_once 'includes/head.php';
     ?>
@@ -49,11 +49,16 @@ router_add('index', function(){
                         linha.appendChild(sistema.gerar_td(['text-left'], prateleiras.nome_prateleira), 'inner');
                         linha.appendChild(sistema.gerar_td(['tex-center'], prateleiras.codigo_barras, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_prateleira_'+prateleiras.id_prateleira, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar(){cadastro_prateleira(prateleiras.id_prateleira);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('imprimir_codigo_barras_prateleira_'+prateleiras.id_prateleira, 'IMIPRIMIR CÓDIGO DE BARRAS', ['btn', 'btn-success'], function impressao(){imprimir_codigo_barras_prateleiras(prateleiras.id_prateleira)}), 'append'));
 
                         tabela.appendChild(linha);
                     });
                 }
-            });
+            }, false);
+        }
+
+        function imprimir_codigo_barras_prateleiras(codigo_prateleira){
+            window.open(sistema.url('/prateleira.php', {'rota':'impressao_codigo_barras_prateleira', 'codigo_prateleira':codigo_prateleira}), 'Impressão de código de barras', 'width=740px, height=500px, scrollbars=yes');
         }
     </script>
     <div class="container-fluid">
@@ -71,17 +76,17 @@ router_add('index', function(){
                         <div class="row">
                             <div class="col-3 text-center">
                                 <label class="text">Armário</label>
-                                <select id="codigo_armario" class="form-control custom-radius">
+                                <select id="codigo_armario" class="form-control custom-radius" onblur="pesquisar_prateleiras();">
                                     <option value="0">Selecione um armário</option>
                                 </select>
                             </div>
                             <div class="col-4 text-center">
                                 <label class="text">Nome Prateleira</label>
-                                <input type="text" class="form-control custom-radius text-uppercase" id="nome_prateleira" placeholder="Nome Prateleira"/>
+                                <input type="text" class="form-control custom-radius text-uppercase" id="nome_prateleira" placeholder="Nome Prateleira" onkeyup="pesquisar_prateleiras();"/>
                             </div>
                             <div class="col-3 text-center">
                                 <label class="text">Código Barras</label>
-                                <input type="text" id="codigo_barras" class="form-control custom-radius" sistema-mask="codigo" placeholder="Código Barras" maxlength="13"/>
+                                <input type="text" id="codigo_barras" class="form-control custom-radius" sistema-mask="codigo" placeholder="Código Barras" maxlength="13" onkeyup="pesquisar_prateleiras();"/>
                             </div>
                             <div class="col-2 text-center">
                                 <button class="btn btn-info botao_vertical_linha" onclick="pesquisar_prateleiras();">Pesquisar</button>
@@ -98,9 +103,10 @@ router_add('index', function(){
                                                 <th scope="col">Nome</th>
                                                 <th scope="col">Código Barras</th>
                                                 <th scope="col">Ação</th>
+                                                <th scope="col">Imprimir cíódigo de barras</th>
                                             </tr>
                                         </thead>
-                                        <tbody><tr><td colspan="4" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td></tr></tbody>
+                                        <tbody><tr><td colspan="5" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td></tr></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -113,6 +119,7 @@ router_add('index', function(){
     <script>
         window.onload = function(){
             pesquisar_armarios();
+            pesquisar_prateleiras();
         }
     </script>
     <?php
@@ -269,4 +276,98 @@ router_add('pesquisar_prateleira_todas', function(){
     echo json_encode(['dados' => (array) $objeto_prateleira->pesquisar_todos($dados)], JSON_UNESCAPED_UNICODE);
     exit;
 });
+
+/**
+ * Rota reponsável pela impressão de código de barras
+ * TODO imprime apenas um código de barras por vez.
+ */
+
+ router_add('impressao_codigo_barras_prateleira', function(){
+    $codigo_prateleira = (int) (isset($_REQUEST['codigo_prateleira']) ? intval($_REQUEST['codigo_prateleira'], 10):0);
+    $filtro = ['filtro' => (array) ['codigo_prateleira', '===', (int) $codigo_prateleira]];
+
+    $objeto_prateleira = new Prateleira();
+    $retorno_pesquisa_prateleira = (array) $objeto_prateleira->pesquisar($filtro);
+
+    $nome_prateleira = (string) '';
+    $codigo_barras = (string) '';
+
+    if(array_key_exists('nome_prateleira', $retorno_pesquisa_prateleira) == true){
+        $nome_prateleira = (string) $retorno_pesquisa_prateleira['nome_prateleira'];
+    }
+
+    if(array_key_exists('codigo_barras', $retorno_pesquisa_prateleira) == true){
+        $codigo_barras = (string) $retorno_pesquisa_prateleira['codigo_barras'];
+    }
+
+    require_once 'includes/head_relatorio.php';
+    ?>
+    <script>
+        const CODIGO_BARRAS = "<?php echo $codigo_barras; ?>";
+
+        function gerar_codigo_barras(){
+            JsBarcode("#barcode")
+                .options({
+                    font: "OCR-B"
+                })
+                .CODE128(CODIGO_BARRAS, {
+                    fontSize: 25,
+                    textMargin: 0
+                })
+                .blank(20)
+                .render();
+        }
+
+        function fechar_janela(){
+            window.close();
+        }
+
+        function imprimir_conteudo() {
+            document.querySelector('#botao_fechar').style.display = 'none';
+            document.querySelector('#botao_imprimir').style.display = 'none';
+            
+            let card_impressao = document.querySelector('#card_impressao');
+            
+            card_impressao.classList.remove();
+            card_impressao.classList.add('col-12');
+
+            window.print();
+
+            window.setTimeout(function() {
+                document.querySelector('#botao_fechar').style.display = 'block';
+                document.querySelector('#botao_imprimir').style.display = 'block';
+
+                card_impressao.classList.remove();
+                card_impressao.classList.add('col-8');
+            }, 500);
+        }
+    </script>
+    <div class="row">
+        <div class="col-8" id="card_impressao">
+            <div class="card text-center">
+                <div class="card-header">
+                    <?php echo $nome_prateleira; ?>
+                </div>
+                <div class="card-body">
+                    <svg id="barcode"></svg>
+                </div>
+            </div>
+        </div>
+        <div class="col-2" id="botao_imprimir">
+            <br />
+            <button class="btn btn-info btn-lg" onclick="imprimir_conteudo();">IMPRIMIR</button>
+        </div>
+        <div class="col-2" id="botao_fechar">
+            <br />
+            <button class="btn btn-danger btn-lg" onclick="fechar_janela();">FECHAR</button>
+        </div>
+    </div>
+    <script>
+        window.onload = function(){
+            gerar_codigo_barras();
+        }
+    </script>
+    <?php
+    require_once 'includes/footer_relatorio.php';
+ });
 ?>
