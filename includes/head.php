@@ -154,8 +154,8 @@ $tipo_usuario = (string) $_SESSION['tipo_usuario'];
                                     <li class="sidebar-item"><a href="organizacao.php" class="sidebar-link"><span class="hide-menu">Organização</span></a></li>
                                     <li class="sidebar-item"><a href="armario.php" class="sidebar-link"><span class="hide-menu">Armário</span></a></li>
                                     <li class="sidebar-item"><a href="prateleira.php" class="sidebar-link"><span class="hide-menu">Prateleira</span></a></li>
-                                    <!-- <li class="sidebar-item"><a href="caixa.php" class="sidebar-link"><span class="hide-menu">caixa</span></a></li>
-                                    <li class="sidebar-item"><a href="contas_bancarias.php" class="sidebar-link"><span class="hide-menu">Contas Bancárias</span></a></li>
+                                    <li class="sidebar-item"><a href="caixa.php" class="sidebar-link"><span class="hide-menu">caixa</span></a></li>
+                                    <!-- <li class="sidebar-item"><a href="contas_bancarias.php" class="sidebar-link"><span class="hide-menu">Contas Bancárias</span></a></li>
                                     <li class="sidebar-item"><a href="tipo_despesa.php" class="sidebar-link"><span class="hide-menu">Tipo Despesa / tipo Contas</span></a></li> -->
                                 </ul>
                             </li>

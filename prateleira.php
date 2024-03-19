@@ -284,7 +284,7 @@ router_add('pesquisar_prateleira_todas', function(){
 
  router_add('impressao_codigo_barras_prateleira', function(){
     $codigo_prateleira = (int) (isset($_REQUEST['codigo_prateleira']) ? intval($_REQUEST['codigo_prateleira'], 10):0);
-    $filtro = ['filtro' => (array) ['codigo_prateleira', '===', (int) $codigo_prateleira]];
+    $filtro = ['filtro' => (array) ['id_prateleira', '===', (int) $codigo_prateleira]];
 
     $objeto_prateleira = new Prateleira();
     $retorno_pesquisa_prateleira = (array) $objeto_prateleira->pesquisar($filtro);

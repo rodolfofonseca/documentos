@@ -2,7 +2,9 @@
 require_once 'Classes/bancoDeDados.php';
 require_once 'Modelos/Documentos.php';
 
-//@note index
+/**
+ * Rota index, primeira rota do sistema, 
+ */
 router_add('index', function(){
     require_once 'includes/head.php';
     $cadastro_documento = (string) (isset($_REQUEST['cadastro_documento']) ? (string) $_REQUEST['cadastro_documento']:'false');
@@ -34,7 +36,7 @@ router_add('index', function(){
 
                 if(tamanho_retorno == 0){
                     let linha = document.createElement('tr');
-                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM DOCUMENTO ENCONTRADO COM OS FILTROS PASSADOS!', 'inner', true, 5));
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM DOCUMENTO ENCONTRADO COM OS FILTROS PASSADOS!', 'inner', true, 6));
                     tabela.appendChild(linha);
                 }else{
                     sistema.each(documentos, function(index, documento){
@@ -50,7 +52,7 @@ router_add('index', function(){
                         tabela.appendChild(linha);
                     });
                 }
-            });
+            }, false);
         }
     </script>
     <div class="container-fluid">
@@ -69,15 +71,15 @@ router_add('index', function(){
                         <div class="row">
                             <div class="col-2 text-center">
                                 <label class="text">Código</label>
-                                <input type="text" class="form-control custom-radius" id="codigo_documento" sistema-mask="codigo" placeholder="Código Documento"/>
+                                <input type="text" class="form-control custom-radius" id="codigo_documento" sistema-mask="codigo" placeholder="Código Documento" onkeyup="pesquisar_documento();"/>
                             </div>
                             <div class="col-7 text-center">
                                 <label class="text">Nome</label>
-                                <input type="text" class="form-control custom-radius text-uppercase" id="nome_documento" placeholder="Nome Documento"/>
+                                <input type="text" class="form-control custom-radius text-uppercase" id="nome_documento" placeholder="Nome Documento" onkeyup="pesquisar_documento();"/>
                             </div>
                             <div class="col-3 text-center">
                                 <label class="text">Código Barras</label>
-                                <input type="text" class="form-control custom-radius" id="codigo_barras" sistema-mask="codigo" placeholder="Código Barras" maxlength="13"/>
+                                <input type="text" class="form-control custom-radius" id="codigo_barras" sistema-mask="codigo" placeholder="Código Barras" maxlength="13" onkeyup="pesquisar_documento();"/>
                             </div>
                         </div>
                         <br/>
@@ -132,7 +134,9 @@ router_add('index', function(){
     require_once 'includes/footer.php';
 });
 
-//@note salvar_dados_documentos
+/**
+ * Rota responsável por realizar o cadastro e alteração de novos documentos no sistema.
+ */
 router_add('salvar_dados_documentos', function(){
     $codigo_documento = (int) (isset($_REQUEST['codigo_documento']) ? (int) intval($_REQUEST['codigo_documento'], 10):0);
     require_once 'includes/head.php';
@@ -140,11 +144,12 @@ router_add('salvar_dados_documentos', function(){
     <script>
         let CODIGO_DOCUMENTO = <?php echo $codigo_documento; ?>;
 
-        function valor(parametro){
-            // if(parametro == 1){
-            //     return false;
-            // }
+        function valor(parametro, sair){
             parametro.preventDefault();
+
+            if(sair == true){
+                window.location.href = sistema.url('/documentos.php', {'rota':'index'});
+            }
         }
 
         function selecionar_informacao(tipo, valor){
@@ -323,7 +328,7 @@ router_add('salvar_dados_documentos', function(){
                                             <input type="text" class="form-control custom-radius text-center" id="codigo_armario" name="codigo_armario" value="0" readonly="true"/>
                                         </div>
                                         <div class="col-6">
-                                            <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_armario" onclick="valor(event);">Pesquisar</button>
+                                            <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_armario" onclick="valor(event, false);">Pesquisar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -334,7 +339,7 @@ router_add('salvar_dados_documentos', function(){
                                             <input type="text" class="form-control custom-radius text-center" id="codigo_prateleira" name="codigo_prateleira" value="0" readonly="true"/>
                                         </div>
                                         <div class="col-6">
-                                            <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_prateleira" onclick="valor(event);">Pesquisar</button>
+                                            <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_prateleira" onclick="valor(event, false);">Pesquisar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -345,7 +350,7 @@ router_add('salvar_dados_documentos', function(){
                                             <input type="text" class="form-control custom-radius text-center" id="codigo_caixa" name="codigo_caixa" value="0" readonly="true"/>
                                         </div>
                                         <div class="col-6">
-                                            <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_caixa" onclick="valor(event);">Pesquisar</button>
+                                            <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_caixa" onclick="valor(event, false);">Pesquisar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -356,7 +361,7 @@ router_add('salvar_dados_documentos', function(){
                                             <input type="text" class="form-control custom-radius text-center" id="codigo_organizacao" name="codigo_organizacao" value="0" readonly="true"/>
                                         </div>
                                         <div class="col-6">
-                                            <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_organizacao" onclick="valor(event);">Pesquisar</button>
+                                            <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_organizacao" onclick="valor(event, false);">Pesquisar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -380,6 +385,9 @@ router_add('salvar_dados_documentos', function(){
                             <div class="row">
                                 <div class="col-3">
                                     <input type="submit" class="btn btn-info" value="Salvar Dados"/>
+                                </div>
+                                <div class="col-3">
+                                    <button class="btn btn-secondary" onclick="valor(event, true);">Retornar</button>
                                 </div>
                             </div>
                         </form>
