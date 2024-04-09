@@ -296,6 +296,7 @@ router_add('salvar_dados_documentos', function(){
                         <br/>
                         <!-- onsubmit="valor(0); return false;" -->
                         <form method="POST" accept="documentos.php" enctype="multipart/form-data" >
+                            <input type="hidden" name="login_usuario" id="login_usuario" value="<?php echo $nome_usuario; ?>"/>
                             <input type="hidden" name="rota" id="rota" value="salvar_dados"/> 
                             <input type="hidden" name="quantidade_downloads" id="quantidade_downloads"/> 
                             <div class="row">
@@ -667,8 +668,8 @@ router_add('baixar_documento', function(){
         $extensao = (array) model_one('tipo_arquivo', ['id_tipo_arquivo', '===', (int) intval($informacoes_documento['id_tipo_arquivo'], 10)]);
 
         if(empty($extensao) == false){
-            if(array_key_exists('tipo', $extensao) == true){
-                $nome_documento = (string) $nome_documento.$extensao['tipo'];
+            if(array_key_exists('tipo_arquivo', $extensao) == true){
+                $nome_documento = (string) $nome_documento.$extensao['tipo_arquivo'];
             }
         }
     }

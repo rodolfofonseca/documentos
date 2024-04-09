@@ -41,7 +41,7 @@ router_add('index', function () {
 
                 if (tamanho_retorno < 1) {
                     let linha = document.createElement('tr');
-                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM ARMÁRIO ENCONTRADO', 'inner', true, 4));
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM ARMÁRIO ENCONTRADO', 'inner', true, 5));
                     tabela.appendChild(linha);
                 } else {
                     sistema.each(retorno_armario, function(contador, armario) {

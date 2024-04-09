@@ -28,7 +28,7 @@ router_add('index', function () {
 
                 if (tamanho_retorno == 0) {
                     let linha = document.createElement('tr');
-                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA CAIXA ENCONTRADA COM OS FILTROS INFORMADOS', 'inner', true, 4));
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA CAIXA ENCONTRADA COM OS FILTROS INFORMADOS', 'inner', true, 5));
                     tabela.appendChild(linha);
                 } else {
                     sistema.each(caixas, function(index, caixa) {
@@ -295,7 +295,9 @@ router_add('pesquisar_caixa', function () {
     exit;
 });
 
-//@audit pesquisar_caixa_todas
+/**
+ * Rota responsável por realizar a pesquisa de todas as caixas cadastradas no sistema e retornar as informações para a rota que realizou o chamado
+ */
 router_add('pesquisar_caixa_todas', function () {
     $id_caixa = (int) (isset($_REQUEST['codigo_caixa']) ? (int) intval($_REQUEST['codigo_caixa'], 10) : 0);
     $id_prateleira = (int) (isset($_REQUEST['codigo_prateleira']) ? (int) intval($_REQUEST['codigo_prateleira'], 10) : 0);
@@ -316,7 +318,7 @@ router_add('pesquisar_caixa_todas', function () {
     }
 
     if ($codigo_barras != '') {
-        array_push($filtro, ['codigo_barras', '===', (string) $codigo_barras]);
+        array_push($filtro, ['codigo_barras', '=', (string) $codigo_barras]);
     }
 
     array_push($filtro, ['nome_caixa', '=', (string) $nome_caixa]);
@@ -327,6 +329,9 @@ router_add('pesquisar_caixa_todas', function () {
     exit;
 });
 
+/**
+ * Rota responsável por realizar a impressão dos código de barras.
+ */
 router_add('impressao_codigo_barra_caixa', function () {
     $codigo_caixa = (int) (isset($_REQUEST['codigo_caixa']) ? intval($_REQUEST['codigo_caixa'], 10) : 0);
     $filtro = (array) ['filtro' => (array) ['id_caixa', '===', (int) $codigo_caixa]];

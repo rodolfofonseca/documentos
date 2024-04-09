@@ -39,7 +39,7 @@ router_add('index', function(){
 
                 if(tamanho_retorno < 1){
                     let linha = document.createElement('tr');
-                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA PRATELEIRA ENCONTRADA COM OS FILTROS INFORMADOS', 'inner', true, 4));
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA PRATELEIRA ENCONTRADA COM OS FILTROS INFORMADOS', 'inner', true, 5));
                     tabela.appendChild(linha);
                 }else{
                     sistema.each(retorno_prateleira, function(contador, prateleiras){
@@ -244,7 +244,9 @@ router_add('pesquisar_prateleira', function(){
     exit;
 });
 
-//@audit pesquisar_prateleira_todas
+/**
+ * Rota responsável por montar o filtro de pesquisa e realizar a pesquisa retornando as informações para a rota que fez a solicitação.
+ */
 router_add('pesquisar_prateleira_todas', function(){
     $objeto_prateleira = new Prateleira();
     $codigo_prateleira = (int) (isset($_REQUEST['codigo_prateleira']) ? (int) intval($_REQUEST['codigo_prateleira'], 10):0);
@@ -262,7 +264,7 @@ router_add('pesquisar_prateleira_todas', function(){
     }
 
     if($codigo_barras != ''){
-        array_push($filtro, ['codigo_barras', '===', (string) $codigo_barras]);
+        array_push($filtro, ['codigo_barras', '=', (string) $codigo_barras]);
     }
 
     if($codigo_armario != 0){

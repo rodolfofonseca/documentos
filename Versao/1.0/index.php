@@ -100,9 +100,9 @@ router_add('index', function(){
           $atualizacao->exibir_mensagem('Falha ao cadastrar o usuário administrador!');
         }
 
-        $atualizacao->criar_tabela_banco_dados('sistema', (array) ['id_sistema' => (int) 0, 'versao_sistema' => (string) '']);
+        $atualizacao->criar_tabela_banco_dados('sistema', (array) ['id_sistema' => (int) 0, 'versao_sistema' => (string) '', 'chave_api' => (string) '', 'cidade' => (string) '']);
 
-        model_insert('sistema', ['id_sistema' => (int) model_next('sistema', 'id_sistema'), 'versao_sistema' => (string) '1.0']);
+        model_insert('sistema', ['id_sistema' => (int) model_next('sistema', 'id_sistema'), 'versao_sistema' => (string) '1.0', 'chave_api' => (string) '', 'cidade' => (string) '']);
 
         $atualizacao->criar_tabela_banco_dados('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) 0, 'descricao' => (string) '', 'tipo_arquivo' => (string) '', 'endereco_icone' => (string) '']);
 
