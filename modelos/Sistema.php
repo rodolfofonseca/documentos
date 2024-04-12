@@ -16,8 +16,8 @@ Class Sistema{
     }
 
     private function colocar_dados($dados){
-        if(array_key_exists('id_sistema', $dados) == true){
-            $this->id_sistema = (int) intval($dados['id_sistema'], 10);
+        if(array_key_exists('codigo_sistema', $dados) == true){
+            $this->id_sistema = (int) intval($dados['codigo_sistema'], 10);
         }
 
         if(array_key_exists('versao_sistema', $dados) == true){
@@ -28,7 +28,7 @@ Class Sistema{
             $this->chave_api = (string) $dados['chave_api'];
         }
 
-        if(array_key_exists('cidade', $dados['cidade']) == true){
+        if(array_key_exists('cidade', $dados) == true){
             $this->cidade = (string) $dados['cidade'];
         }
     }

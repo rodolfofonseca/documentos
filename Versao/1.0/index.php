@@ -104,7 +104,7 @@ router_add('index', function(){
 
         model_insert('sistema', ['id_sistema' => (int) model_next('sistema', 'id_sistema'), 'versao_sistema' => (string) '1.0', 'chave_api' => (string) '', 'cidade' => (string) '']);
 
-        $atualizacao->criar_tabela_banco_dados('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) 0, 'descricao' => (string) '', 'tipo_arquivo' => (string) '', 'endereco_icone' => (string) '']);
+        $atualizacao->criar_tabela_banco_dados('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) 0, 'descricao' => (string) '', 'tipo_arquivo' => (string) '', 'usar' => (string) '', 'endereco_documento' => (string) '']);
 
         $atualizacao->criar_tabela_banco_dados('armario', (array) ['id_armario' => (int) 0, 'nome_armario' => (string) '', 'codigo_barras' => (string) '']);
 
@@ -116,22 +116,22 @@ router_add('index', function(){
 
         $atualizacao->criar_tabela_banco_dados('prateleira', (array) ['id_prateleira' => (int) 0, 'id_armario' => (int) 0, 'nome_prateleira' => (string) '', 'codigo_barras' => (string) '']);
 
-        $atualizacao->exibir_mensagem('Preparando para adicionar tipo de arquivos ao banco de dados!');
+        // $atualizacao->exibir_mensagem('Preparando para adicionar tipo de arquivos ao banco de dados!');
 
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WINRAR', 'tipo_arquivo' => (string) '.rar', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'BIN', 'tipo_arquivo' => (string) '.bin', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'IMAGEM', 'tipo_arquivo' => (string) '.jpeg', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WINRAR', 'tipo_arquivo' => (string) '.zip', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'IMAGEM', 'tipo_arquivo' => (string) '.jpg', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'PDF', 'tipo_arquivo' => (string) '.pdf', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WORD', 'tipo_arquivo' => (string) '.doc', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WORD', 'tipo_arquivo' => (string) '.odt', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'ASTAH', 'tipo_arquivo' => (string) '.asta', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WORD', 'tipo_arquivo' => (string) '.docx', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'IAMGEM', 'tipo_arquivo' => (string) '.png', 'endereco_icone' => (string) '']);
-        model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'PHOTOSHOP', 'tipo_arquivo' => (string) '.psd', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WINRAR', 'tipo_arquivo' => (string) '.rar', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'BIN', 'tipo_arquivo' => (string) '.bin', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'IMAGEM', 'tipo_arquivo' => (string) '.jpeg', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WINRAR', 'tipo_arquivo' => (string) '.zip', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'IMAGEM', 'tipo_arquivo' => (string) '.jpg', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'PDF', 'tipo_arquivo' => (string) '.pdf', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WORD', 'tipo_arquivo' => (string) '.doc', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WORD', 'tipo_arquivo' => (string) '.odt', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'ASTAH', 'tipo_arquivo' => (string) '.asta', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WORD', 'tipo_arquivo' => (string) '.docx', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'IAMGEM', 'tipo_arquivo' => (string) '.png', 'endereco_icone' => (string) '']);
+        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'PHOTOSHOP', 'tipo_arquivo' => (string) '.psd', 'endereco_icone' => (string) '']);
 
-        $atualizacao->exibir_mensagem('Tipo de arquivos cadastrados com sucesso!');
+        // $atualizacao->exibir_mensagem('Tipo de arquivos cadastrados com sucesso!');
 
         model_delete('usuario', (array) ['id_usuario', '===', (int) 2]);
         model_delete('sistema', (array) ['id_sistema', '===', (int) 2]);
