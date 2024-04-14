@@ -5,6 +5,8 @@ require_once 'Modelos/TipoArquivo.php';
 
 router_add('index', function () {
     require_once 'includes/head.php';
+    
+    $id_sistema = (int) intval($_SESSION['id_sistema'], 10);
 ?>
     <script>
         /**
@@ -70,11 +72,11 @@ router_add('index', function () {
                         </div>
                     </div>
                     <div class="card-body">
-                        <input type="hidden" name="id_sistema" id="id_sistema" value="" />
+                        <input type="hidden" name="id_sistema" id="id_sistema" value="<?php echo $id_sistema; ?>" />
                         <div class="row">
                             <div class="col-2 text-center">
                                 <label>VERSÃO SISTEMA ATUAL</label>
-                                <input type="text" class="form-control custom-radius text-center" name="versao_sistema" id="versao_sistema" value="1.0" readonly />
+                                <input type="text" class="form-control custom-radius text-center" name="versao_sistema" id="versao_sistema" value="0.0" readonly />
                             </div>
                             <div class="col-5 text-center">
                                 <label>CHAVE DE API PREVISÃO TEMPO</label>
@@ -160,13 +162,17 @@ router_add('index', function () {
 
     <script>
         window.onload = function() {
+            let id_sistema = document.querySelector('#id_sistema').value;
+
             sistema.request.post('/sistema.php', {
-                'rota': 'pesquisar_dados_sistema'
+                'rota': 'pesquisar_dados_sistema',
+                'codigo_sistema':id_sistema
             }, function(retorno) {
-                document.querySelector('#id_sistema').value = retorno.dados.id_sistema;
-                document.querySelector('#versao_sistema').value = retorno.dados.versao_sistema;
-                document.querySelector('#chave_api').value = retorno.dados.chave_api;
-                document.querySelector('#cidade').value = retorno.dados.cidade;
+                let dados_sistema = retorno.dados;
+                    document.querySelector('#id_sistema').value = retorno.dados.id_sistema;
+                    document.querySelector('#versao_sistema').value = retorno.dados.versao_sistema;
+                    document.querySelector('#chave_api').value = retorno.dados.chave_api;
+                    document.querySelector('#cidade').value = retorno.dados.cidade;         
 
                 montar_select_tipo_arquivo();
             });
@@ -192,7 +198,9 @@ router_add('enviar_dados', function () {
  * Rota responsável por realizar a pesquisa das informações do sistema para o usuário visualizar
  */
 router_add('pesquisar_dados_sistema', function () {
-    $filtro = (array) ['filtro' => (array) ['id_sistema', '===', (int) 1]];
+    $id_sistema = (isset($_REQUEST['codigo_sistema']) ? (int) intval($_REQUEST['codigo_sistema'], 10):0);
+
+    $filtro = (array) ['filtro' => (array) ['id_sistema', '===', (int) $id_sistema]];
 
     $objeto_sistema = new Sistema();
 

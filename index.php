@@ -1,6 +1,7 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
 require_once 'modelos/Usuario.php';
+require_once 'modelos/Sistema.php';
 
 router_add('index', function(){
     ?>
@@ -40,19 +41,22 @@ router_add('validar_login', function(){
     $_SESSION['senha'] = (string) $usuario['senha_usuario'];
     $_SESSION['tipo_usuario'] = (string) $usuario['tipo'];
     $_SESSION['versao_sistema'] = (string) 'v0.0';
+    $_SESSION['id_empresa'] = (int) $usuario['id_empresa'];
+    $_SESSION['id_sistema'] = (int) 0;
+    $_SESSION['versao_sistema'] = (string) '0.00';
 
-    $retorno = (array) model_one('sistema', ['id_sistema', '===', (int) 1]);
+    $objeto_sistema = new Sistema();
+    $filtro_sistema['filtro'] = (array) ['id_empresa', '===', (int) $usuario['id_empresa']];
+    $retorno_sistema = (array) $objeto_sistema->pesquisar($filtro_sistema);
 
-    if(empty($retorno) == false){
-      $versao_sistema = (string) 'v0.0';
+    if(empty($retorno_sistema) == false){
+      $_SESSION['id_sistema'] = (int) $retorno_sistema['id_sistema'];
+      $_SESSION['versao_sistema'] = (string) $retorno_sistema['versao_sistema'];
       
-      if(array_key_exists('versao_sistema', $retorno) == true){
-        $versao_sistema = (string) $retorno['versao_sistema'];
-      }
-
-      $_SESSION['versao_sistema'] = (string) $versao_sistema;
+      header('location:dashboard.php');
+    }else{
+      header('location:index.php');
     }
-    header('location:dashboard.php');
   }else{
     header('location:index.php');
   }

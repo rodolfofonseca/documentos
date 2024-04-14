@@ -9,9 +9,11 @@ require_once 'Classes/Sistema/db.php';
 class Documentos
 {
     private $id_documento;
+    private $id_empresa;
     private $id_caixa;
     private $id_tipo_arquivo;
     private $id_organizacao;
+    private $id_usuario;
     private $nome_documento;
     private $descricao;
     private $endereco;
@@ -37,7 +39,7 @@ class Documentos
 
     private function modelo()
     {
-        return (array) ['id_documento' => (int) 0, 'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_usuario' => (int) 0, 'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date'];
+        return (array) ['id_documento' => (int) 0, 'id_empresa' => (int) 0,'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_usuario' => (int) 0, 'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date'];
     }
 
     private function colocar_dados($dados)

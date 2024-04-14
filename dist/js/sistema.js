@@ -235,13 +235,15 @@ var sistema = (function (window) {
             
             return arr[0];
         }),
-        verificar_status:(function(status, arquivo){
+        verificar_status:(function(status, arquivo = null){
             if(status == true){
                 Swal.fire('Sucesso!', 'Operação realizada com sucesso!', 'success');
 
-                window.setTimeout(function(){
-                    window.location.href = arquivo;
-                }, 2500);
+                if(arquivo != null){
+                    window.setTimeout(function(){
+                        window.location.href = arquivo;
+                    }, 2500);
+                }
             }else{
                 Swal.fire('Erro', 'Erro durante a operação!', 'error');
             }

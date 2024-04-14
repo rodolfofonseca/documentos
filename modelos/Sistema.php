@@ -3,6 +3,7 @@ require_once 'Classes/bancoDeDados.php';
 
 Class Sistema{
     private $id_sistema;
+    private $id_empresa;
     private $versao_sistema;
     private $chave_api;
     private $cidade;
@@ -12,12 +13,16 @@ Class Sistema{
     }
 
     private function modelo(){
-        return (array) ['id_sistema' => (int) 0, 'versao_sistema' => (string) '', 'chave_api' => (string) '', 'cidade' => (string) ''];
+        return (array) ['id_sistema' => (int) 0, 'id_empresa' => (int) 0,'versao_sistema' => (string) '1.0', 'chave_api' => (string) '', 'cidade' => (string) ''];
     }
 
     private function colocar_dados($dados){
         if(array_key_exists('codigo_sistema', $dados) == true){
             $this->id_sistema = (int) intval($dados['codigo_sistema'], 10);
+        }
+
+        if(array_key_exists('codigo_empresa', $dados) == true){
+            $this->id_empresa = (int) intval($dados['codigo_empresa'], 10);
         }
 
         if(array_key_exists('versao_sistema', $dados) == true){
@@ -36,12 +41,18 @@ Class Sistema{
     public function salvar_dados($dados){
         $this->colocar_dados($dados);
         $retorno = (bool) false;
-        $checar_existencia = (bool) model_check($this->tabela(), ['id_sistema', '===', (int) 1]);
+        $checar_existencia = (bool) model_check($this->tabela(), ['id_sistema', '===', (int) $this->id_sistema]);
 
         if($checar_existencia == true){
-            $retorno = (bool) model_update($this->tabela(), ['id_sistema', '===', (int) $this->id_sistema], model_parse($this->modelo(), ['id_sistema' => (int) $this->id_sistema, 'versao_sistema' => (string) $this->versao_sistema, 'chave_api' => (string) $this->chave_api, 'cidade' => (string) $this->cidade]));
+            $retorno_pesquisa = (array) model_one($this->tabela(), ['id_sistema', '===', (int) $this->id_sistema]);
+            
+            $retorno_pesquisa['versao_sistema'] = (string) $this->versao_sistema;
+            $retorno_pesquisa['chave_api'] = (string) $this->chave_api;
+            $retorno_pesquisa['cidade'] = (string) $this->cidade;
+
+            $retorno = (bool) model_update((string) $this->tabela(), (array) ['id_sistema', '===', (int) $this->id_sistema], (array) model_parse((array) $this->modelo(), (array) $retorno_pesquisa));
         }else{
-            $retorno = (bool) model_insert($this->tabela(), model_parse($this->modelo(), ['id_sistema' => (int) 1, 'versao_sistema' => (string) '1.0']));
+            $retorno = (bool) model_insert($this->tabela(), model_parse($this->modelo(), ['id_sistema' => (int) model_next($this->tabela(), 'id_empresa'), 'id_empresa' => (int) $this->id_empresa, 'versao_sistema' => (string) '1.0']));
         }
 
         return (bool) $retorno;

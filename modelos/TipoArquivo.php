@@ -5,6 +5,7 @@ class TipoArquivo
 {
 
     private $id_tipo_arquivo;
+    private $id_empresa;
     private $descricao;
     private $tipo_arquivo;
     private $usar;
