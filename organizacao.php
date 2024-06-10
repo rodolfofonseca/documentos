@@ -66,7 +66,7 @@ router_add('index', function(){
                             </div>
                             <div class="col-8 text-center">
                                 <label class="text">Descrição Organização</label>
-                                <input type="text" class="form-control custom-radius" id="descricao_organizacao" placeholder="Descrição Organização" onkeyup="pesquisar_organizacao();"/>
+                                <input type="text" class="form-control custom-radius text-uppercase" id="descricao_organizacao" placeholder="Descrição Organização" onkeyup="pesquisar_organizacao();"/>
                             </div>
                             <div class="col-2">
                                 <button class="btn btn-info botao_vertical_linha" onclick="pesquisar_organizacao();">Pesquisar</button>
@@ -137,7 +137,7 @@ router_add('salvar_dados', function(){
                             </div>
                             <div class="col-8 text-center">
                                 <label class="text">Descrição Organização</label>
-                                <input type="text" class="form-control custom-radius" id="descricao_organizacao" placeholder="Descrição Organização"/>
+                                <input type="text" class="form-control custom-radius text-uppercase" id="descricao_organizacao" placeholder="Descrição Organização"/>
                             </div>
                             <div class="col-2">
                                 <button class="btn btn-info botao_vertical_linha" onclick="salvar_dados();">Salvar Dados</button>

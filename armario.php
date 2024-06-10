@@ -20,10 +20,10 @@ router_add('index', function () {
         function pesquisar_armario() {
             let codigo_armario = parseInt(document.querySelector('#codigo_armario').value, 10);
             let nome_armario = document.querySelector('#nome_armario').value;
-
             if (isNaN(codigo_armario)) {
                 codigo_armario = 0;
             }
+
 
             sistema.request.post('/armario.php', {
                 'rota': 'pesquisar_armario_todos',
@@ -87,7 +87,7 @@ router_add('index', function () {
                             </div>
                             <div class="col-8 text-center">
                                 <label class="text">Nome Armário</label>
-                                <input type="text" class="form-control custom-radius" id="nome_armario" placeholder="Nome Armário" onkeyup="pesquisar_armario();" />
+                                <input type="text" class="form-control custom-radius text-uppercase" id="nome_armario" placeholder="Nome Armário" onkeyup="pesquisar_armario();" />
                             </div>
                             <div class="col-2">
                                 <button class="btn btn-info botao_vertical_linha" onclick="pesquisar_armario();">Pesquisar</button>
@@ -174,7 +174,7 @@ router_add('salvar_alterar_dados', function () {
                             </div>
                             <div class="col-7 text-center">
                                 <label class="text">Nome Armário</label>
-                                <input type="text" id="nome_armario" class="form-control custom-radius" placeholder="Nome Armário" />
+                                <input type="text" id="nome_armario" class="form-control custom-radius text-uppercase" placeholder="Nome Armário" />
                             </div>
                             <div class="col-3 text-center">
                                 <label class="text">Código Barras</label>

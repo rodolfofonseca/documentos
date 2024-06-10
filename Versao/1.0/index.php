@@ -89,32 +89,34 @@ router_add('index', function(){
       <?php
         $atualizacao->exibir_mensagem('Começando a atualização do sistema');
         
-        $atualizacao->criar_tabela_banco_dados('usuario', (array) ['id_usuario' => (int) 0, 'nome_usuario' => (string) '', 'login' => (string) '', 'senha_usuario' => (string) '', 'tipo' => (string) '']);
+        // $atualizacao->criar_tabela_banco_dados('usuario', (array) ['id_usuario' => (int) 0, 'nome_usuario' => (string) '', 'login' => (string) '', 'senha_usuario' => (string) '', 'tipo' => (string) '']);
         
-        $usuario_adm = (array) ['id_usuario' => (int) model_next('usuario', 'id_usuario'), 'nome_usuario' => (string) 'ADMINITRADOR MASTER', 'login' => (string) 'adm', 'senha_usuario' => (string) password_hash('adm', PASSWORD_DEFAULT, ['const' => 8]), 'tipo' => (string)'ADMINISTRADOR'];
-        $retorno = (bool) model_insert('usuario', $usuario_adm);
+        // $usuario_adm = (array) ['id_usuario' => (int) model_next('usuario', 'id_usuario'), 'nome_usuario' => (string) 'ADMINITRADOR MASTER', 'login' => (string) 'adm', 'senha_usuario' => (string) password_hash('adm', PASSWORD_DEFAULT, ['const' => 8]), 'tipo' => (string)'ADMINISTRADOR'];
+        // $retorno = (bool) model_insert('usuario', $usuario_adm);
 
-        if($retorno == true){
-          $atualizacao->exibir_mensagem('Usuario administrador cadastrado com sucesso!');
-        }else{
-          $atualizacao->exibir_mensagem('Falha ao cadastrar o usuário administrador!');
-        }
+        // if($retorno == true){
+        //   $atualizacao->exibir_mensagem('Usuario administrador cadastrado com sucesso!');
+        // }else{
+        //   $atualizacao->exibir_mensagem('Falha ao cadastrar o usuário administrador!');
+        // }
 
-        $atualizacao->criar_tabela_banco_dados('sistema', (array) ['id_sistema' => (int) 0, 'versao_sistema' => (string) '', 'chave_api' => (string) '', 'cidade' => (string) '']);
+        // $atualizacao->criar_tabela_banco_dados('sistema', (array) ['id_sistema' => (int) 0, 'versao_sistema' => (string) '', 'chave_api' => (string) '', 'cidade' => (string) '']);
 
-        model_insert('sistema', ['id_sistema' => (int) model_next('sistema', 'id_sistema'), 'versao_sistema' => (string) '1.0', 'chave_api' => (string) '', 'cidade' => (string) '']);
+        // model_insert('sistema', ['id_sistema' => (int) model_next('sistema', 'id_sistema'), 'versao_sistema' => (string) '1.0', 'chave_api' => (string) '', 'cidade' => (string) '']);
 
-        $atualizacao->criar_tabela_banco_dados('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) 0, 'descricao' => (string) '', 'tipo_arquivo' => (string) '', 'usar' => (string) '', 'endereco_documento' => (string) '']);
+        // $atualizacao->criar_tabela_banco_dados('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) 0, 'descricao' => (string) '', 'tipo_arquivo' => (string) '', 'usar' => (string) '', 'endereco_documento' => (string) '']);
 
-        $atualizacao->criar_tabela_banco_dados('armario', (array) ['id_armario' => (int) 0, 'nome_armario' => (string) '', 'codigo_barras' => (string) '']);
+        // $atualizacao->criar_tabela_banco_dados('armario', (array) ['id_armario' => (int) 0, 'nome_armario' => (string) '', 'codigo_barras' => (string) '']);
 
-        $atualizacao->criar_tabela_banco_dados('caixa', (array) ['id_caixa' => (int) 0, 'id_prateleira' => (int) 0, 'nome_caixa' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '']);
+        // $atualizacao->criar_tabela_banco_dados('caixa', (array) ['id_caixa' => (int) 0, 'id_prateleira' => (int) 0, 'nome_caixa' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '']);
 
-        $atualizacao->criar_tabela_banco_dados('documentos', (array) ['id_documento' => (int) 0, 'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_usuario' => (int) 0,'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date']);
+        // $atualizacao->criar_tabela_banco_dados('documentos', (array) ['id_documento' => (int) 0, 'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_usuario' => (int) 0,'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date']);
 
-        $atualizacao->criar_tabela_banco_dados('organizacao', (array) ['id_organizacao' => (int) 0, 'nome_organizacao' => (string) '']);
+        // $atualizacao->criar_tabela_banco_dados('organizacao', (array) ['id_organizacao' => (int) 0, 'nome_organizacao' => (string) '']);
 
-        $atualizacao->criar_tabela_banco_dados('prateleira', (array) ['id_prateleira' => (int) 0, 'id_armario' => (int) 0, 'nome_prateleira' => (string) '', 'codigo_barras' => (string) '']);
+        // $atualizacao->criar_tabela_banco_dados('prateleira', (array) ['id_prateleira' => (int) 0, 'id_armario' => (int) 0, 'nome_prateleira' => (string) '', 'codigo_barras' => (string) '']);
+
+        // $atualizacao->criar_tabela_banco_dados('cloudinary', (array) ['id_cloudinary' => (int) 0, 'id_empresa' => (int) 0, 'dns' => (string) '', 'usar' => (string) '']);
 
         // $atualizacao->exibir_mensagem('Preparando para adicionar tipo de arquivos ao banco de dados!');
 
@@ -133,8 +135,8 @@ router_add('index', function(){
 
         // $atualizacao->exibir_mensagem('Tipo de arquivos cadastrados com sucesso!');
 
-        model_delete('usuario', (array) ['id_usuario', '===', (int) 2]);
-        model_delete('sistema', (array) ['id_sistema', '===', (int) 2]);
+        // model_delete('usuario', (array) ['id_usuario', '===', (int) 2]);
+        // model_delete('sistema', (array) ['id_sistema', '===', (int) 2]);
       ?>
       <input type="hidden" id="mensagens" value='<?= json_encode($mensagens) ?>' />
     </body>

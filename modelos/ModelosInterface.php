@@ -19,7 +19,7 @@ interface ModelosInterface{
      * @param array $dados com as informações que devem ser colocadas na variável
      * @return bool com o retorno do banco de dados.
      */
-    public function salvar($dados);
+    public function salvar_dados($dados);
     
     /**
      * Método responsável por retornar o nome da tabela.
@@ -38,5 +38,12 @@ interface ModelosInterface{
      * @param string dados
      */
     public function colocar_dados($dados);
+
+    /**
+     * Método responsável por deletar uma informação no banco de dados.
+     * @param array $dados ['filtro', 'ordenacao']
+     * @return bool com o retorno do banco de dados.
+     */
+    public function deletar($dados);
 }
 ?>

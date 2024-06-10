@@ -48,6 +48,10 @@ class Documentos
             $this->id_documento = (int) intval($dados['codigo_documento'], 10);
         }
 
+        if(array_key_exists('id_empresa', $dados) == true){
+            $this->id_empresa = (int) intval($dados['id_empresa'], 10);
+        }
+
         if (array_key_exists('codigo_caixa', $dados) == true) {
             $this->id_caixa = (int) intval($dados['codigo_caixa'], 10);
         }
@@ -125,38 +129,7 @@ class Documentos
         return (string) $endereco_documento;
     }
 
-    /**
-     * Função que faz a conexão com o cloudinary e realiza o upload do arquivo
-     * @param string nome_temporario do arquivo, na variável files
-     * @param string nome_definitivo nome do arquivo para consultar posteriormente
-     * @return array array_retorno contendo as chaves para utilizar mais a frente.
-     */
-    private function upload_arquivos($nome_temporario, $nome_definitivo)
-    {
-        $arquivo_de_configuracao = (array) ler_arquivo_configuracao('COMPLETO');
-
-        $usar = (string) '1';
-        $dns = (string) '';
-        $array_retorno = (array) ['url' => (string) '', 'cloudinary' => (int) 1];
-
-        if (array_key_exists('usar', $arquivo_de_configuracao['ARQUIVOS']) == true) {
-            $usar = (string) $arquivo_de_configuracao['ARQUIVOS']['usar'];
-        }
-
-        $dns = (string) $arquivo_de_configuracao['ARQUIVOS']['dns_arquivos_' . $usar];
-        Configuration::instance($dns);
-
-        $upload = new UploadApi();
-        $retorno = (array) $upload->upload($nome_temporario, ['public_id' => (string) $nome_definitivo, 'user_file_name' => (bool) true, 'overwrite' => (bool) true]);
-
-        if (array_key_exists('url', $retorno) == true) {
-            $array_retorno['url'] = (string) $retorno['url'];
-        }
-
-        $array_retorno['cloudinary'] = (int) intval($usar, 10);
-
-        return (array) $array_retorno;
-    }
+ 
 
     /**
      * Função responsável por salvar as informações do arquivo menor de 10 megas na api
@@ -279,64 +252,68 @@ class Documentos
     {
         $this->colocar_dados($dados);
 
-        if ($this->escolha_usuario == 'TODOS' || $this->escolha_usuario == 'ARQUIVOS') {
-            if (isset($arquivo['arquivo']['name']) && $arquivo['arquivo']) {
-                $tamanho_arquivo = (int) $arquivo['arquivo']['size'];
-                $retorno = (bool) false;
-
-                $nome_atual = (string) $arquivo['arquivo']['name'];
-
-                $extensao = (string) strrchr($nome_atual, '.');
-                $extensao = (string) strtolower($extensao);
-
-                $retorno_extensao = (array) model_one($this->tabela_tipo_arquivo(), ['tipo_arquivo', '===', (string) $extensao]);
-
-                if (array_key_exists('id_tipo_arquivo', $retorno_extensao) == true) {
-                    $this->id_tipo_arquivo = (int) intval($retorno_extensao['id_tipo_arquivo'], 10);
-                }
-
-                if (array_key_exists('descricao', $retorno_extensao) == true) {
-                    $this->nome_tipo_arquivo = (string)  $retorno_extensao['descricao'];
-                }
-
-                if ($tamanho_arquivo < 9961472 && $this->nome_tipo_arquivo == 'IMAGEM' ||  $tamanho_arquivo < 9961472 && $this->nome_tipo_arquivo == 'PHOTOSHOP' || $tamanho_arquivo < 9961472 && $this->nome_tipo_arquivo == 'PDF') {
-                    $retorno = (bool) $this->salvar_api($arquivo);
-                } else {
-                    $retorno = (bool) $this->salvar_local($arquivo);
-                }
-
-                $checar_existencia = (bool) model_check($this->tabela(), ['id_documento', '===', (int) $this->id_documento]);
-
-                $id_usuario = (int) 0;
-
-                $retorno_usuario = (array) model_one('usuario', ['login', '===', (string) $this->nome_usuario]);
-
-                if (array_key_exists('id_usuario', $retorno_usuario) == true) {
-                    $id_usuario = (int) $retorno_usuario['id_usuario'];
-                }
-
-                file_put_contents('teste.txt', $id_usuario);
-
-                if ($checar_existencia == true) {
-                    return (bool) model_update($this->tabela(), ['id_documento', '===', (int) $this->id_documento], ['id_documento' => (int) $this->id_documento, 'id_caixa' => (int) $this->id_caixa, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) $this->quantidade_downloads, 'data_alteracao' => model_date()]);
-                } else {
-                    return (bool) model_insert($this->tabela(), model_parse($this->modelo(), ['id_documento' => (int) $this->id_documento, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) $this->quantidade_downloads]));
-                }
-
-                return (bool) $retorno;
-            }
-        } else if ($this->escolha_usuario == 'INFORMACOES') {
-            $checar_existencia = (bool) model_check($this->tabela(), ['id_documento', '===', (int) $this->id_documento]);
-
-            if ($checar_existencia == true) {
-                return (bool) model_update($this->tabela(), ['id_documento', '===', (int) $this->id_documento], ['id_documento' => (int) $this->id_documento, 'id_caixa' => (int) $this->id_caixa, 'id_organizacao' => (int) $this->id_organizacao, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) $this->quantidade_downloads]);
-            } else {
-                return (bool) model_insert($this->tabela(), model_parse($this->modelo(), ['id_documento' => (int) $this->id_documento, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) $this->quantidade_downloads]));
-            }
-            //não passar modelo na alteração buga endereço documento
-        } else {
-            return (bool) false;
+        if($this->escolha_usuario == 'TODOS' || $this->escolha_usuario == 'ARQUIVOS'){
+            
         }
+
+        // if ($this->escolha_usuario == 'TODOS' || $this->escolha_usuario == 'ARQUIVOS') {
+        //     if (isset($arquivo['arquivo']['name']) && $arquivo['arquivo']) {
+        //         $tamanho_arquivo = (int) $arquivo['arquivo']['size'];
+        //         $retorno = (bool) false;
+
+        //         $nome_atual = (string) $arquivo['arquivo']['name'];
+
+        //         $extensao = (string) strrchr($nome_atual, '.');
+        //         $extensao = (string) strtolower($extensao);
+
+        //         $retorno_extensao = (array) model_one($this->tabela_tipo_arquivo(), ['tipo_arquivo', '===', (string) $extensao]);
+
+        //         if (array_key_exists('id_tipo_arquivo', $retorno_extensao) == true) {
+        //             $this->id_tipo_arquivo = (int) intval($retorno_extensao['id_tipo_arquivo'], 10);
+        //         }
+
+        //         if (array_key_exists('descricao', $retorno_extensao) == true) {
+        //             $this->nome_tipo_arquivo = (string)  $retorno_extensao['descricao'];
+        //         }
+
+        //         if ($tamanho_arquivo < 9961472 && $this->nome_tipo_arquivo == 'IMAGEM' ||  $tamanho_arquivo < 9961472 && $this->nome_tipo_arquivo == 'PHOTOSHOP' || $tamanho_arquivo < 9961472 && $this->nome_tipo_arquivo == 'PDF') {
+        //             $retorno = (bool) $this->salvar_api($arquivo);
+        //         } else {
+        //             $retorno = (bool) $this->salvar_local($arquivo);
+        //         }
+
+        //         $checar_existencia = (bool) model_check($this->tabela(), ['id_documento', '===', (int) $this->id_documento]);
+
+        //         $id_usuario = (int) 0;
+
+        //         $retorno_usuario = (array) model_one('usuario', ['login', '===', (string) $this->nome_usuario]);
+
+        //         if (array_key_exists('id_usuario', $retorno_usuario) == true) {
+        //             $id_usuario = (int) $retorno_usuario['id_usuario'];
+        //         }
+
+        //         file_put_contents('teste.txt', $id_usuario);
+
+        //         if ($checar_existencia == true) {
+        //             return (bool) model_update($this->tabela(), ['id_documento', '===', (int) $this->id_documento], ['id_documento' => (int) $this->id_documento, 'id_caixa' => (int) $this->id_caixa, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) $this->quantidade_downloads, 'data_alteracao' => model_date()]);
+        //         } else {
+        //             return (bool) model_insert($this->tabela(), model_parse($this->modelo(), ['id_documento' => (int) $this->id_documento, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) $this->quantidade_downloads]));
+        //         }
+
+        //         return (bool) $retorno;
+        //     }
+        // } else if ($this->escolha_usuario == 'INFORMACOES') {
+        //     $checar_existencia = (bool) model_check($this->tabela(), ['id_documento', '===', (int) $this->id_documento]);
+
+        //     if ($checar_existencia == true) {
+        //         return (bool) model_update($this->tabela(), ['id_documento', '===', (int) $this->id_documento], ['id_documento' => (int) $this->id_documento, 'id_caixa' => (int) $this->id_caixa, 'id_organizacao' => (int) $this->id_organizacao, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) $this->quantidade_downloads]);
+        //     } else {
+        //         return (bool) model_insert($this->tabela(), model_parse($this->modelo(), ['id_documento' => (int) $this->id_documento, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) $this->quantidade_downloads]));
+        //     }
+        //     //não passar modelo na alteração buga endereço documento
+        // } else {
+        //     return (bool) false;
+        // }
     }
 
     /**
@@ -389,5 +366,34 @@ class Documentos
         }
 
         return (int) $quantidade_documentos;
+    }
+
+    /**
+     * Função responsável por realizar a consulta se o documento existe no banco de dados
+     * @param (array) $dados
+     */
+    public function checar_existencia_documento($dados){
+        return (bool) model_check($this->tabela(), $dados['filtro']);
+    }
+
+    /**
+     * Função responsável por retornar o próximo id de documento disponível para a empresa
+     * @param (array) $dados
+     */
+    public function proximo_id_documento($dados){
+        $this->colocar_dados($dados);
+
+        return (int) intval(model_next($this->tabela(), 'id_documento', ['id_empresa', '===', (int) $this->id_empresa]), 10);
+    }
+
+    /**
+     * Função responsável por retornar o nome do documento formatado no padrão do sistema.
+     * @param (array) $dados
+     */
+    public function formatar_nome_documento($dados){
+        $this->colocar_dados($dados);
+
+        $this->nome_documento = (string) str_pad($this->id_documento, 12, '0', STR_PAD_LEFT);
+        return (string) $this->nome_documento;
     }
 }

@@ -82,7 +82,7 @@ router_add('index', function(){
                             </div>
                             <div class="col-4 text-center">
                                 <label class="text">Nome Prateleira</label>
-                                <input type="text" class="form-control custom-radius text-uppercase" id="nome_prateleira" placeholder="Nome Prateleira" onkeyup="pesquisar_prateleiras();"/>
+                                <input type="text" class="form-control custom-radius text-uppercase text-uppercase" id="nome_prateleira" placeholder="Nome Prateleira" onkeyup="pesquisar_prateleiras();"/>
                             </div>
                             <div class="col-3 text-center">
                                 <label class="text">Código Barras</label>
