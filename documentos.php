@@ -5,49 +5,113 @@ require_once 'Modelos/Documentos.php';
 /**
  * Rota index, primeira rota do sistema, 
  */
-router_add('index', function(){
+router_add('index', function () {
     require_once 'includes/head.php';
-    $cadastro_documento = (string) (isset($_REQUEST['cadastro_documento']) ? (string) $_REQUEST['cadastro_documento']:'false');
-    $mensagem = (string) (isset($_REQUEST['retorno']) ? (string) $_REQUEST['retorno']:'false');
-    ?>
+    $cadastro_documento = (string) (isset($_REQUEST['cadastro_documento']) ? (string) $_REQUEST['cadastro_documento'] : 'false');
+    $mensagem = (string) (isset($_REQUEST['retorno']) ? (string) $_REQUEST['retorno'] : 'false');
+?>
     <script>
-        let CADASTRO_DOCUMENTO = "<?php echo $cadastro_documento;?>";
+        let CADASTRO_DOCUMENTO = "<?php echo $cadastro_documento; ?>";
         let MENSAGEM = "<?php echo $mensagem ?>";
-        function cadastro_documentos(codigo_documento){
-            window.location.href = sistema.url('/documentos.php', {'rota': 'salvar_dados_documentos', 'codigo_documento': codigo_documento});
+
+        function cadastro_documentos(codigo_documento) {
+            window.location.href = sistema.url('/documentos.php', {
+                'rota': 'salvar_dados_documentos',
+                'codigo_documento': codigo_documento
+            });
         }
 
-        function baixar_documento(endereco ,codigo_documento){
-            sistema.download('/documentos.php', {rota:'baixar_documento', 'endereco':endereco, 'codigo_documento': codigo_documento});
+        function baixar_documento(endereco, codigo_documento) {
+            sistema.download('/documentos.php', {
+                rota: 'baixar_documento',
+                'endereco': endereco,
+                'codigo_documento': codigo_documento
+            });
         }
 
-        function pesquisar_documento(){
+        /**
+         * Funçao responsável por realizar a pergunta se o usuário desejar realmente deletar o documento do banco de dados, caso o mesmo responda que sim, o sistema realiza a comunicação com a rota, deletando o documento, caso a resposta seja que não, o sistema não faz nada.
+         * @param integer codigo_documento.
+         */
+        function excluir_documentos(codigo_documento) {
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-success",
+                    cancelButton: "btn btn-danger"
+                },
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: "Você tem certeza?",
+                text: "A operação de exclusão é irreversível! \n Os arquivos na pasta serão excluídos permanentemente e nenhuma cópia será mantida.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sim, deletar documento!",
+                cancelButtonText: "Não, cancelar!",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sistema.request.post('/documentos.php', {'rota':'excluir_documento', 'codigo_documento':codigo_documento}, function(retorno){}, false);
+
+                    pesquisar_documento();
+
+                    swalWithBootstrapButtons.fire({
+                        title: "Deletado!",
+                        text: "O documento foi excluído com sucesso.",
+                        icon: "success"
+                    });
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    swalWithBootstrapButtons.fire({
+                        title: "Cancelado",
+                        text: "Não foi deletado nenhum documento do sistema :)",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+
+        function pesquisar_documento() {
             let codigo_documento = sistema.int(document.querySelector('#codigo_documento').value);
             let nome_documento = sistema.string(document.querySelector('#nome_documento').value);
             let descricao = sistema.string(document.querySelector('#descricao').value);
             let codigo_barras = sistema.string(document.querySelector('#codigo_barras').value);
 
-            sistema.request.post('/documentos.php', {'rota': 'pesquisar_documentos_todos', 'codigo_documento': codigo_documento, 'nome_documento': nome_documento, 'descricao': descricao, 'codigo_barras': codigo_barras}, function(retorno){
+            sistema.request.post('/documentos.php', {
+                'rota': 'pesquisar_documentos_todos',
+                'codigo_documento': codigo_documento,
+                'nome_documento': nome_documento,
+                'descricao': descricao,
+                'codigo_barras': codigo_barras
+            }, function(retorno) {
                 let documentos = retorno.dados;
                 let tamanho_retorno = documentos.length;
                 let tabela = document.querySelector('#tabela_documentos tbody');
 
                 tabela = sistema.remover_linha_tabela(tabela);
 
-                if(tamanho_retorno == 0){
+                if (tamanho_retorno == 0) {
                     let linha = document.createElement('tr');
                     linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM DOCUMENTO ENCONTRADO COM OS FILTROS PASSADOS!', 'inner', true, 6));
                     tabela.appendChild(linha);
-                }else{
-                    sistema.each(documentos, function(index, documento){
+                } else {
+                    sistema.each(documentos, function(index, documento) {
                         let linha = document.createElement('tr');
 
                         linha.appendChild(sistema.gerar_td(['text-center'], documento.id_documento, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-left'], documento.nome_documento, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-left'], documento.descricao, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], documento.quantidade_downloads, 'inner'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_'+documento.id_documento, 'ALTERAR', ['btn', 'btn-info'], function alterar(){cadastro_documentos(documento.id_documento);}), 'append'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_'+documento.id_documento, 'BAIXAR', ['btn', 'btn-success'], function alterar(){baixar_documento(documento.endereco, documento.id_documento);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento, 'EXCLUIR', ['btn', 'btn-danger'], function alterar() {
+                            excluir_documentos(documento.id_documento);
+                        }), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento, 'ALTERAR', ['btn', 'btn-info'], function alterar() {
+                            cadastro_documentos(documento.id_documento);
+                        }), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento, 'BAIXAR', ['btn', 'btn-success'], function alterar() {
+                            baixar_documento(documento.endereco, documento.id_documento);
+                        }), 'append'));
 
                         tabela.appendChild(linha);
                     });
@@ -61,38 +125,38 @@ router_add('index', function(){
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title text-center">Pesquisa de Documentos</h4>
-                        <br/>
+                        <br />
                         <div class="row">
                             <div class="col-3">
                                 <button class="btn btn-secondary" onclick="cadastro_documentos(0);">Cadastro de Documentos</button>
                             </div>
                         </div>
-                        <br/>
+                        <br />
                         <div class="row">
                             <div class="col-2 text-center">
                                 <label class="text">Código</label>
-                                <input type="text" class="form-control custom-radius" id="codigo_documento" sistema-mask="codigo" placeholder="Código Documento" onkeyup="pesquisar_documento();"/>
+                                <input type="text" class="form-control custom-radius" id="codigo_documento" sistema-mask="codigo" placeholder="Código Documento" onkeyup="pesquisar_documento();" />
                             </div>
                             <div class="col-7 text-center">
                                 <label class="text">Nome</label>
-                                <input type="text" class="form-control custom-radius text-uppercase" id="nome_documento" placeholder="Nome Documento" onkeyup="pesquisar_documento();"/>
+                                <input type="text" class="form-control custom-radius text-uppercase" id="nome_documento" placeholder="Nome Documento" onkeyup="pesquisar_documento();" />
                             </div>
                             <div class="col-3 text-center">
                                 <label class="text">Código Barras</label>
-                                <input type="text" class="form-control custom-radius" id="codigo_barras" sistema-mask="codigo" placeholder="Código Barras" maxlength="13" onkeyup="pesquisar_documento();"/>
+                                <input type="text" class="form-control custom-radius" id="codigo_barras" sistema-mask="codigo" placeholder="Código Barras" maxlength="13" onkeyup="pesquisar_documento();" />
                             </div>
                         </div>
-                        <br/>
+                        <br />
                         <div class="row">
                             <div class="col-9 text-center">
-                            <label class="text">Descrição</label>
-                                <input type="text" class="form-control custom-radius" id="descricao" placeholder="Descrição Documento" onkeyup="pesquisar_documento();"/>
+                                <label class="text">Descrição</label>
+                                <input type="text" class="form-control custom-radius" id="descricao" placeholder="Descrição Documento" onkeyup="pesquisar_documento();" />
                             </div>
                             <div class="col-3 text-center">
                                 <button class="btn btn-info botao_vertical_linha" onclick="pesquisar_documento();"> Pesquisar Documento</button>
                             </div>
                         </div>
-                        <br/>
+                        <br />
                         <div class="row">
                             <div class="col-12">
                                 <div class="table-responsive">
@@ -105,9 +169,14 @@ router_add('index', function(){
                                                 <th scope="col">Dow.</th>
                                                 <th scope="col">Ação</th>
                                                 <th scope="col">Ação</th>
+                                                <th scope="col">Ação</th>
                                             </tr>
                                         </thead>
-                                        <tbody><tr><td colspan="5" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td></tr></tbody>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="5" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
@@ -118,11 +187,11 @@ router_add('index', function(){
         </div>
     </div>
     <script>
-        window.onload = function(){
-            if(CADASTRO_DOCUMENTO == 'true'){
-                if(MENSAGEM == 'true'){
+        window.onload = function() {
+            if (CADASTRO_DOCUMENTO == 'true') {
+                if (MENSAGEM == 'true') {
                     Swal.fire('Sucesso!', 'Operação realizada com sucesso!', 'success');
-                }else{
+                } else {
                     Swal.fire('Erro', 'Erro durante a operação!', 'error');
                 }
             }
@@ -130,52 +199,72 @@ router_add('index', function(){
             pesquisar_documento();
         }
     </script>
-    <?php
+<?php
     require_once 'includes/footer.php';
 });
 
 /**
  * Rota responsável por realizar o cadastro e alteração de novos documentos no sistema.
  */
-router_add('salvar_dados_documentos', function(){
-    $codigo_documento = (int) (isset($_REQUEST['codigo_documento']) ? (int) intval($_REQUEST['codigo_documento'], 10):0);
+router_add('salvar_dados_documentos', function () {
     require_once 'includes/head.php';
-    ?>
+
+    $codigo_documento = (int) (isset($_REQUEST['codigo_documento']) ? (int) intval($_REQUEST['codigo_documento'], 10) : 0);
+    $codigo_empresa = (int) 0;
+    $codigo_usuario = (int) 0;
+
+    if (isset($_SESSION['id_empresa'])) {
+        $codigo_empresa = (int) intval($_SESSION['id_empresa'], 10);
+    }
+
+    if (isset($_SESSION['id_usuario'])) {
+        $codigo_usuario = (int) intval($_SESSION['id_usuario'], 10);
+    }
+
+?>
     <script>
         let CODIGO_DOCUMENTO = <?php echo $codigo_documento; ?>;
+        let CODIGO_USUARIO = <?php echo $codigo_usuario; ?>;
+        let CODIGO_EMPRESA = <?php echo $codigo_empresa; ?>;
 
-        function valor(parametro, sair){
+        function valor(parametro, sair) {
             parametro.preventDefault();
 
-            if(sair == true){
-                window.location.href = sistema.url('/documentos.php', {'rota':'index'});
+            if (sair == true) {
+                window.location.href = sistema.url('/documentos.php', {
+                    'rota': 'index'
+                });
             }
         }
 
-        function selecionar_informacao(tipo, valor){
-            if(tipo == 'ARMARIO'){
+        function selecionar_informacao(tipo, valor) {
+            if (tipo == 'ARMARIO') {
                 document.querySelector('#codigo_armario').value = valor;
                 let botao_fechar = document.querySelector('#botao_fechar_modal_armario');
                 botao_fechar.click();
-            }else if(tipo == 'PRATELEIRA'){
+            } else if (tipo == 'PRATELEIRA') {
                 document.querySelector('#codigo_prateleira').value = valor;
                 let botao_fechar = document.querySelector('#botao_fechar_modal_prateleira');
                 botao_fechar.click();
-            }else if(tipo == 'CAIXA'){
+            } else if (tipo == 'CAIXA') {
                 document.querySelector('#codigo_caixa').value = valor;
                 let botao_fechar = document.querySelector('#botao_fechar_modal_caixa');
                 botao_fechar.click();
-            }else if(tipo == 'ORGANIZACAO'){
+            } else if (tipo == 'ORGANIZACAO') {
                 document.querySelector('#codigo_organizacao').value = valor;
                 let botao_fechar = document.querySelector('#botao_fechar_modal_organizacao');
                 botao_fechar.click();
             }
         }
 
-        function pesquisar_armario(){
+        function pesquisar_armario() {
             let codigo_armario = sistema.int(document.querySelector('#codigo_modal_armario').value);
             let nome_armario = document.querySelector('#descricao_modal_armario').value;
-            sistema.request.post('/armario.php', {'rota': 'pesquisar_armario_todos', 'codigo_armario': codigo_armario, 'nome_armario': nome_armario}, function(retorno){
+            sistema.request.post('/armario.php', {
+                'rota': 'pesquisar_armario_todos',
+                'codigo_armario': codigo_armario,
+                'nome_armario': nome_armario
+            }, function(retorno) {
                 let tabela = document.querySelector('#tabela_modal_armario tbody');
 
                 tabela = sistema.remover_linha_tabela(tabela);
@@ -183,17 +272,19 @@ router_add('salvar_dados_documentos', function(){
                 let armarios = retorno.dados;
                 let tamanho_retorno = armarios.length;
 
-                if(tamanho_retorno < 1){
+                if (tamanho_retorno < 1) {
                     let linha = document.createElement('tr');
                     linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM ARMÁRIO ENCONTRADO!', 'inner', true, 3));
                     tabela.appendChild(linha);
-                }else{
-                    sistema.each(armarios, function(index, armario){
+                } else {
+                    sistema.each(armarios, function(index, armario) {
                         let linha = document.createElement('tr');
 
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(armario.id_armario, 3, '0'), 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-left'], armario.nome_armario, 'inner'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_armario_'+armario.id_armario, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_armario(){selecionar_informacao('ARMARIO', armario.id_armario);}),'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_armario_' + armario.id_armario, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_armario() {
+                            selecionar_informacao('ARMARIO', armario.id_armario);
+                        }), 'append'));
 
                         tabela.appendChild(linha);
                     });
@@ -201,25 +292,29 @@ router_add('salvar_dados_documentos', function(){
             });
         }
 
-        function pesquisar_organizacao(){
-            sistema.request.post('/organizacao.php', {'rota': 'pesquisar_todos'}, function(retorno){
+        function pesquisar_organizacao() {
+            sistema.request.post('/organizacao.php', {
+                'rota': 'pesquisar_todos'
+            }, function(retorno) {
                 let organizacoes = retorno.dados;
                 let tamanho_retorno = organizacoes.length;
                 let tabela = document.querySelector('#tabela_modal_organizacao tbody');
 
                 tabela = sistema.remover_linha_tabela(tabela);
 
-                if(tamanho_retorno < 1){
+                if (tamanho_retorno < 1) {
                     let linha = document.createElement('tr');
                     linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA ORGANIZAÇÃO ENCONTRADA!', 'inner', true, 3));
                     tabela.appendChild(linha);
-                }else{
-                    sistema.each(organizacoes, function(index, organizacao){
+                } else {
+                    sistema.each(organizacoes, function(index, organizacao) {
                         let linha = document.createElement('tr');
 
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(organizacao.id_organizacao, 3, '0'), 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-left'], organizacao.nome_organizacao, 'inner'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_organizacao_'+organizacao.id_organizacao, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_organizacao(){selecionar_informacao('ORGANIZACAO', organizacao.id_organizacao);}),'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_organizacao_' + organizacao.id_organizacao, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_organizacao() {
+                            selecionar_informacao('ORGANIZACAO', organizacao.id_organizacao);
+                        }), 'append'));
 
                         tabela.appendChild(linha);
                     });
@@ -227,29 +322,36 @@ router_add('salvar_dados_documentos', function(){
             });
         }
 
-        function pesquisar_prateleira(){
+        function pesquisar_prateleira() {
             let codigo_armario = sistema.int(document.querySelector('#codigo_armario').value);
             let codigo_prateleira = sistema.int(document.querySelector('#codigo_modal_prateleira').value);
             let nome_prateleira = document.querySelector('#descricao_modal_prateleira').value;
 
-            sistema.request.post('/prateleira.php', {'rota': 'pesquisar_prateleira_todas', 'codigo_armario': codigo_armario, 'codigo_prateleira': codigo_prateleira, 'nome_prateleira': nome_prateleira}, function(retorno){
+            sistema.request.post('/prateleira.php', {
+                'rota': 'pesquisar_prateleira_todas',
+                'codigo_armario': codigo_armario,
+                'codigo_prateleira': codigo_prateleira,
+                'nome_prateleira': nome_prateleira
+            }, function(retorno) {
                 let tabela = document.querySelector('#tabela_modal_prateleira tbody');
                 let prateleiras = retorno.dados;
                 let tamanho_retorno = prateleiras.length;
 
                 tabela = sistema.remover_linha_tabela(tabela);
 
-                if(tamanho_retorno < 1){
+                if (tamanho_retorno < 1) {
                     let linha = document.createElement('tr');
                     linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA PRATELEIRA ENCONTRADO!', 'inner', true, 3));
                     tabela.appendChild(linha);
-                }else{
-                    sistema.each(prateleiras, function(index, prateleira){
+                } else {
+                    sistema.each(prateleiras, function(index, prateleira) {
                         let linha = document.createElement('tr');
 
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(prateleira.id_prateleira, 3, '0'), 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-left'], prateleira.nome_prateleira, 'inner'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_prateleira_'+prateleira.id_prateleira, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_prateleira(){selecionar_informacao('PRATELEIRA', prateleira.id_prateleira);}),'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_prateleira_' + prateleira.id_prateleira, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_prateleira() {
+                            selecionar_informacao('PRATELEIRA', prateleira.id_prateleira);
+                        }), 'append'));
 
                         tabela.appendChild(linha);
                     });
@@ -257,29 +359,36 @@ router_add('salvar_dados_documentos', function(){
             });
         }
 
-        function pesquisar_caixa(){
+        function pesquisar_caixa() {
             let codigo_prateleira = sistema.int(document.querySelector('#codigo_prateleira').value);
             let codigo_caixa = sistema.int(document.querySelector('#codigo_modal_caixa').value);
             let nome_caixa = document.querySelector('#descricao_modal_caixa').value;
 
-            sistema.request.post('/caixa.php', {'rota': 'pesquisar_caixa_todas', 'codigo_prateleira': codigo_prateleira, 'codigo_caixa': codigo_caixa, 'nome_caixa': nome_caixa}, function(retorno){
+            sistema.request.post('/caixa.php', {
+                'rota': 'pesquisar_caixa_todas',
+                'codigo_prateleira': codigo_prateleira,
+                'codigo_caixa': codigo_caixa,
+                'nome_caixa': nome_caixa
+            }, function(retorno) {
                 let tabela = document.querySelector('#tabela_modal_caixa tbody');
                 tabela = sistema.remover_linha_tabela(tabela);
 
                 let caixas = retorno.dados;
                 let tamanho_retorno = caixas.length;
 
-                if(tamanho_retorno < 1){
+                if (tamanho_retorno < 1) {
                     let linha = document.createElement('tr');
                     linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA CAIXA ENCONTRADO!', 'inner', true, 3));
                     tabela.appendChild(linha);
-                }else{
-                    sistema.each(caixas, function(index, caixa){
+                } else {
+                    sistema.each(caixas, function(index, caixa) {
                         let linha = document.createElement('tr');
 
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(caixa.id_caixa, 3, '0'), 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-left'], caixa.nome_caixa, 'inner'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_caixa_'+caixa.id_caixa, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_caixa(){selecionar_informacao('CAIXA', caixa.id_caixa);}),'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_caixa_' + caixa.id_caixa, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_caixa() {
+                            selecionar_informacao('CAIXA', caixa.id_caixa);
+                        }), 'append'));
 
                         tabela.appendChild(linha);
                     });
@@ -293,40 +402,42 @@ router_add('salvar_dados_documentos', function(){
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title text-center">Cadastro de Documentos</h4>
-                        <br/>
+                        <br />
                         <!-- onsubmit="valor(0); return false;" -->
-                        <form method="POST" accept="documentos.php" enctype="multipart/form-data" >
-                            <input type="hidden" name="login_usuario" id="login_usuario" value="<?php echo $nome_usuario; ?>"/>
-                            <input type="hidden" name="rota" id="rota" value="salvar_dados"/> 
-                            <input type="hidden" name="quantidade_downloads" id="quantidade_downloads"/> 
+                        <form method="POST" accept="documentos.php" enctype="multipart/form-data">
+                            <input type="hidden" name="login_usuario" id="login_usuario" value="<?php echo $nome_usuario; ?>" />
+                            <input type="hidden" name="rota" id="rota" value="salvar_dados" />
+                            <input type="hidden" name="codigo_empresa" id="codigo_empresa" value="<?php echo $codigo_empresa; ?>" />
+                            <input type="hidden" name="codigo_usuario" id="codigo_usuario" value="<?php echo $codigo_usuario; ?>" />
+                            <input type="hidden" name="quantidade_downloads" id="quantidade_downloads" />
                             <div class="row">
                                 <div class="col-2 text-center">
                                     <label class="text">Código</label>
-                                    <input type="text" class="form-control custom-radius text-center" id="codigo_documento" sistema-mask="codigo" placeholder="Código" readonly="true" name="codigo_documento"/>
+                                    <input type="text" class="form-control custom-radius text-center" id="codigo_documento" sistema-mask="codigo" placeholder="Código" readonly="true" name="codigo_documento" />
                                 </div>
                                 <div class="col-7 text-center">
                                     <label class="text">Nome</label>
-                                    <input type="text" class="form-control custom-radius text-uppercase" id="nome_documento" placeholder="Nome Documento" name="nome_documento"/>
+                                    <input type="text" class="form-control custom-radius text-uppercase" id="nome_documento" placeholder="Nome Documento" name="nome_documento" />
                                 </div>
                                 <div class="col-3 text-center">
                                     <label class="text">Código Barras</label>
-                                    <input type="text" class="form-control custom-radius text-center" id="codigo_barras" sistema-mask="codigo" placeholder="Código Barras" maxlength="13" readonly="true" value="<?php echo codigo_barras(); ?>" name="codigo_barras"/>
+                                    <input type="text" class="form-control custom-radius text-center" id="codigo_barras" sistema-mask="codigo" placeholder="Código Barras" maxlength="13" readonly="true" value="<?php echo codigo_barras(); ?>" name="codigo_barras" />
                                 </div>
                             </div>
-                            <br/>
+                            <br />
                             <div class="row">
                                 <div class="col-12 text-center">
                                     <label class="text">Descrição</label>
                                     <textarea class="form-control custom-radius" id="descricao" placeholder="Descrição Documento" name="descricao"></textarea>
                                 </div>
                             </div>
-                            <br/>
+                            <br />
                             <div class="row">
                                 <div class="col-3 text-center">
                                     <label class="text">Armário</label>
                                     <div class="row">
                                         <div class="col-6">
-                                            <input type="text" class="form-control custom-radius text-center" id="codigo_armario" name="codigo_armario" value="0" readonly="true"/>
+                                            <input type="text" class="form-control custom-radius text-center" id="codigo_armario" name="codigo_armario" value="0" readonly="true" />
                                         </div>
                                         <div class="col-6">
                                             <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_armario" onclick="valor(event, false);">Pesquisar</button>
@@ -337,7 +448,7 @@ router_add('salvar_dados_documentos', function(){
                                     <label class="text">Prateleira</label>
                                     <div class="row">
                                         <div class="col-6">
-                                            <input type="text" class="form-control custom-radius text-center" id="codigo_prateleira" name="codigo_prateleira" value="0" readonly="true"/>
+                                            <input type="text" class="form-control custom-radius text-center" id="codigo_prateleira" name="codigo_prateleira" value="0" readonly="true" />
                                         </div>
                                         <div class="col-6">
                                             <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_prateleira" onclick="valor(event, false);">Pesquisar</button>
@@ -348,7 +459,7 @@ router_add('salvar_dados_documentos', function(){
                                     <label class="text">Caixa</label>
                                     <div class="row">
                                         <div class="col-6">
-                                            <input type="text" class="form-control custom-radius text-center" id="codigo_caixa" name="codigo_caixa" value="0" readonly="true"/>
+                                            <input type="text" class="form-control custom-radius text-center" id="codigo_caixa" name="codigo_caixa" value="0" readonly="true" />
                                         </div>
                                         <div class="col-6">
                                             <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_caixa" onclick="valor(event, false);">Pesquisar</button>
@@ -359,7 +470,7 @@ router_add('salvar_dados_documentos', function(){
                                     <label class="text">Organização</label>
                                     <div class="row">
                                         <div class="col-6">
-                                            <input type="text" class="form-control custom-radius text-center" id="codigo_organizacao" name="codigo_organizacao" value="0" readonly="true"/>
+                                            <input type="text" class="form-control custom-radius text-center" id="codigo_organizacao" name="codigo_organizacao" value="0" readonly="true" />
                                         </div>
                                         <div class="col-6">
                                             <button class="btn btn-info" data-toggle="modal" data-target="#modal_pesquisar_organizacao" onclick="valor(event, false);">Pesquisar</button>
@@ -367,25 +478,25 @@ router_add('salvar_dados_documentos', function(){
                                     </div>
                                 </div>
                             </div>
-                            <br/>
+                            <br />
                             <div class="row">
                                 <div class="col-8 text-center">
                                     <label class="text">arquivo</label>
-                                    <input type="file" class="form-control custom-radius text-center" id="arquivo" placeholder="arquivo" name="arquivo"/>
+                                    <input type="file" class="form-control custom-radius text-center" id="arquivo" placeholder="arquivo" name="arquivo" />
                                 </div>
                                 <div class="col-4 text-center">
                                     <label class="text">Tipo Alteração</label>
                                     <select class="form-control custom-radius" name="tipo_alteracao" id="tipo_alteracao">
-                                        <option value="TODOS">Todos</option>
-                                        <option value="INFORMACOES">Informações</option>
-                                        <option value="ARQUIVOS">Arquivos</option>
+                                        <option value="TODOS">TODOS</option>
+                                        <option value="INFORMACOES">INFORMAÇÕES</option>
+                                        <!-- <option value="ARQUIVOS">Arquivos</option> -->
                                     </select>
                                 </div>
                             </div>
-                            <br/> 
+                            <br />
                             <div class="row">
                                 <div class="col-3">
-                                    <input type="submit" class="btn btn-info" value="Salvar Dados"/>
+                                    <input type="submit" class="btn btn-info" value="Salvar Dados" />
                                 </div>
                                 <div class="col-3">
                                     <button class="btn btn-secondary" onclick="valor(event, true);">Retornar</button>
@@ -412,17 +523,17 @@ router_add('salvar_dados_documentos', function(){
                     <div class="row">
                         <div class="col-3 text-center">
                             <label class="text" for="codigo_modal_armario">Código</label>
-                            <input type="text" class="form-control custom-radius text-center" id="codigo_modal_armario" placeholder="Código" sistema-mask="codigo"/>
+                            <input type="text" class="form-control custom-radius text-center" id="codigo_modal_armario" placeholder="Código" sistema-mask="codigo" />
                         </div>
                         <div class="col-7 text-center">
                             <label class="text" for="descricao_modal_armario">Descrição</label>
-                            <input type="text" class="form-control custom-radius" id="descricao_modal_armario" placeholder="Descrição"/>
+                            <input type="text" class="form-control custom-radius" id="descricao_modal_armario" placeholder="Descrição" />
                         </div>
                         <div class="col-2 text-center">
                             <button class="btn btn-info botao_vertical_linha" onclick="pesquisar_armario();">Pesquisar</button>
                         </div>
                     </div>
-                    <br/>
+                    <br />
                     <div class="row">
                         <div class="col-12">
                             <div class="table-responsive">
@@ -434,7 +545,11 @@ router_add('salvar_dados_documentos', function(){
                                             <th scope="col">Ação</th>
                                         </tr>
                                     </thead>
-                                    <tbody><tr><td colspan="3" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td></tr></tbody>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="3" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                        </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -459,20 +574,20 @@ router_add('salvar_dados_documentos', function(){
                     </button>
                 </div>
                 <div class="modal-body">
-                <div class="row">
+                    <div class="row">
                         <div class="col-3 text-center">
                             <label class="text" for="codigo_modal_prateleira">Código</label>
-                            <input type="text" class="form-control custom-radius text-center" id="codigo_modal_prateleira" placeholder="Código" sistema-mask="codigo"/>
+                            <input type="text" class="form-control custom-radius text-center" id="codigo_modal_prateleira" placeholder="Código" sistema-mask="codigo" />
                         </div>
                         <div class="col-7 text-center">
                             <label class="text" for="descricao_modal_prateleira">Descrição</label>
-                            <input type="text" class="form-control custom-radius" id="descricao_modal_prateleira" placeholder="Descrição"/>
+                            <input type="text" class="form-control custom-radius" id="descricao_modal_prateleira" placeholder="Descrição" />
                         </div>
                         <div class="col-2 text-center">
                             <button class="btn btn-info botao_vertical_linha" onclick="pesquisar_prateleira();">Pesquisar</button>
                         </div>
                     </div>
-                    <br/>
+                    <br />
                     <div class="row">
                         <div class="col-12">
                             <div class="table-responsive">
@@ -484,7 +599,11 @@ router_add('salvar_dados_documentos', function(){
                                             <th scope="col">Ação</th>
                                         </tr>
                                     </thead>
-                                    <tbody><tr><td colspan="3" class="text-center">NENHUMA ORGANIZAÇÃO ENCONTRADA</td></tr></tbody>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="3" class="text-center">NENHUMA ORGANIZAÇÃO ENCONTRADA</td>
+                                        </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -512,17 +631,17 @@ router_add('salvar_dados_documentos', function(){
                     <div class="row">
                         <div class="col-3 text-center">
                             <label class="text" for="codigo_modal_caixa">Código</label>
-                            <input type="text" class="form-control custom-radius text-center" id="codigo_modal_caixa" placeholder="Código" sistema-mask="codigo"/>
+                            <input type="text" class="form-control custom-radius text-center" id="codigo_modal_caixa" placeholder="Código" sistema-mask="codigo" />
                         </div>
                         <div class="col-7 text-center">
                             <label class="text" for="descricao_modal_caixa">Descrição</label>
-                            <input type="text" class="form-control custom-radius" id="descricao_modal_caixa" placeholder="Descrição"/>
+                            <input type="text" class="form-control custom-radius" id="descricao_modal_caixa" placeholder="Descrição" />
                         </div>
                         <div class="col-2 text-center">
                             <button class="btn btn-info botao_vertical_linha" onclick="pesquisar_caixa();">Pesquisar</button>
                         </div>
                     </div>
-                    <br/>
+                    <br />
                     <div class="row">
                         <div class="col-12">
                             <div class="table-responsive">
@@ -534,7 +653,11 @@ router_add('salvar_dados_documentos', function(){
                                             <th scope="col">Ação</th>
                                         </tr>
                                     </thead>
-                                    <tbody><tr><td colspan="3" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td></tr></tbody>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="3" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                        </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -570,7 +693,11 @@ router_add('salvar_dados_documentos', function(){
                                             <th scope="col">Ação</th>
                                         </tr>
                                     </thead>
-                                    <tbody><tr><td colspan="3" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td></tr></tbody>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="3" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                        </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -584,14 +711,15 @@ router_add('salvar_dados_documentos', function(){
         </div>
     </div>
 
-
-
     <script>
-        window.onload = function(){
+        window.onload = function() {
             pesquisar_organizacao();
 
-            if(CODIGO_DOCUMENTO != 0){
-                sistema.request.post('/documentos.php', {'rota': 'pesquisar_documentos', 'codigo_documento': CODIGO_DOCUMENTO}, function(retorno){
+            if (CODIGO_DOCUMENTO != 0) {
+                sistema.request.post('/documentos.php', {
+                    'rota': 'pesquisar_documentos',
+                    'codigo_documento': CODIGO_DOCUMENTO
+                }, function(retorno) {
                     document.querySelector('#codigo_documento').value = retorno.dados.id_documento;
                     document.querySelector('#nome_documento').value = retorno.dados.nome_documento;
                     document.querySelector('#codigo_barras').value = retorno.dados.codigo_barras;
@@ -604,36 +732,36 @@ router_add('salvar_dados_documentos', function(){
             }
         }
     </script>
-    <?php
+<?php
     require_once 'includes/footer.php';
     exit;
 });
 
 //@audit pesquisar_documentos_todos
-router_add('pesquisar_documentos_todos', function(){
-    $id_documento = (int) (isset($_REQUEST['codigo_documento']) ? (int) intval($_REQUEST['codigo_documento'], 10): 0);
-    $nome_documento = (string) (isset($_REQUEST['nome_documento']) ? (string) strtoupper($_REQUEST['nome_documento']):'');
-    $codigo_barras = (string) (isset($_REQUEST['codigo_barras']) ? (string) $_REQUEST['codigo_barras']:'');
-    $descricao = (string) (isset($_REQUEST['descricao']) ? (string) $_REQUEST['descricao']:'');
+router_add('pesquisar_documentos_todos', function () {
+    $id_documento = (int) (isset($_REQUEST['codigo_documento']) ? (int) intval($_REQUEST['codigo_documento'], 10) : 0);
+    $nome_documento = (string) (isset($_REQUEST['nome_documento']) ? (string) strtoupper($_REQUEST['nome_documento']) : '');
+    $codigo_barras = (string) (isset($_REQUEST['codigo_barras']) ? (string) $_REQUEST['codigo_barras'] : '');
+    $descricao = (string) (isset($_REQUEST['descricao']) ? (string) $_REQUEST['descricao'] : '');
     $objeto_documento = new Documentos();
     $filtro = (array) [];
     $dados = (array) ['filtro' => (array) [], 'ordenacao' => ['quantidade_downloads' => (bool) false], 'limite' => (int) 10];
 
     array_push($filtro, ['nome_documento', '=', (string) $nome_documento]);
 
-    if($id_documento != 0){
+    if ($id_documento != 0) {
         array_push($filtro, ['id_documento', '===', (int) $id_documento]);
     }
 
-    if($codigo_barras != ''){
+    if ($codigo_barras != '') {
         array_push($filtro, ['codigo_barras', '===', (string) $codigo_barras]);
     }
 
-    if($descricao != ''){
+    if ($descricao != '') {
         array_push($filtro, ['descricao', '=', (string) $descricao]);
     }
 
-    if(empty($filtro) == false){
+    if (empty($filtro) == false) {
         $dados['filtro'] = (array) ['and' => (array) $filtro];
     }
 
@@ -642,9 +770,9 @@ router_add('pesquisar_documentos_todos', function(){
 });
 
 //@audit pesquisar_documentos
-router_add('pesquisar_documentos', function(){
+router_add('pesquisar_documentos', function () {
     $objeto_documento = new Documentos();
-    $id_documento = (int) (isset($_REQUEST['codigo_documento']) ? intval($_REQUEST['codigo_documento'], 10):0);
+    $id_documento = (int) (isset($_REQUEST['codigo_documento']) ? intval($_REQUEST['codigo_documento'], 10) : 0);
 
     $dados['filtro'] = (array) ['and' => [['id_documento', '===', (int) $id_documento]]];
 
@@ -653,28 +781,28 @@ router_add('pesquisar_documentos', function(){
 });
 
 //@audit baixar_documento
-router_add('baixar_documento', function(){
+router_add('baixar_documento', function () {
     $documento_objeto = new Documentos();
     $informacoes_documento = (array) $documento_objeto->update_download($_REQUEST);
-	$endereco = (string) (isset($_REQUEST['endereco']) ? (string) $_REQUEST['endereco']:'');
-	$arquivo = (string) file_get_contents($endereco);
+    $endereco = (string) (isset($_REQUEST['endereco']) ? (string) $_REQUEST['endereco'] : '');
+    $arquivo = (string) file_get_contents($endereco);
     $nome_documento = (string) 'nome_padrao';
 
-    if(array_key_exists('nome_documento', $informacoes_documento) == true){
+    if (array_key_exists('nome_documento', $informacoes_documento) == true) {
         $nome_documento = (string) $informacoes_documento['nome_documento'];
     }
 
-    if(array_key_exists('id_tipo_arquivo', $informacoes_documento) == true){
+    if (array_key_exists('id_tipo_arquivo', $informacoes_documento) == true) {
         $extensao = (array) model_one('tipo_arquivo', ['id_tipo_arquivo', '===', (int) intval($informacoes_documento['id_tipo_arquivo'], 10)]);
 
-        if(empty($extensao) == false){
-            if(array_key_exists('tipo_arquivo', $extensao) == true){
-                $nome_documento = (string) $nome_documento.$extensao['tipo_arquivo'];
+        if (empty($extensao) == false) {
+            if (array_key_exists('tipo_arquivo', $extensao) == true) {
+                $nome_documento = (string) $nome_documento . strtolower($extensao['tipo_arquivo']);
             }
         }
     }
 
-    header('Content-Disposition: attachment; filename="'.$nome_documento.'"');
+    header('Content-Disposition: attachment; filename="' . $nome_documento . '"');
     header('Content-Type: application/octet-stream');
     header('Content-Type: application/download');
     header('Content-Length: ' . strlen($arquivo));
@@ -682,16 +810,24 @@ router_add('baixar_documento', function(){
     exit;
 });
 
+router_add('excluir_documento', function () {
+    $documento_objeto = new Documentos();
+
+    echo json_encode((array) ['status' => (bool) $documento_objeto->excluir_documento($_REQUEST)], JSON_UNESCAPED_UNICODE);
+
+    exit;
+});
+
 //@audit salvar_documento
-if($_SERVER['REQUEST_METHOD'] == 'POST'){
-    if(!empty($_POST)){
-        if(array_key_exists('rota', $_POST)){
-            if($_POST['rota'] == 'salvar_dados'){
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!empty($_POST)) {
+        if (array_key_exists('rota', $_POST)) {
+            if ($_POST['rota'] == 'salvar_dados') {
                 $objeto_documento = new Documentos();
-                $retorno = (bool) $objeto_documento->salvar($_POST, $_FILES);
-                if($retorno == true){
+                $retorno = (bool) $objeto_documento->salvar_dados($_POST, $_FILES);
+                if ($retorno == true) {
                     header('Location:documentos.php?cadastro_documento=true&retorno=true');
-                }else{
+                } else {
                     header('Location:documentos.php?cadastro_documento=true&retorno=false');
                 }
             }

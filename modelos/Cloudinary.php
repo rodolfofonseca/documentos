@@ -1,5 +1,6 @@
 <?php
 use Cloudinary\Api\Upload\UploadApi;
+use Cloudinary\Api\Admin\AdminApi;
 use Cloudinary\Configuration\Configuration;
 
 require_once 'Classes/bancoDeDados.php';
@@ -68,63 +69,66 @@ class Cloudinary{
     }
 
     /**
-     * Função responsável por realizar a conexão com o cloudinary previamente configurado e realizar o upload do arquivo.
-     * @param (array) $dados
+     * Função responsável por realizar o upload do arquivo, quando o mesmo for salvo no cloudinary
+     * @param array $dados
+     * @param string $codigo_barras
+     * @param string $extensao
+     * @param file $arquivo
+     * @return array $dados
      */
-    private function upload_arquivo_cloudinary($dados){
-        $return_url = (string) '';
-
-        $filtro_pesquisa_cloudinary = (array) ['filtro' => (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['usar', '===', (string) 'S']]]];
-
-        $retorno_cloudinary = (array) $this->pesquisar($filtro_pesquisa_cloudinary);
-
-        if(array_key_exists('dns', $retorno_cloudinary) == true){
-            $this->dns = $retorno_cloudinary['dns'];
-        }
-
-        if($this->dns != ''){
-            Configuration::instance($this->dns);
-            $upload = new UploadApi();
-
-            $retorno_upload = (array) $upload->upload($dados['nome_temporario'], (array) ['public_id' => (string) $dados['nome_definitivo'], 'user_file_name' => (bool) true, 'overwrite' => (bool) true]);
-
-            if(array_key_exists('url', $retorno_upload) == true){
-                $return_url = (String) $retorno_upload['url'];
-            }
-        }
-        
-        return (string) $return_url;
-    }
-
-    public function upload_arquivo($dados, $arquivo){
+    public function upload_arquivo($dados, $codigo_barras, $extensao, $arquivo){
         $this->colocar_dados($dados);
 
-        $array_upload = (array) ['nome_temporario' => (string) '', 'nome_definitivo' => (string) ''];
-        $nome_atual = (string) '';
-        $id_documento = (int) 0;
+        $array_retorno = (array) ['url' => (string) '', 'cloudinary' => (int) 0, 'status' => (bool) false];
 
-        $array_upload['nome_temporario'] = (string) $arquivo['arquivo']['tmp_name'];
-        $nome_atual = (string) $arquivo['arquivo']['name'];
-        
-        $extensao = (string) strtoupper(strrchr($nome_atual, '.'));
+        $dados_cloudinary_ativo = (array) model_one($this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['usar', '===', (string) 'S']]]);
 
-        $filtro_pesquisa_tipo_arquivo = (array) [(array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['tipo_arquivo', '===', (string) $extensao], (array) ['usar', '===', (string) 'S']]]];
-
-        if(empty($filtro_pesquisa_tipo_arquivo) == false){
-            $objeto_documento = new Documentos();
-            $filtro_pesquisa_existencia_documento = (array) ['and' => [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_documento', '===', (int) $dados['id_documento']]]];
-
-            $retorno_existencia_documento = (bool) $objeto_documento->checar_existencia_documento($filtro_pesquisa_existencia_documento);
-
-            if($retorno_existencia_documento == false){
-                $id_documento = (int) intval($objeto_documento->proximo_id_documento(['id_empresa' => $this->id_empresa]), 10);
+        if(empty($dados_cloudinary_ativo) == false){
+            if(array_key_exists('dns', $dados_cloudinary_ativo) == true){
+                $this->dns = (string) $dados_cloudinary_ativo['dns'];
+            }
+            
+            if(array_key_exists('id_cloudinary', $dados_cloudinary_ativo) == true){
+                $this->id_cloudinary = (int) $dados_cloudinary_ativo['id_cloudinary'];
+                $array_retorno['cloudinary'] = (int) intval($dados_cloudinary_ativo['id_cloudinary'], 10);
+            }
+    
+            Configuration::instance($this->dns);
+            $upload = new UploadApi();
+            
+            $retorno = (array) $upload->upload($arquivo['arquivo']['tmp_name'], ['public_id' => (string) $codigo_barras.$extensao, 'user_file_name' => (bool) true, 'overwrite' => (bool) true]);
+    
+            if(array_key_exists('url',  $retorno) == true){
+                $array_retorno['url'] = (string) $retorno['url'];
             }
 
-            $nome_documento = (string) $objeto_documento->formatar_nome_documento($id_documento);
-            $retorno_upload = (array) $this->upload_arquivo_cloudinary((array) ['nome_temporario' => (string) $array_upload['nome_temporario'], 'nome_documento' => (string) $nome_documento]);
+            $array_retorno['status'] = (bool) true;
+        }
 
-            //PAREI AQUI, NA LINHA 162 DO ARQUIVO DOCUMENTOS, ONDE EU PEGAR O IDENTIFICADOR DO USUÁRIO QUE IRA VIR ATRAVES DA VARIAÇÃO DE SESSAO POR MEIO DO REQUEST.
+        return (array) $array_retorno;
+    }
+
+    /**
+     * Função responsável por realizar a exclusão do arquivo no cloudinary
+     * @param string $nome_arquivo Nome do documento, com  extesão
+     * @param int $cloudinary identificador do cloudinary na base de dados
+     * @return bool retornar true ou false de acordo com o resultado da funcionalidade.
+     */
+    public function deletar_documento($nome_arquivo, $cloudinary){
+        $retorno_cloudinary = (array) model_one($this->tabela(), ['id_cloudinary', '===', (int) intval($cloudinary, 10)]);
+
+        if(empty($retorno_cloudinary) == false){
+            if(array_key_exists('dns', $retorno_cloudinary) == true){
+                $this->dns = (string) $retorno_cloudinary['dns'];
+            }
+
+            Configuration::instance($this->dns);
+            $admin = new AdminApi();
+            return (bool) $admin->deleteAssets((string) $nome_arquivo);
+        }else{
+            return (bool) false;
         }
     }
+
 }
 ?>

@@ -164,7 +164,6 @@ router_add('index', function () {
                     });
                 }
             });
-
         }
 
         function salvar_dados_cloudinary(){
