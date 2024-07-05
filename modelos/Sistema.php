@@ -13,7 +13,7 @@ Class Sistema{
     }
 
     private function modelo(){
-        return (array) ['id_sistema' => (int) 0, 'id_empresa' => (int) 0,'versao_sistema' => (string) '1.0', 'chave_api' => (string) '', 'cidade' => (string) ''];
+        return (array) ['id_sistema' => (int) 0, 'id_empresa' => (int) 0,'versao_sistema' => (string) '0.0', 'chave_api' => (string) '', 'cidade' => (string) ''];
     }
 
     private function colocar_dados($dados){

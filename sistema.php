@@ -166,6 +166,9 @@ router_add('index', function () {
             });
         }
 
+        /** 
+         * Função responsável por salvar os dados do cloudinary no banco de dados.
+         */
         function salvar_dados_cloudinary(){
             let dns = document.querySelector('#dns').value;
             let usar = document.querySelector('#usar').value;
@@ -184,6 +187,55 @@ router_add('index', function () {
                     }
                 });
             }
+        }
+
+        /** Função responsável por pesquisar os cloudinary cadastrados no banco de dados para empresa. */
+        function pesquisar_cloudinary(){
+            sistema.request.post('/sistema.php', {'rota': 'pesquisar_cloudinary_empresa', 'codigo_empresa':ID_EMPRESA}, function(retorno){
+                let cloudinary = retorno.dados;
+                let tamanho = cloudinary.length;
+                let tabela = document.querySelector('#tabela_cloudinary tbody');
+                let tamanho_tabela = tabela.rows.length;
+
+                if(tamanho_tabela > 0){
+                    tabela = sistema.remover_linha_tabela(tabela);
+                }
+
+                if(tamanho < 1){
+                    let linha = document.createElement('tr');
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM CLOUDINARY ENCONTRADO!', 'inner', true, 5));
+                    tabela.appendChild(linha);
+                }else{
+                    sistema.each(cloudinary, function(contador, dados){
+                        linha = document.createElement('tr');
+
+                        linha.appendChild(sistema.gerar_td(['text-center'], dados.id_cloudinary, 'inner'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], dados.dns, 'inner'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], dados.usar, 'inner'));
+
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_cloudinary_'+dados.id_cloudinary, 'ALTERAR', ['btn', 'btn-info'], function alterar_usar_cloudinary(){alterar_cloudinary(dados.id_cloudinary);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_excluir_cloudinary_'+dados.id_cloudinary, 'EXCLUIR',['btn', 'btn-danger'], function excluir_cloudinary_sistema(){excluir_cloudinary(dados.id_cloudinary);}), 'append'));
+
+                        tabela.appendChild(linha);
+                    });
+                }
+            }, false);
+        }
+
+        /**
+         * Função responsável por alterar a visualização do cloudinary para usar = S ou usar = N
+         * @param {int} id_cloudinary
+         */
+        function alterar_cloudinary(id_cloudinary){
+
+        }
+
+        /**
+         * Função responsável por perguntar se o usuário deseja mesmo excluir o cloudinary que está cadastrado no sistema. 
+         * Caso o usuário escolha excluir o cloudinary o sistema já faz na hora a exclusão do mesmo.
+         * @param {int} id_cloudinary  */
+        function excluir_cloudinary(id_cloudinary){
+
         }
     </script>
     <div class="container-fluid">
@@ -318,6 +370,30 @@ router_add('index', function () {
                         <button class="btn btn-info botao_vertical_linha" onclick="salvar_dados_cloudinary();">Salvar Dados</button>
                         </div>
                     </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped" id="tabela_cloudinary">
+                                    <thead class="bg-info text-white">
+                                        <tr class="text-center">
+                                            <th scope="col">#</th>
+                                            <th scope="col">DNS</th>
+                                            <th scope="col">USAR</th>
+                                            <th scope="col">ALTERAR</th>
+                                            <th scope="col">ALTERAR ENDEREÇO</th>
+                                            <th scope="col">EXCLUIR</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="6" class="text-center">NENHUM CLOUDINARY ENCONTRADO!</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -341,6 +417,7 @@ router_add('index', function () {
             });
 
             pesquisar_tipo_arquivo();
+            pesquisar_cloudinary();
         }
     </script>
 <?php
@@ -403,6 +480,17 @@ router_add('pesquisar_todos_tipos_arquivos', function () {
     exit;
 });
 
+/**
+ * Rota responsável por pesquisar os cloudinary cadastrados no sistema para empresa.
+ */
+router_add('pesquisar_cloudinary_empresa', function(){
+    $id_empresa = (isset($_REQUEST['codigo_empresa']) ? (int) intval($_REQUEST['codigo_empresa'], 10) : 0);
+    $objeto_cloudinary = new Cloudinary();
+
+    echo json_encode(['dados' => (array) $objeto_cloudinary->pesqusiar_todos((array) ['filtro' => (array) ['id_empresa', '===', (int) intval($id_empresa, 10)], 'ordenacao' => (array) [], 'limite' => (int) 0])], JSON_UNESCAPED_UNICODE);
+    exit;
+});
+
 router_add('montar_array_tipo_arquivo', function () {
     $objeto_tipo_arquivo = new TipoArquivo();
     echo json_encode((array) $objeto_tipo_arquivo->montar_array_tipo_arquivo(), JSON_UNESCAPED_UNICODE);
@@ -416,6 +504,17 @@ router_add('excluir_tipo_arquivo', function () {
     $objeto_tipo_arquivo = new TipoArquivo();
 
     echo json_encode((array) ['status' => (bool) $objeto_tipo_arquivo->deletar((array) ['id_tipo_arquivo' => $id_tipo_arquivo])]);
+    exit;
+});
+
+/**
+ * Rota responsável por alterar a variável usar do cloudinary
+ * 
+ * Por padrão apenas um cloudinary pode estar ativo como usar = S.
+ * Então se o usuário vai alterar um cloudinary S para N o sistema permite, mas se o usuário for alterar um N para S ele altera o outro S para N.
+ * 
+ */
+router_add('alterar_tipo_cloudinary', function(){
     exit;
 });
 

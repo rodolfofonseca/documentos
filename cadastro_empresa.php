@@ -6,7 +6,7 @@ require_once 'modelos/Sistema.php';
 
 router_add('index', function () {
     require_once 'includes/head_relatorio.php';
-?>
+    ?>
     <script>
         /**
          * Função responsável por realizar a pesquisa de todas as empresas cadastradas no sistema e apresentar ao usuário.
@@ -43,6 +43,9 @@ router_add('index', function () {
             }, false);
         }
 
+        /** 
+         * Função responsável por abrir o modal de cadatro de usuários.
+         */
         function abril_modal_cadastro_usuario(id_empresa, nome_empresa, representante, informacao_contato) {
             window.location.href = sistema.url('/cadastro_empresa.php', {
                 'rota': 'cadastro_usuario',
@@ -53,23 +56,29 @@ router_add('index', function () {
             });
         }
 
+        /** 
+         * Função responsável por capturar as informações preenxidas pelo usuário no formulário e enviar para a dao, para que a mesma possa realizar a validação das informações e fazer a pensistência na base de dados.
+         */
         function salvar_dados_empresa() {
-            let id_empresa = document.querySelector('#id_empresa').value;
+            let id_empresa = parseInt(document.querySelector('#id_empresa').value, 10);
             let nome_empresa = document.querySelector('#nome_empresa').value;
             let representante = document.querySelector('#representante').value;
             let informacao_contato = document.querySelector('#informacao_contato').value;
 
-            sistema.request.post('/cadastro_empresa.php', {
-                'rota': 'salvar_dados_empresa',
-                'codigo_empresa': id_empresa,
-                'nome_empresa': nome_empresa,
-                'representante': representante,
-                'informacao_contato': informacao_contato
-            }, function(retorno) {
-                sistema.verificar_status(retorno.status, sistema.url('/cadastro_empresa.php', {
-                    'rota': 'index'
-                }));
+            if(isNaN(id_empresa) == true){
+                id_empresa = 0;
+            }
+
+            sistema.request.post('/cadastro_empresa.php', {'rota': 'salvar_dados_empresa', 'codigo_empresa': id_empresa, 'nome_empresa': nome_empresa, 'representante': representante, 'informacao_contato': informacao_contato}, function(retorno) {
+                validar_retorno(retorno, sistema.url('/cadastro_empresa.php', {'rota':'index'}));
             });
+        }
+
+        /** 
+         * Função responsável por retornar a página de login de usuário
+         */
+        function retornar(){
+            window.location.href = sistema.url('/index.php', {'rota': 'index'});
         }
     </script>
     <div class="container-fluid">
@@ -86,7 +95,10 @@ router_add('index', function () {
                     <div class="card-body">
                         <div class="row">
                             <div class="col-3 text-center">
-                                <button class="btn btn-info botao_vertical_linha" data-toggle="modal" data-target="#modal_cadastro_empresa">CADASTRO DE EMPRESA</button>
+                                <button class="btn btn-info botao_vertical_linha custom-radius" data-toggle="modal" data-target="#modal_cadastro_empresa">CADASTRO DE EMPRESA</button>
+                            </div>
+                            <div class="col-3 text-center">
+                                <button class="btn btn-secondary botao_vertical_linha custom-radius" onclick="retornar();">RETORNAR</button>
                             </div>
                         </div>
                         <br />
@@ -133,22 +145,22 @@ router_add('index', function () {
                         <input type="hidden" id="id_empresa" name="id_empresa" value="0" />
                         <div class="col-4 text-center">
                             <label class="text" for="nome_empresa">Nome Empresa</label>
-                            <input type="text" class="form-control custom-radius" id="nome_empresa" name="nome_empresa" placeholder="Nome Empresa" />
+                            <input type="text" class="form-control custom-radius text-uppercase" id="nome_empresa" name="nome_empresa" placeholder="Nome Empresa" />
                         </div>
                         <div class="col-4 text-center">
                             <label class="text" for="representante">Representante</label>
-                            <input type="text" class="form-control custom-radius" id="representante" name="representante" placeholder="Representante" />
+                            <input type="text" class="form-control custom-radius text-uppercase" id="representante" name="representante" placeholder="Representante" />
                         </div>
                         <div class="col-4 text-center">
                             <label class="text" for="informacao_contato">Informação de Contato</label>
-                            <input type="text" class="form-control custom-radius" id="informacao_contato" name="informacao_contato" placeholder="Informação de Contato" />
+                            <input type="text" class="form-control custom-radius text-uppercase" id="informacao_contato" name="informacao_contato" placeholder="Informação de Contato" />
                         </div>
                     </div>
                     <br />
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal" id="botao_fechar_modal_empresa">Fechar</button>
-                    <button type="button" class="btn btn-primary" onclick="salvar_dados_empresa();">Salvar</button>
+                    <button type="button" class="btn btn-danger custom-radius" data-dismiss="modal" id="botao_fechar_modal_empresa">Fechar</button>
+                    <button type="button" class="btn btn-primary custom-radius" onclick="salvar_dados_empresa();">Salvar</button>
                 </div>
             </div>
         </div>
@@ -249,19 +261,15 @@ router_add('cadastro_usuario', function () {
                     codigo_usuario = 0;
                 }
 
-                sistema.request.post('/cadastro_empresa.php', {
-                    'rota': 'salvar_dados_usuario',
-                    'codigo_usuario': codigo_usuario,
-                    'codigo_empresa': codigo_empresa,
-                    'nome_usuario': nome_usuario,
-                    'login': login,
-                    'senha_usuario': senha_usuario,
-                    'tipo': tipo
-                }, function(retorno) {
+                sistema.request.post('/cadastro_empresa.php', {'rota': 'salvar_dados_usuario', 'codigo_usuario': codigo_usuario, 'codigo_empresa': codigo_empresa, 'nome_usuario': nome_usuario, 'login': login, 'senha_usuario': senha_usuario, 'tipo': tipo}, function(retorno) {
                     sistema.verificar_status(retorno.status);
 
                     pesquisar_usuario();
                 });
+            }
+
+            function retornar(){
+                window.location.href = sistema.url('/cadastro_empresa.php', {'rota':'index'});
             }
         </script>
         <div class="container-fluid">
@@ -338,10 +346,10 @@ router_add('cadastro_usuario', function () {
                             <br />
                             <div class="row">
                                 <div class="col-3">
-                                    <button class="btn btn-info" onclick="enviar_dados();">SALVAR</button>
+                                    <button class="btn btn-info custom-radius" onclick="enviar_dados();">SALVAR</button>
                                 </div>
                                 <div class="col-3">
-                                    <button class="btn btn-secondary">VOLTAR</button>
+                                    <button class="btn btn-secondary custom-radius" onclick="retornar();">VOLTAR</button>
                                 </div>
                             </div>
                         </div>
@@ -394,32 +402,45 @@ router_add('pesquisar_empresas', function () {
 });
 
 /**
- * Rota responsável por capturar os dados do formulário e realizar o envio a modal.
+ * Rota responsável por realizar o cadastro de empresas no banco de dados juntamente com o cadastro de novos sistemas.
  */
 router_add('salvar_dados_empresa', function () {
     $objeto_empresa = new Empresa();
     $objeto_sistema = new Sistema();
-    $nome_empresa = (isset($_REQUEST['nome_empresa']) ? (string) $_REQUEST['nome_empresa'] : '');
+    $versao_sistema = (string) '0';
     $id_empresa = (int) 0;
+    $retorno_cadastro = (bool) false;
+    $nome_empresa = (string) (isset($_REQUEST['nome_empresa']) ? (string) strtoupper($_REQUEST['nome_empresa']):'');
 
     $retorno_cadastro_empresa = (bool) $objeto_empresa->salvar_dados($_REQUEST);
 
-    if ($retorno_cadastro_empresa == true) {
-        $filtro['filtro'] = (array) ['nome_empresa', '===', (string) $nome_empresa];
+    if($retorno_cadastro_empresa == true){
+        $arquivo_versao_sistema = (string) 'versao_sistema.ini';
+        
+        if(file_exists($arquivo_versao_sistema) == true){
+            $configuracao_aquivo = (array) parse_ini_file($arquivo_versao_sistema, true);
 
-        $retorno_pesquisa = (array) $objeto_empresa->pesquisar($filtro);
+            if(isset($configuracao_aquivo['sistema']['versao_sistema']) == true){
+                $versao_sistema = (string) $configuracao_aquivo['sistema']['versao_sistema'];
+            }
+        }
 
-        if (array_key_exists('id_empresa', $retorno_pesquisa) == true) {
-            $id_empresa = (int) intval($retorno_pesquisa['id_empresa'], 10);
+        $pesquisa_dados_empresa = (array) $objeto_empresa->pesquisar((array) ['filtro' => (array) ['nome_empresa', '===', (string) $nome_empresa]]);
 
-            $sistema = (array) ['codigo_empresa' => (int) $id_empresa];
+        if(empty($pesquisa_dados_empresa) == false){
+            $id_empresa = (int) intval($pesquisa_dados_empresa['id_empresa'], 10);
 
-            $retorno_sistema = (bool) $objeto_sistema->salvar_dados($sistema);
-
-            echo json_encode((array) ['status' => (bool) $retorno_sistema], JSON_UNESCAPED_UNICODE);
+            $retorno_cadastro = (bool) $objeto_sistema->salvar_dados((array) ['codigo_empresa' => (int) $id_empresa, 'versao_sistema' => (string) $versao_sistema]);
         }
     }
 
+    if($retorno_cadastro == false){
+        $retorno = $objeto_empresa->excluir((array) ['codigo_emmpresa' => (int) $id_empresa]);
+
+        $retorno_cadastro = (bool) false;
+    }
+
+    echo json_encode((array) ['status' => (bool) $retorno_cadastro], JSON_UNESCAPED_UNICODE);
     exit;
 });
 

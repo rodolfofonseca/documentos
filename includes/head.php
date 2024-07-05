@@ -34,6 +34,7 @@ $tipo_usuario = (string) $_SESSION['tipo_usuario'];
     <script type="text/javascript" src="dist/js/sistema.js?v=<?php echo filemtime('dist/js/sistema.js'); ?>"></script>
     <script type="text/javascript" src="dist/js/padrao.js"></script>
     <script type="text/javascript" src="js/basics.js?v=<?php echo filemtime('js/basics.js'); ?>"></script>
+    <script type="text/javascript" src="js/mensagens.js?v=<?php echo filemtime('js/mensagens.js'); ?>"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <link href="css/estilo.css?v=<?php echo filemtime('css/estilo.css'); ?>" rel="stylesheet">
 </head>

@@ -61,5 +61,16 @@ class Empresa{
     public function pesquisar_todos($filtro){
         return (array) model_all($this->tabela(), $filtro['filtro'], $filtro['ordenacao'], $filtro['limite']);
     }
+
+    /**
+     * Função responsável por excluir uma empresa cadastrada no banco de dados.
+     * @param array $dados array contendo o "codigo_empresa"
+     * @return boolean TRUE ou FALSE de acordo com o retorno da função.
+     */
+    public function excluir($dados){
+        $this->colocar_dados($dados);
+
+        return (bool) model_delete($this->tabela(), ['id_empresa', '===', (int) $this->id_empresa]);
+    }
 }
 ?>

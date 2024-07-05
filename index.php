@@ -3,8 +3,18 @@ require_once 'Classes/bancoDeDados.php';
 require_once 'modelos/Usuario.php';
 require_once 'modelos/Sistema.php';
 
+/**
+ * Rota responsável por capturar as informações de login do usuário, e caso o banco de dados do usuário não possui nenhuma empresa cadastrada redirecionar o usuário para o formulário onde o mesmo irá realizar o cadastro de sua empresa.
+ */
 router_add('index', function(){
-    ?>
+  $retorno = (bool) false;
+  $retorno_dados = model_one('sistema');
+
+  if(empty($retorno_dados) == false){
+    $retorno_dados = (bool) true;
+  }
+
+  ?>
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -20,16 +30,24 @@ router_add('index', function(){
           <input type="submit" class="fadeIn fourth" value="Entrar no Sistema">
         </form>
 
-        <!-- Remind Passowrd -->
-        <!-- <div id="formFooter">
-        <a class="underlineHover" href="#">Forgot Password?</a>
-        </div> -->
+        <?php
+          if($retorno_dados == false){
+            ?>
+              <div id="formFooter">
+                <a class="underlineHover" href="cadastro_empresa.php">Primeiro Acesso!</a>
+              </div>
+            <?php
+          }
+        ?>
       </div>
     </div>
     <?php
     exit;
 });
 
+/**
+ * Rota responsável por validar as informações do usuário e redirecionar ele para o local correto caso todas as informações estejam corretas.
+ */
 router_add('validar_login', function(){
   $objeto_usuario = new Usuario();
   $usuario = (array) $objeto_usuario->login_sistema($_REQUEST);

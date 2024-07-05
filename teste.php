@@ -7,13 +7,18 @@ use Cloudinary\Configuration\Configuration;
 require_once 'Classes/bancoDeDados.php';
 require_once 'Classes/Sistema/db.php';
 
- Configuration::instance('cloudinary://553346733577561:KZcRLgJyqU7UtPv_h5aMpNcFKi8@dw5jerbyf?secure=true');
-$upload = new UploadApi();
+$arquivo_configuracao = (string) 'versao_sistema.ini';
 
 
-// //1718494508050.pdf
- $admin = new AdminApi();
+if (file_exists($arquivo_configuracao) == true) {
+    $configuracao = (array) parse_ini_file($arquivo_configuracao, true);
+    
+    if (isset($configuracao['sistema']['versao_sistema']) == true) {
+        echo $configuracao['sistema']['versao_sistema'];
+    }else{
+        echo 'não encontrado array';
+    }
+}else{
+    echo 'não encontrado arquivo';
+}
 
-$retorno = $admin->usage();
-
-var_dump($retorno);

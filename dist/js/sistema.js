@@ -288,6 +288,8 @@ var sistema = (function (window) {
             button.id = id_botao;
             button.textContent = texto;
 
+            button.classList.add('custom-radius');
+
             for(let contador = 0; contador < classe.length; contador++){
                 button.classList.add(classe[contador]);
             }

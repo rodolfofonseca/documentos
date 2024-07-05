@@ -8,6 +8,7 @@ class Usuario{
     private $login;
     private $senha_usuario;
     private $tipo;
+    private $status;
     private $opcao = ['const' => 8];
 
     private function tabela(){
@@ -15,16 +16,20 @@ class Usuario{
     }
 
     private function modelo(){
-        return (array) ['id_usuario' => (int) 0, 'id_empresa' => (int) 0, 'nome_usuario' => (string) '', 'login' => (string) '', 'senha_usuario' => (string) '', 'tipo' => (string)'COMUM'];
+        return (array) ['id_usuario' => (int) 0, 'id_empresa' => (int) 0, 'nome_usuario' => (string) '', 'login' => (string) '', 'senha_usuario' => (string) '', 'tipo' => (string)'COMUM', 'status' => (string) 'ATIVO'];
     }
 
     private function colocar_dados($dados){
         if(array_key_exists('codigo_usuario', $dados) == true){
             $this->id_usuario = (int) intval($dados['codigo_usuario'], 10);
+        }else{
+            $this->id_usuario = (int) 0;
         }
 
         if(array_key_exists('codigo_empresa', $dados) == true){
             $this->id_empresa = (int) intval($dados['codigo_empresa'], 10);
+        }else{
+            $this->id_empresa = (int) 0;
         }
 
         if(array_key_exists('nome_usuario', $dados) == true){
@@ -41,6 +46,14 @@ class Usuario{
 
         if(array_key_exists('tipo', $dados) == true){
             $this->tipo = (string) $dados['tipo'];
+        }else{
+            $this->tipo = (string) 'COMUM';
+        }
+
+        if(array_key_exists('status', $dados) == true){
+            $this->status = (string) $dados['status'];
+        }else{
+            $this->status = (string) 'ATIVO';
         }
     }
 
@@ -72,7 +85,7 @@ class Usuario{
                 return (bool) false;
             }
 
-            return (bool) model_insert($this->tabela(), model_parse($this->modelo(), ['id_usuario' => (int) model_next($this->tabela(), 'id_usuario'), 'id_empresa' => (int) $this->id_empresa,'nome_usuario' => (string) $this->nome_usuario, 'login' => (string) $this->login, 'senha_usuario' => (string) $this->senha_usuario, 'tipo' => (string) $this->tipo]));
+            return (bool) model_insert($this->tabela(), model_parse($this->modelo(), ['id_usuario' => (int) model_next($this->tabela(), 'id_usuario'), 'id_empresa' => (int) $this->id_empresa,'nome_usuario' => (string) $this->nome_usuario, 'login' => (string) $this->login, 'senha_usuario' => (string) $this->senha_usuario, 'tipo' => (string) $this->tipo, 'status' => (string) $this->status]));
         }
     }
 
