@@ -79,4 +79,12 @@ router_add('validar_login', function(){
     header('location:index.php');
   }
 });
+
+/**
+ * Rota responsável por criar um novo código de barras e retornar para a rota que está realizando a requisição.
+ */
+router_add('buscar_codigo_barras', function(){
+  echo json_encode((array) ['codigo_barras' => (string) codigo_barras()], JSON_UNESCAPED_UNICODE);
+  exit;
+});
 ?>

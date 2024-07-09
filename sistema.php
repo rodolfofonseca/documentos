@@ -12,6 +12,7 @@ router_add('index', function () {
 ?>
     <script>
         const ID_EMPRESA = <?php echo $id_empresa; ?>;
+        var ID_CLOUDINARY = 0;
         /**
          * Função responsável por realizar o salvamento dos dados básico do sistema
          */
@@ -110,7 +111,7 @@ router_add('index', function () {
                 } else {
                     sistema.each(tipo_arquivo, function(contador, arquivo) {
                         let linha = document.createElement('tr');
-                        linha.appendChild(sistema.gerar_td(['text-center'], arquivo.id_tipo_arquivo, 'inner'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(arquivo.id_tipo_arquivo, 2, "0"), 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], arquivo.tipo_arquivo, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], arquivo.descricao, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], arquivo.endereco_documento, 'inner'));
@@ -176,15 +177,13 @@ router_add('index', function () {
             if(ID_EMPRESA != 0){
                 sistema.request.post('/sistema.php', {
                     'rota':'enviar_dados_cloudinary',
+                    'id_cloudinary': ID_CLOUDINARY,
                     'id_empresa': ID_EMPRESA,
                     'dns': dns,
                     'usar': usar
                 }, function(retorno){
-                    if(retorno.status == true){
-                        Swal.fire('Sucesso!', 'Operação realizada com sucesso!', 'success');
-                    }else{
-                        Swal.fire('Erro', 'Erro durante a operação!', 'error');
-                    }
+                    validar_retorno(retorno);
+                    pesquisar_cloudinary();
                 });
             }
         }
@@ -203,17 +202,23 @@ router_add('index', function () {
 
                 if(tamanho < 1){
                     let linha = document.createElement('tr');
-                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM CLOUDINARY ENCONTRADO!', 'inner', true, 5));
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM CLOUDINARY ENCONTRADO!', 'inner', true, 6));
                     tabela.appendChild(linha);
                 }else{
                     sistema.each(cloudinary, function(contador, dados){
                         linha = document.createElement('tr');
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], dados.id_cloudinary, 'inner'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(dados.id_cloudinary, 2, "0"), 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], dados.dns, 'inner'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], dados.usar, 'inner'));
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_cloudinary_'+dados.id_cloudinary, 'ALTERAR', ['btn', 'btn-info'], function alterar_usar_cloudinary(){alterar_cloudinary(dados.id_cloudinary);}), 'append'));
+                        if(dados.usar == 'S'){
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_usar_sim_'+dados.id_cloudinary, 'SIM', ['btn', 'btn-success'], function usar(){}), 'append'));
+                        }else{
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_usar_sim_'+dados.id_cloudinary, 'NÃO', ['btn', 'btn-danger'], function usar(){}), 'append'));
+                        }
+
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_cloudinary_'+dados.id_cloudinary, 'ALTERAR TIPO', ['btn', 'btn-info'], function alterar_usar_cloudinary(){alterar_cloudinary(dados.id_cloudinary, dados.usar);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_dns_cloudinary_'+dados.id_cloudinary, 'ALTERAR DNS', ['btn', 'btn-info'], function alterar_cloudinary_dns(){alterar_dns(dados.id_cloudinary, dados.dns, dados.usar);}), 'append'));
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_excluir_cloudinary_'+dados.id_cloudinary, 'EXCLUIR',['btn', 'btn-danger'], function excluir_cloudinary_sistema(){excluir_cloudinary(dados.id_cloudinary);}), 'append'));
 
                         tabela.appendChild(linha);
@@ -224,10 +229,33 @@ router_add('index', function () {
 
         /**
          * Função responsável por alterar a visualização do cloudinary para usar = S ou usar = N
-         * @param {int} id_cloudinary
+         * @param {int} id_cloudinary identificador único do cloudinary na base de dados
+         * @param string dns string contendo o endereço do cloudinary para fazer o upload do arquivo
+         * @param string usar string contendo a informação de qual cloudinary o usuário deseja estar utilizando.
          */
-        function alterar_cloudinary(id_cloudinary){
+        function alterar_dns(id_cloudinary, dns, usar){
+            document.querySelector('#dns').value = dns;
+            document.querySelector('#usar').value = usar;
+            ID_CLOUDINARY = id_cloudinary;
+        }
 
+        /**
+         * Função responsável por adicionar as informações do cloudinary nos campos para que o usuário possa estar realizando a alteração completa do cloudinary
+         * @param {int} id_cloudinary 
+         * @param {string} usar
+         * 
+         */
+        function alterar_cloudinary(id_cloudinary, usar){
+            if(usar == 'S'){
+                usar = 'N';
+            }else{
+                usar = 'S';
+            }
+
+            sistema.request.post('/sistema.php', {'rota': 'alterar_tipo_cloudinary', 'id_cloudinary': id_cloudinary, 'id_empresa': ID_EMPRESA, 'usar': usar}, function(retorno){
+                validar_retorno(retorno);
+                pesquisar_cloudinary();
+            });
         }
 
         /**
@@ -235,7 +263,42 @@ router_add('index', function () {
          * Caso o usuário escolha excluir o cloudinary o sistema já faz na hora a exclusão do mesmo.
          * @param {int} id_cloudinary  */
         function excluir_cloudinary(id_cloudinary){
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: { confirmButton: "btn btn-success", cancelButton: "btn btn-danger"}, buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: "Você tem certeza?",
+                text: "A operação de exclusão é irreversível! \n As informações pertinentes a este cloudinary serão mantidas. Mas os arquvios já cadastrados não serão excluídos.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sim, deletar!",
+                cancelButtonText: "Não, cancelar!",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sistema.request.post('/sistema.php', {
+                        'rota': 'deletar_cloudinary',
+                        'id_cloudinary': id_cloudinary,
+                        'id_empresa': ID_EMPRESA
+                    }, function(retorno) {pesquisar_cloudinary();}, false);
 
+                    
+
+                    swalWithBootstrapButtons.fire({
+                        title: "Deletado!",
+                        text: "O cloudinary foi excluído com sucesso.",
+                        icon: "success"
+                    });
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    swalWithBootstrapButtons.fire({
+                        title: "Cancelado",
+                        text: "O cloudinary não foi deletado do sistema :)",
+                        icon: "error"
+                    });
+                }
+            });
         }
     </script>
     <div class="container-fluid">
@@ -380,7 +443,7 @@ router_add('index', function () {
                                             <th scope="col">#</th>
                                             <th scope="col">DNS</th>
                                             <th scope="col">USAR</th>
-                                            <th scope="col">ALTERAR</th>
+                                            <th scope="col">ALTERAR TIPO</th>
                                             <th scope="col">ALTERAR ENDEREÇO</th>
                                             <th scope="col">EXCLUIR</th>
                                         </tr>
@@ -515,6 +578,21 @@ router_add('excluir_tipo_arquivo', function () {
  * 
  */
 router_add('alterar_tipo_cloudinary', function(){
+    $objeto_cloudinary = new Cloudinary();
+
+    echo json_encode(['status' => (bool) $objeto_cloudinary->alterar_tipo_cloudinary($_REQUEST)], JSON_UNESCAPED_UNICODE);
+    exit;
+});
+
+/**
+ * Rota responsável por excluir o cloudinary do banco de dados.
+ * 
+ * A opção de exclusão é irreversível, portanto antes de realizar essa opção o sistema pergunta para o usuário se o mesmo deseja realmente realizar a operação de exclusão.
+ */
+router_add('deletar_cloudinary', function(){
+    $objeto_cloudinary = new Cloudinary();
+
+    echo json_encode(['status' => (bool) $objeto_cloudinary->deletar_cloudinary($_REQUEST)], JSON_UNESCAPED_UNICODE);
     exit;
 });
 

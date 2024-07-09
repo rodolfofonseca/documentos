@@ -103,25 +103,60 @@ router_add('index', function(){
     require_once 'includes/footer.php';
 });
 
-//@note cadastro/alteracao
+/**
+ * Rota responsável por apresentar o formulário de cadastro de novas organizações dentro do sistema.
+ * E realizar o envio das informações preenxidas pelo usuário para o back.
+ */
 router_add('salvar_dados', function(){
-    $id_organizacao = (int) (isset($_REQUEST['codigo_organizacao']) ? intval($_REQUEST['codigo_organizacao'], 10):0);
     require_once 'includes/head.php';
+
+    $id_organizacao = (int) (isset($_REQUEST['codigo_organizacao']) ? intval($_REQUEST['codigo_organizacao'], 10):0);
+    $id_usuario = (int) intval($_SESSION['id_usuario'], 10);
+    $id_empresa = (int) intval($_SESSION['id_empresa'], 10);
     ?>
     <script>
         var ID_ORGANIZACAO = <?php echo $id_organizacao; ?>;
+        const ID_EMPRESA = <?php echo $id_empresa; ?>;
+        const ID_USUARIO = <?php echo $id_usuario; ?>;
+        const TIPO_USUARIO = '<?php echo $tipo_usuario; ?>';
 
+        /**
+         * Função responsável por pegar as informacoes dos campos preenxidos pelo usuário e enviar para o back.
+         */
         function salvar_dados(){
             let codigo_organizacao = parseInt(document.querySelector('#codigo_organizacao').value, 10);
             let nome_organizacao = document.querySelector('#descricao_organizacao').value;
+            let forma_visualizacao = document.querySelector('#forma_visualizacao').value;
+            let codigo_barras = document.querySelector('#codigo_barras').value;
 
             if(isNaN(codigo_organizacao)){
                 codigo_organizacao = 0;
             }
 
-            sistema.request.post('/organizacao.php', {'rota': 'enviar_dados', 'codigo_organizacao': codigo_organizacao, 'nome_organizacao': nome_organizacao}, function(retorno){
-                sistema.verificar_status(retorno.status, sistema.url('/organizacao.php', {'rota':'index'}));
+            sistema.request.post('/organizacao.php', {'rota': 'enviar_dados', 'codigo_organizacao': codigo_organizacao, 'codigo_empresa': ID_EMPRESA, 'codigo_usuario': ID_USUARIO, 'nome_organizacao': nome_organizacao, 'forma_visualizacao': forma_visualizacao, 'codigo_barras': codigo_barras}, function(retorno){
+                validar_retorno(retorno);
+                limpar_campos();
             });        
+        }
+
+        /**
+         * Função responsável por limpar todos os campos do sistema.
+         */
+        function limpar_campos(){
+            document.querySelector('#codigo_organizacao').value = '';
+            document.querySelector('#descricao_organizacao').value = '';
+            document.querySelector('#forma_visualizacao').value = '';
+            
+            sistema.request.post('/index.php', {'rota': 'buscar_codigo_barras'}, function(retorno){
+                document.querySelector('#codigo_barras').value = retorno.codigo_barras;
+            }, false);
+        }
+
+        /**
+         * Função responsável por retornar o usuário para a rota index do módulo de organização.
+         */
+        function voltar(){
+            window.location.href = sistema.url('/organizacao.php', {'rota': 'index'});
         }
     </script>
     <div class="container-fluid">
@@ -131,17 +166,38 @@ router_add('salvar_dados', function(){
                     <div class="card-body">
                         <h4 class="card-title text-center">Cadastro de Organização</h4>
                         <div class="row">
-                        <div class="col-2 text-center">
+                            <div class="col-2 text-center">
                                 <label class="text">Código</label>
                                 <input type="text" sistema-mask="codigo" class="form-control custom-radius text-center" id="codigo_organizacao" placeholder="Código" readonly="true"/>
                             </div>
-                            <div class="col-8 text-center">
+                            <div class="col-4 text-center">
                                 <label class="text">Descrição Organização</label>
                                 <input type="text" class="form-control custom-radius text-uppercase" id="descricao_organizacao" placeholder="Descrição Organização"/>
                             </div>
-                            <div class="col-2">
-                                <button class="btn btn-info botao_vertical_linha" onclick="salvar_dados();">Salvar Dados</button>
+                            <div class="col-3 text-center">
+                                <label class="text">Tipo</label>
+                                <select class="form-control custom-radius" id="forma_visualizacao">
+                                    <option value="">Selecione uma Opção</option>
+                                    <option value="PUBLICO">PÚBLICO</option>
+                                    <option value="PRIVADO">PRIVADO</option>
+                                </select>
                             </div>
+                            <div class="col-3 text-center">
+                                <label class="text">Código de Barras</label>
+                                <input type="text" class="form-control custom-radius text-center" id="codigo_barras" readonly="true" value="<?php echo codigo_barras(); ?>"/>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-4">
+                                <button class="btn btn-info custom-radius btn-lg botao_grande" onclick="salvar_dados();">Salvar Dados</button>
+                            </div>    
+                            <div class="col-4">
+                                <button class="btn btn-danger custom-radius btn-lg botao_grande" onclick="limpar_campos();">Limpar Campos</button>
+                            </div>    
+                            <div class="col-4">
+                                <button class="btn btn-secondary custom-radius btn-lg botao_grande" onclick="voltar();">Voltar</button>
+                            </div>    
                         </div>
                     </div>
                 </div>
@@ -150,6 +206,11 @@ router_add('salvar_dados', function(){
     </div>
     <script>
         window.onload = function(){
+            if(TIPO_USUARIO != 'ADMINISTRADOR'){
+                window.location.href = sistema.url('/dashboard.php', {'rota':'index'});
+            }
+
+
             if(ID_ORGANIZACAO != 0){
                 sistema.request.post('/organizacao.php', {'rota':'pesquisar_organizacao', 'codigo_organizacao': ID_ORGANIZACAO}, function(retorno){
                     document.querySelector('#codigo_organizacao').value = retorno.dados.id_organizacao;

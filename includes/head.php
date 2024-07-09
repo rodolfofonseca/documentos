@@ -3,8 +3,6 @@ session_start();
 date_default_timezone_set('America/Sao_Paulo');
 if ((!isset($_SESSION['login']) == true) && (!isset($_SESSION['senha']) == true)) {
     header('location:index.php');
-} else {
-    $vari = (string) 'tem sessão';
 }
 
 // $quantidade_notificacao = (int) contar_notificaoes();
@@ -122,8 +120,15 @@ $tipo_usuario = (string) $_SESSION['tipo_usuario'];
                                 <a class="dropdown-item" href="usuario.php"> <i data-feather="user" class="svg-icon mr-2 ml-1"></i>Meu Perfil</a>
                                 <a class="dropdown-item" href="#"> <i data-feather="credit-card" class="svg-icon mr-2 ml-1"> </i>caixa</a>
                                 <a class="dropdown-item" href="#"><i data-feather="mail" class="svg-icon mr-2 ml-1"></i>Mensagens</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="sistema.php"><i data-feather="settings" class="svg-icon mr-2 ml-1"></i>Configurações da Empresa</a>
+                                <?php
+                                    if($tipo_usuario == 'ADMINISTRADOR'){
+                                        ?>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="usuario.php"><i data-feather="settings" class="svg-icon mr-2 ml-1"></i>Configurações de Usuários</a>
+                                            <a class="dropdown-item" href="sistema.php"><i data-feather="settings" class="svg-icon mr-2 ml-1"></i>Configurações da Empresa</a>
+                                        <?php
+                                    }
+                                ?>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="index.php"><i data-feather="power" class="svg-icon mr-2 ml-1"></i>Sair</a>
                                 <div class="dropdown-divider"></div>

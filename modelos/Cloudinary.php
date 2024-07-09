@@ -48,11 +48,24 @@ class Cloudinary{
 
     public function salvar_dados($dados){
         $this->colocar_dados($dados);
+        $retorno_validacao_ja_existe_empresa = (bool) model_check((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['dns', '===', (string) $this->dns]]]);
+
+        if($retorno_validacao_ja_existe_empresa == true){
+            return (bool) false;
+        }
 
         if($this->id_cloudinary != 0){
-            return (bool) model_update($this->tabela(), ['id_cloudinary', '===', (int) $this->id_cloudinary], model_parse($this->modelo(), ['id_cloudinary' => (int) $this->id_cloudinary, 'id_empresa' => (int) $this->id_empresa, 'dns' => (string) $this->dns, 'usar' => (string) $this->usar]));
+            model_update($this->tabela(), ['id_cloudinary', '===', (int) $this->id_cloudinary], model_parse($this->modelo(), ['id_cloudinary' => (int) $this->id_cloudinary, 'id_empresa' => (int) $this->id_empresa, 'dns' => (string) $this->dns, 'usar' => (string) $this->usar]));
+
+            return (bool) $this->alterar_tipo_cloudinary((array) []);
         }else{
-            return (bool) model_insert($this->tabela(), model_parse($this->modelo(), ['id_cloudinary' => (int) model_next($this->tabela(), 'id_cloudinary'), 'id_empresa' => (int) $this->id_empresa, 'dns' => (string) $this->dns, 'usar' => (string) $this->usar]));
+            model_insert($this->tabela(), model_parse($this->modelo(), ['id_cloudinary' => (int) model_next((string) $this->tabela(), (string) 'id_cloudinary', (array) ['id_empresa', '===', (int) $this->id_empresa]), 'id_empresa' => (int) $this->id_empresa, 'dns' => (string) $this->dns, 'usar' => (string) $this->usar]));
+
+            $retorno_pesquisa = (array) model_one((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['dns', '===', (string) $this->dns]]]);
+
+            $this->colocar_dados($retorno_pesquisa);
+            
+            return (bool) $this->alterar_tipo_cloudinary((array) []);
         }
     }
 
@@ -130,5 +143,43 @@ class Cloudinary{
         }
     }
 
+    /**
+     * Função responsável por realizar a checagem se possui algum cloudinary no sistema como S antees de colocar outro.
+     * Por padrão apenas um cloudinary no sistema pode estar ativo como S.
+     * @param array $dados contendo as informações que serão trabalhadas.
+     * @return bool TRUE ou FALSE de acordo com o resultado da função.
+     */
+    public function alterar_tipo_cloudinary($dados){
+
+        if(empty($dados) == false){
+            $this->colocar_dados($dados);
+        }
+
+        if($this->usar == 'S'){
+            $retorno_alteracao_massiva = (bool) model_update($this->tabela(), (array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['usar' => (string) 'N']);
+
+            if($retorno_alteracao_massiva == true){
+                return (bool) model_update($this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_cloudinary', '===', (int) $this->id_cloudinary]]], (array) ['usar' => (string) 'S']);
+            }else{
+                return (bool) false;
+            }
+        }else{
+            return (bool) model_update($this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_cloudinary', '===', (int) $this->id_cloudinary]]], (array) ['usar' => (string) 'N']);
+        }
+    }
+
+    /**
+     * função responsável por excluir o cloudinary da base de dados. Uma vez realizado a operação de exclusão, não tem como ativar novamente.
+     * @param array $dados do cloudinary a ser excluido
+     * @return bool TRUE ou FALSE de acordo com o resultado da função.
+     */
+    public function deletar_cloudinary($dados){
+        $this->colocar_dados($dados);
+
+        return (bool) model_delete((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_cloudinary', '===', (int) $this->id_cloudinary]]]);
+    }
+
+    //cloudinary://266345532352813:HgYJP-tuYqUVBk-i9Eo9LBrPi2c@dptzzccb6?secure=true     N
+    //cloudinary://553346733577561:KZcRLgJyqU7UtPv_h5aMpNcFKi8@dw5jerbyf?secure=true     S
 }
 ?>
