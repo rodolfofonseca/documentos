@@ -1,4 +1,8 @@
-
+/** 
+ * Função responsável por retornar a de acordo com o retorno da operação e redirecionar o usuário para outra tela caso for necessário.
+ * @param array retorno da operação que vem do back convertido em forma json.
+ * @param array contendo o endereço que a função deve redirecionar o usuário, caso não esteja ''
+ */
 function validar_retorno(retorno, endereco = ''){
 	if(retorno.status == true){
 		this.Swal.fire({title: "SUCESSO NA OPERAÇÃO!", text: "Operação realizada com sucesso!", icon: "success"});
@@ -11,5 +15,21 @@ function validar_retorno(retorno, endereco = ''){
 		window.setTimeout(function(){
 			window.location.href = endereco;
 		}, 2500);
+	}
+}
+
+/** 
+ * Função responsável por apresentar uma mensagem de erro caso o sistema apresente algum erro de validação de dados.
+ * o mesmo ainda adiciona o focu para o compo que apresentou o erro.
+ * @param string nome_componente_usuario nome que deve aparecer para o usuário do componente.
+ * @param string identificador_componente #id do componente para adicionar o focus.
+ */
+
+function apresentar_mensagem_erro(nome_componente_usuario, identificador_componente = ''){
+    this.Swal.fire({title: "ERRO DE VALIDAÇÃO!", text: 'o campo '+nome_componente_usuario+' não pode ser vazio, ou a informação informada está incorreta!', icon: "error"});
+
+	if(identificador_componente != ''){
+		let campo = document.querySelector(identificador_componente);
+		campo.classList.add('is-invalid');
 	}
 }

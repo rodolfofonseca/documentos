@@ -119,5 +119,33 @@ class Usuario{
     public function pesquisar($dados){
         return (array) model_one($this->tabela(), $dados['filtro']);
     }
+
+    /**
+     * Função responsável por verificar qual o status atual do usuário e realizar a alteração de acordo com o status.
+     * @param array contendo os dados do usuário
+     * @return bool com o status da operação
+     */
+    public function alterar_status($dados){
+        $this->colocar_dados($dados);
+
+        if($this->status == 'ATIVO'){
+            return (bool) model_update((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_usuario', '===', (int) $this->id_usuario]]], (array) ['status' => (string) 'INATIVO']);
+        }else if($this->status == 'INATIVO'){
+            return (bool) model_update((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_usuario', '===', (int) $this->id_usuario]]], (array) ['status' => (string) 'ATIVO']);
+        }else{
+            return (bool) false;
+        }
+    }
+
+    /**
+     * Função responsável por realizar apenas a troca da senha do usuário
+     * @param array contendo as informações do usuário que será realizado a troca da senha
+     * @return bool contendo o resultado da troca da senha.
+     */
+    public function alterar_senha($dados){
+        $this->colocar_dados($dados);
+
+        return (bool) model_update((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_usuario', '===', (int) $this->id_usuario]]], (array) ['senha_usuario' => (string) $this->senha_usuario]);
+    }
 }
 ?>

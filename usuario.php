@@ -23,7 +23,16 @@ router_add('index', function(){
          * E montar a tabela com o resultado das informações pesquisadas.
          */
         function pesquisar_usuario(){
-            sistema.request.post('/usuario.php', {'rota': 'pesquisar_usuario'}, function(retorno){
+            let id_usuario = parseInt(document.querySelector('#id_usuario').value, 10);
+            let nome_usuario = document.querySelector('#nome_usuario').value;
+            let login = document.querySelector('#login').value;
+            let tipo = document.querySelector('#tipo').value;
+
+            if(isNaN(id_usuario)){
+                id_usuario = 0;
+            }
+
+            sistema.request.post('/usuario.php', {'rota': 'pesquisar_usuario', 'codigo_usuario': id_usuario, 'codigo_empresa': ID_EMPRESA, 'nome_usuario': nome_usuario, 'login': login, 'tipo': tipo}, function(retorno){
                 let retorno_usuario = retorno.dados;
                 let tamanho_retorno = retorno_usuario.length;
                 let tabela = document.querySelector('#tabela_usuario tbody');
@@ -58,7 +67,7 @@ router_add('index', function(){
                         }
 
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_Alterar_senha_'+usuario.id_usuario, 'ALTERAR SENHA', ['btn', 'btn-info'], function alterar_senha_usuario(){alterar_senha(usuario.id_usuario);}),'append'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_status_'+usuario.id_usuario, 'ALTERAR STATUS', ['btn', 'btn-info'], function alterar_status_usuario(){alterar_status(usuario.id_usuario);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_status_'+usuario.id_usuario, 'ALTERAR STATUS', ['btn', 'btn-info'], function alterar_status_usuario(){alterar_status(usuario.id_usuario, usuario.status);}), 'append'));
 
                         tabela.appendChild(linha);
                     });
@@ -69,8 +78,14 @@ router_add('index', function(){
         /** Função responsável por alterar a senha do usuário
          * @param integer id_usuario identificador único do usuário
          */
-        function alterar_senha(id_usuario){
-
+        async function alterar_senha(id_usuario){
+            const { value: senha_usuario } = await Swal.fire({title: "Digite uma nova senha", input: "password", inputLabel: "Senha para realizar login no sistema", inputPlaceholder: "Digite a senha", inputAttributes: {maxlength: "100", autocapitalize: "off", autocorrect: "off"}});
+            
+            if (senha_usuario) {
+                sistema.request.post('/usuario.php', {'rota': 'alterar_senha_usuario', 'codigo_usuario':id_usuario, 'codigo_empresa': ID_EMPRESA, 'senha_usuario': senha_usuario}, function(retorno){
+                    validar_retorno(retorno);
+                });
+            }
         }
 
         /** 
@@ -78,8 +93,11 @@ router_add('index', function(){
          * @param integer id_usuario identificador do usuário.
          * 
         */
-        function alterar_status(id_usuario){
-
+        function alterar_status(id_usuario, status){
+            sistema.request.post('/usuario.php', {'rota': 'alterar_status_usuario', 'codigo_usuario': id_usuario, 'codigo_empresa':ID_EMPRESA, 'status':status}, function(retorno){
+                validar_retorno(retorno);
+                pesquisar_usuario();
+            });
         }
     </script>
     <div class="container-fluid">
@@ -98,7 +116,7 @@ router_add('index', function(){
                         <div class="row">
                             <div class="col-1 text-center">
                                 <label>Código</label>
-                                <input type="text" class="form-control custom-radius text-center" id="codigo_usuario" placeholder="Código" sistema-mask="codigo"/>
+                                <input type="text" class="form-control custom-radius text-center" id="id_usuario" placeholder="Código" sistema-mask="codigo"/>
                             </div>
                             <div class="col-3 text-center">
                                 <label>Nome Usuário</label>
@@ -106,18 +124,18 @@ router_add('index', function(){
                             </div>
                             <div class="col-3 text-center">
                                 <label>Login usuário</label>
-                                <input type="text" class="form-control custom-radius" id="login_usuario" placeholder="Login usuário"/>
+                                <input type="text" class="form-control custom-radius" id="login" placeholder="Login usuário"/>
                             </div>
                             <div class="col-3 text-center">
                                 <label>Tipo Usuário</label>
-                                <select class="form-control custom-radius">
+                                <select class="form-control custom-radius" id="tipo">
                                     <option value="TODOS">TODOS</option>
                                     <option value="ADMINISTRADOR">ADMINISTRADOR</option>
                                     <option value="COMUM">COMUM</option>
                                 </select>
                             </div>
                             <div class="col-2 text-center">
-                                <button class="btn btn-info custom-radius botao_vertical_linha botao_grande">Pesquisar</button>
+                                <button class="btn btn-info custom-radius botao_vertical_linha botao_grande" onclick="pesquisar_usuario();">Pesquisar</button>
                             </div>
                         </div>
                         <br/>
@@ -156,7 +174,141 @@ router_add('index', function(){
     exit;
 });
 
+/**
+ * Rota responsável por apresentar o formulário de cadastro de novos usuários na base de dados.
+ */
 router_add('cadastro_usuario', function(){
+    require_once 'includes/head.php';
+    $id_empresa = (int) intval($_SESSION['id_empresa'], 10);
+    ?>
+     <script>
+        const ID_EMPRESA = <?php echo $id_empresa; ?>;
+
+        /** 
+         * Função responsável por validar os dados do usuário e enviar para o back para salvar as informações no banco de dados.
+         */
+        function salvar_dados(){
+            let codigo_usuario = parseInt(document.querySelector('#codigo_usuario').value, 10);
+            let nome_usuario = document.querySelector('#nome_usuario').value;
+            let login = document.querySelector('#login').value;
+            let senha_usuario = document.querySelector('#senha_usuario').value;
+            let tipo = document.querySelector('#tipo').value;
+            let status = document.querySelector('#status').value;
+            let retorno_validacao = true;
+
+            if(isNaN(codigo_usuario)){
+                codigo_usuario = 0;
+            }
+
+            if(nome_usuario == ''){
+                apresentar_mensagem_erro('NOME USUÁRIO', '#nome_usuario');
+                retorno_validacao = false;
+            }
+
+            if(login == ''){
+                apresentar_mensagem_erro('LOGIN USUÁRIO', '#login');
+                retorno_validacao = false;
+            }
+
+            if(senha_usuario == ''){
+                apresentar_mensagem_erro('SENHA USUÁRIO', '#senha_usuario');
+                retorno_validacao = false;
+            }
+
+            if(tipo == ''){
+                apresentar_mensagem_erro('TIPO USUÁRIO', '#tipo');
+                retorno_validacao = false;
+            }
+
+            if(status == ''){
+                apresentar_mensagem_erro('STATUS USUÁRIO', '#status');
+                retorno_validacao = false;
+            }
+
+            if(retorno_validacao == true){
+                sistema.request.post('/usuario.php', {'rota': 'salvar_dados_usuario', 'codigo_usuario': codigo_usuario, 'codigo_empresa':ID_EMPRESA, 'nome_usuario': nome_usuario, 'login': login, 'senha_usuario': senha_usuario, 'tipo': tipo, 'status': status}, function(retorno){
+                    validar_retorno(retorno, sistema.url('/usuario.php', {'rota':'index'}));
+                });
+            }
+        }
+
+        /** 
+         * Função responsável por limpar o formulário de cadastro de usuários.
+         */
+        function excluir_dados(){
+            document.querySelector('#codigo_usuario').value = "";
+            document.querySelector('#nome_usuario').value = "";
+            document.querySelector('#login').value = "";
+            document.querySelector('#senha_usuario').value = "";
+            document.querySelector('#tipo').value = "";
+            document.querySelector('#status').value="";
+        }
+
+        /** 
+         * Função responsável por retornar a rota index do módulo de usuários
+         */
+        function cancelar_dados(){
+            window.location.href = sistema.url('/ususario.php', {'rota': 'index'});
+        }
+    </script>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-center">Cadastro de usuários</h4>
+                        <br/>
+                        <div class="row">
+                            <input type="hidden" class="form-control custom-radius text-center" placeholder="Código" readonly="true" sistema-mask="codigo" id="codigo_usuario"/>
+                            <div class="col-4 text-center">
+                                <label>Nome Usuário</label>
+                                <input type="text" class="form-control custom-radius text-uppercase" placeholder="Nome Usuário" id="nome_usuario"/>
+                            </div>
+                            <div class="col-2 text-center">
+                                <label>Login Usuário</label>
+                                <input type="text" class="form-control custom-radius" placeholder="Login Usuário" id="login"/>
+                            </div>
+                            <div class="col-2 text-center">
+                                <label>Senha Usuário</label>
+                                <input type="password" class="form-control custom-radius" id="senha_usuario" placeholder="Senha Usuário"/>
+                            </div>
+                            <div class="col-2 text-center">
+                                <label>Tipo Usuário</label>
+                                <select class="form-control custom-radius" id="tipo">
+                                    <option value="">Selecione uma opção</option>
+                                    <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+                                    <option value="COMUM">COMUM</option>
+                                </select>
+                            </div>
+                            <div class="col-2 text-center">
+                                <label>Status Usuário</label>
+                                <select class="form-control custom-radius" id="status">
+                                    <option value="">Selecione uma opção</option>
+                                    <option value="ATIVO">ATIVO</option>
+                                    <option value="INATIVO">INATIVO</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-4">
+                                <button class="btn btn-primary custom-radius botao_vertical_linha botao_grande" onclick="salvar_dados();">Salvar</button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-danger custom-radius botao_vertical_linha botao_grande" onclick="excluir_dados();">Excluir</button>
+                            </div>
+                            <dvi class="col-4">
+                                <button class="btn btn-secondary custom-radius botao_vertical_linha botao_grande" onclick="cancelar_dados();">Cancelar</button>
+                            </div>
+                            </dvi>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php
+    require_once 'includes/footer.php';
     exit;
 });
 
@@ -247,12 +399,64 @@ router_add('alterar_informacoes_usuario_comum', function(){
 });
 
 /**
+ * Rota responsável por receber as informaçõs de vem do front e enviar para o back para que seja validada e alterada.
+ */
+router_add('alterar_status_usuario', function(){
+    $objeto_usuario = new Usuario();
+
+    echo json_encode(['status' => (bool) $objeto_usuario->alterar_status($_REQUEST)]);
+    exit;
+});
+
+/**
+ * Rota responsável por alterar a senha do usuário.
+ * Esta rota recebe a nova senha e então envia para o back para que seja validada e alterada.
+ */
+router_add('alterar_senha_usuario', function(){
+    $objeto_usuario = new Usuario();
+    echo json_encode(['status' => (bool) $objeto_usuario->alterar_senha($_REQUEST)], JSON_UNESCAPED_UNICODE);
+    exit;
+});
+
+/**
  * Rota responsável por pesquisar as informações do usuário do sistema.
  * Esta rota recebe todos os filtros e monta o array de pesquisa e então envia para o back.
  */
 router_add('pesquisar_usuario', function(){
     $objeto_usuario = new Usuario();
-    $dados = (array) ['filtro' => (array) [], 'ordenacao' => (array) [], 'limite' => (int) 0];
+
+    $id_usuario = (int) (isset($_REQUEST['codigo_usuario']) ? (int) intval($_REQUEST['codigo_usuario'], 10):0);
+    $id_empresa = (int) (isset($_REQUEST['codigo_empresa']) ? (int) intval($_REQUEST['codigo_empresa'], 10):0);
+    $nome_usuario = (string) (isset($_REQUEST['nome_usuario']) ? (string) $_REQUEST['nome_usuario']:'');
+    $login = (string) (isset($_REQUEST['login']) ? (string) $_REQUEST['login']:'');
+    $tipo_usuario = (string) (isset($_REQUEST['tipo_usuario']) ? (string) $_REQUEST['tipo_usuario']:'');
+
+    $dados = (array) ['filtro' => (array) [], 'ordenacao' => (array) ['nome_usuario' => (bool) true], 'limite' => (int) 0];
+    $filtro = (array) [];
+
+    if($id_usuario != 0){
+        array_push($filtro, (array) ['id_usuario', '===', (int) $id_usuario]);
+    }
+
+    if($id_empresa != 0){
+        array_push($filtro, (array) ['id_empresa', '===', (int) $id_empresa]);
+    }
+
+    if($nome_usuario != ''){
+        array_push($filtro, ['nome_usuario', '=', (string) $nome_usuario]);
+    }
+
+    if($login != ''){
+        array_push($filtro, ['login', '=', (string) $login]);
+    }
+
+    if($tipo_usuario != ''){
+        array_push($filtro, ['tipo_usuario', '===', (string) $tipo_usuario]);
+    }
+
+    if(empty($filtro) == false){
+        $dados['filtro'] = (array) ['and' => (array) $filtro];
+    }
 
     echo json_encode((array) ['dados' => (array) $objeto_usuario->pesquisar_todos($dados)], JSON_UNESCAPED_UNICODE);
     exit;
@@ -277,6 +481,9 @@ router_add('pesquisar_informacoes_usuario', function(){
     exit;
 });
 
+/**
+ * Rota responsável por receber do front das informações do usuário e enviar para o back para que as mesmas possam ser cadastradas na base de dados.
+ */
 router_add('salvar_dados_usuario', function(){
     $objeto_usuario = new Usuario();
 

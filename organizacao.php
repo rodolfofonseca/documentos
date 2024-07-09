@@ -2,7 +2,9 @@
 require_once 'Classes/bancoDeDados.php';
 require_once 'Modelos/Organizacao.php';
 
-//@note index
+/**
+ * Rota responsável por mostrar ao usuário os filtros de pesquisa de organização, juntamente com o botão para cadastrar novas organizações dentro do sistema.
+ */
 router_add('index', function(){
     require_once 'includes/head.php';
     ?>
@@ -31,7 +33,7 @@ router_add('index', function(){
 
                 if(tamanho_retorno < 1){
                     let linha = document.createElement('tr');
-                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM ORGANIZAÇÃO ENCONTRADA', 'inner', true, 3));
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM ORGANIZAÇÃO ENCONTRADA', 'inner', true, 5));
                     tabela.appendChild(linha);
                 }else{
                     sistema.each(retorno_organizacao, function(contador, organizacao){
@@ -39,6 +41,20 @@ router_add('index', function(){
                         
                         linha.appendChild(sistema.gerar_td(['text-center'], organizacao.id_organizacao, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-left'], organizacao.nome_organizacao, 'inner'));
+
+                        if(organizacao.descricao != undefined){
+                            linha.appendChild(sistema.gerar_td(['text-left'], organizacao.descricao, 'inner'));
+                        }else{
+                            linha.appendChild(sistema.gerar_td(['text-left'], '', 'inner'));
+                        }
+
+                        if(organizacao.forma_visualizacao == 'PUBLICO'){
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_forma_visualizacao_'+organizacao.id_organizacao, 'PÚBLICO', ['btn', 'btn-info'], function visualizacao_informacoes(){}),'append'));
+                        }else{
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_forma_visualizacao_'+organizacao.id_organizacao, 'PRIVADO', ['btn', 'btn-secondary'], function visualizacao_informacoes(){}),'append'));
+                        }
+
+
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_organizacao_'+organizacao.id_organizacao, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar(){cadastro_organizacao(organizacao.id_organizacao)}),'append'));
                         
                         tabela.appendChild(linha);
@@ -55,7 +71,7 @@ router_add('index', function(){
                         <h4 class="card-title text-center">Cadastro de Organização</h4>
                         <div class="row">
                             <div class="col-3">
-                                <button class="btn btn-secondary" onclick="cadastro_organizacao(0);">Cadastro de Organização</button>
+                                <button class="btn btn-secondary btn-lg custom-radius" onclick="cadastro_organizacao(0);">Cadastro de Organização</button>
                             </div>
                         </div>
                         <br/>
@@ -64,12 +80,16 @@ router_add('index', function(){
                                 <label class="text">Código</label>
                                 <input type="text" sistema-mask="codigo" class="form-control custom-radius" id="codigo_organizacao" placeholder="Código" onkeyup="pesquisar_organizacao();"/>
                             </div>
-                            <div class="col-8 text-center">
+                            <div class="col-4 text-center">
+                                <label class="text">Nome Organização</label>
+                                <input type="text" class="form-control custom-radius text-uppercase" id="descricao_organizacao" placeholder="Nome Organização" onkeyup="pesquisar_organizacao();"/>
+                            </div>
+                            <div class="col-4 text-center">
                                 <label class="text">Descrição Organização</label>
-                                <input type="text" class="form-control custom-radius text-uppercase" id="descricao_organizacao" placeholder="Descrição Organização" onkeyup="pesquisar_organizacao();"/>
+                                <input type="text" class="form-control custom-radius" id="descricao" placeholder="Descrição da Organização" onkeyup="pesquisar_organizacao();"/>
                             </div>
                             <div class="col-2">
-                                <button class="btn btn-info botao_vertical_linha" onclick="pesquisar_organizacao();">Pesquisar</button>
+                                <button class="btn btn-info botao_vertical_linha botao_grande custom-radius" onclick="pesquisar_organizacao();">Pesquisar</button>
                             </div>
                         </div>
                         <br/>
@@ -81,10 +101,13 @@ router_add('index', function(){
                                             <tr class="text-center">
                                                 <th scope="col">#</th>
                                                 <th scope="col">Nome</th>
-                                                <th scope="col">Ação</th>
+                                                <th scope="col">Descrição</th>
+                                                <th scope="col">Tipo</th>
+                                                <th scope="col">Alterar Tipo</th>
+                                                <th scope="col">Alterar Dados</th>
                                             </tr>
                                         </thead>
-                                        <tbody><tr><td colspan="3" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td></tr></tbody>
+                                        <tbody><tr><td colspan="5" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td></tr></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -126,6 +149,7 @@ router_add('salvar_dados', function(){
         function salvar_dados(){
             let codigo_organizacao = parseInt(document.querySelector('#codigo_organizacao').value, 10);
             let nome_organizacao = document.querySelector('#descricao_organizacao').value;
+            let descricao = document.querySelector('#descricao').value;
             let forma_visualizacao = document.querySelector('#forma_visualizacao').value;
             let codigo_barras = document.querySelector('#codigo_barras').value;
 
@@ -133,7 +157,7 @@ router_add('salvar_dados', function(){
                 codigo_organizacao = 0;
             }
 
-            sistema.request.post('/organizacao.php', {'rota': 'enviar_dados', 'codigo_organizacao': codigo_organizacao, 'codigo_empresa': ID_EMPRESA, 'codigo_usuario': ID_USUARIO, 'nome_organizacao': nome_organizacao, 'forma_visualizacao': forma_visualizacao, 'codigo_barras': codigo_barras}, function(retorno){
+            sistema.request.post('/organizacao.php', {'rota': 'enviar_dados', 'codigo_organizacao': codigo_organizacao, 'codigo_empresa': ID_EMPRESA, 'codigo_usuario': ID_USUARIO, 'nome_organizacao': nome_organizacao, 'descricao': descricao,'forma_visualizacao': forma_visualizacao, 'codigo_barras': codigo_barras}, function(retorno){
                 validar_retorno(retorno);
                 limpar_campos();
             });        
@@ -146,6 +170,7 @@ router_add('salvar_dados', function(){
             document.querySelector('#codigo_organizacao').value = '';
             document.querySelector('#descricao_organizacao').value = '';
             document.querySelector('#forma_visualizacao').value = '';
+            document.querySelector('#descricao').value = '';
             
             sistema.request.post('/index.php', {'rota': 'buscar_codigo_barras'}, function(retorno){
                 document.querySelector('#codigo_barras').value = retorno.codigo_barras;
@@ -171,8 +196,8 @@ router_add('salvar_dados', function(){
                                 <input type="text" sistema-mask="codigo" class="form-control custom-radius text-center" id="codigo_organizacao" placeholder="Código" readonly="true"/>
                             </div>
                             <div class="col-4 text-center">
-                                <label class="text">Descrição Organização</label>
-                                <input type="text" class="form-control custom-radius text-uppercase" id="descricao_organizacao" placeholder="Descrição Organização"/>
+                                <label class="text">Nome Organização</label>
+                                <input type="text" class="form-control custom-radius text-uppercase" id="descricao_organizacao" placeholder="Nome Organização"/>
                             </div>
                             <div class="col-3 text-center">
                                 <label class="text">Tipo</label>
@@ -185,6 +210,13 @@ router_add('salvar_dados', function(){
                             <div class="col-3 text-center">
                                 <label class="text">Código de Barras</label>
                                 <input type="text" class="form-control custom-radius text-center" id="codigo_barras" readonly="true" value="<?php echo codigo_barras(); ?>"/>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <label class="text text-center">Descrição da Organização</label>
+                                <textarea class="form-control custom-radius" id="descricao" placeholder="Descrição da Organização"></textarea>
                             </div>
                         </div>
                         <br/>
@@ -215,6 +247,7 @@ router_add('salvar_dados', function(){
                 sistema.request.post('/organizacao.php', {'rota':'pesquisar_organizacao', 'codigo_organizacao': ID_ORGANIZACAO}, function(retorno){
                     document.querySelector('#codigo_organizacao').value = retorno.dados.id_organizacao;
                     document.querySelector('#descricao_organizacao').value = retorno.dados.nome_organizacao;
+                    document.querySelector('#descricao').value = retorno.dados.descricao;
                 });
             }
         }

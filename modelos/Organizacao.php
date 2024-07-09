@@ -6,6 +6,7 @@ class Organizacao{
     private $id_empresa;
     private $id_usuario;
     private $nome_organizacao;
+    private $descricao;
     private $codigo_barras;
     private $forma_visualizacao;
     
@@ -14,7 +15,7 @@ class Organizacao{
     }
 
     private function modelo(){
-        return (array) ['id_organizacao' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'nome_organizacao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) 'PUBLICO'];
+        return (array) ['id_organizacao' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'nome_organizacao' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) 'PUBLICO'];
     }
 
     private function colocar_dados($dados){
@@ -39,6 +40,10 @@ class Organizacao{
         if(array_key_exists('nome_organizacao', $dados) == true){
             $this->nome_organizacao = (string) strtoupper($dados['nome_organizacao']);
         }
+
+        if(array_key_exists('descricao', $dados) == true){
+            $this->descricao = (string) $dados['descricao'];
+        }
         
         if(array_key_exists('codigo_barras', $dados) == true){
             $this->codigo_barras = (string) $dados['codigo_barras'];
@@ -62,9 +67,9 @@ class Organizacao{
         if($checar_existencia == true){
             $retorno_pesquisa = (array) model_one((string) $this->tabela(), (array) $filtro);
 
-            return (bool) model_update((string) $this->tabela(), (array) $filtro, (array) model_parse((array) $retorno_pesquisa, (array) ['nome_organizacao' => (string) $this->nome_organizacao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
+            return (bool) model_update((string) $this->tabela(), (array) $filtro, (array) model_parse((array) $retorno_pesquisa, (array) ['nome_organizacao' => (string) $this->nome_organizacao, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
         }else{
-            return (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_organizacao' => (int) intval(model_next((string) $this->tabela(), 'id_organizacao', (array) ['id_empresa', '===', (int) $this->id_empresa]), 10), 'id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario,'nome_organizacao' => (string) $this->nome_organizacao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
+            return (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_organizacao' => (int) intval(model_next((string) $this->tabela(), 'id_organizacao', (array) ['id_empresa', '===', (int) $this->id_empresa]), 10), 'id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario,'nome_organizacao' => (string) $this->nome_organizacao, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
         }
     }
     public function pesquisar($dados){
