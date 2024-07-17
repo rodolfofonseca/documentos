@@ -464,6 +464,8 @@ router_add('index', function () {
 
     <script>
         window.onload = function() {
+            validar_acesso_administrador('<?php echo $_SESSION['tipo_usuario']; ?>');
+
             let id_sistema = document.querySelector('#id_sistema').value;
 
             sistema.request.post('/sistema.php', {

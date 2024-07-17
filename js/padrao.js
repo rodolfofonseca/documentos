@@ -1,4 +1,4 @@
-var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+var indexOf = [].indexOf || function (item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::: Core :::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -50,7 +50,7 @@ function isString(elemento) {
 // Verifica se a data é válida
 // @param {String} strData a data a ser testada
 function isDate(strData) {
-  var data    = toString(strData);
+  var data = toString(strData);
 
   if (data.length == 10) {
     if ((data[2] === '/') && (data[5] === '/')) {
@@ -104,18 +104,18 @@ function toInteger(elemento) {
 // @param {Integer} precisao  Quantidade de casas decimais a serem consideradas (parâmetro não implementado até momento)
 function toFloat(elemento, separador, precisao) {
   separador = (existe(separador) === true) ? separador : ",";
-  precisao  = (existe(precisao) === true) ? toInteger(precisao) : 2;
+  precisao = (existe(precisao) === true) ? toInteger(precisao) : 2;
   elemento = toString(elemento);
   if ((elemento.indexOf('.') >= 0) && (elemento.indexOf(',') >= 0)) {
     elemento = strReplace('.', '', elemento);
   }
-  elemento  = elemento.replace(separador, ".");
+  elemento = elemento.replace(separador, ".");
   return (parseFloat(elemento) || 0);
 }
 // Converte um valor para o tipo string
 // @param {Mixed} elemento - O elemento a ser convertido
 function toString(elemento) {
-  switch(typeof elemento) {
+  switch (typeof elemento) {
     case "boolean":
       if (elemento === true) {
         return "true";
@@ -160,7 +160,7 @@ function each(arr, funcao) {
 // @param {Array|Object}  elemento  Array a ser utilizado
 // @param {String}    modo    Função a ser executada a cada posição do array
 function count(elemento, modo) {
-  var contagem  = 0;
+  var contagem = 0;
   var recursivo = (modo === "COUNT_RECURSIVE") ? true : false;
 
   if (existe(elemento) === false) {
@@ -200,16 +200,16 @@ function round(elemento, precisao) {
 // @param   {String}    sujeito     Texto que receberá a alteração
 // @param   {Boolean}     sensivel    Diferenciar maiúsculas e minúsculas (padrão: false)
 function strReplace(procurar, substituir, sujeito, sensivel) {
-  var procurar    = [toString(procurar)];
-  var substituir    = [toString(substituir)];
-  var sujeito     = toString(sujeito);
-  var sensivel    = (existe(sensivel) == true) ? sensivel : false;
+  var procurar = [toString(procurar)];
+  var substituir = [toString(substituir)];
+  var sujeito = toString(sujeito);
+  var sensivel = (existe(sensivel) == true) ? sensivel : false;
 
   if (sensivel === true) {
     sujeito = sujeito.split(procurar).join(substituir);
 
   } else {
-    var escapeRegex = function(str) {
+    var escapeRegex = function (str) {
       return str.replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1');
     };
 
@@ -227,32 +227,32 @@ function strReplace(procurar, substituir, sujeito, sensivel) {
 // @param {String} str    O texto a ser convertido
 // @param {String} [lista]  Lista de caracteres a serem removidos
 function trim(str, lista) {
-  var str     = toString(str);
-  var substituir  = (count(lista) > 0) ? ""  : " ";
-  var lista     = (count(lista) > 0) ? lista : [];
-  var indice    = 0;
+  var str = toString(str);
+  var substituir = (count(lista) > 0) ? "" : " ";
+  var lista = (count(lista) > 0) ? lista : [];
+  var indice = 0;
 
-  each(lista, function(chave, procurar) {
+  each(lista, function (chave, procurar) {
     str = strReplace(procurar, substituir, str);
   });
 
   if ((count(lista) === 0) && (str.length > 0)) {
-    novaStr   = str;
-    carac   = str.substr(indice, 1);
+    novaStr = str;
+    carac = str.substr(indice, 1);
 
     while ((carac === " ") || (carac === "\t") || (carac === "\n") || (carac === "\r") || (carac === "\0") || (carac === "\x0B")) {
       novaStr = str.substr(indice + 1);
-      indice  = indice + 1;
-      carac   = str.substr(indice, 1);
+      indice = indice + 1;
+      carac = str.substr(indice, 1);
     }
 
-    str   = novaStr;
-    indice  = str.length - 1;
-    carac   = str.substr(indice, 1);
+    str = novaStr;
+    indice = str.length - 1;
+    carac = str.substr(indice, 1);
     while ((carac === " ") || (carac === "\t") || (carac === "\n") || (carac === "\r") || (carac === "\0") || (carac === "\x0B")) {
       novaStr = str.substr(0, indice);
-      indice  = indice - 1;
-      carac   = str.substr(indice, 1);
+      indice = indice - 1;
+      carac = str.substr(indice, 1);
     }
 
     str = novaStr;
@@ -319,7 +319,7 @@ function frame(elemento) {
 // @param {String} relacao    - Indica se deve ser exibida a posição em relação ao elemento anterior ou a toda janela (padrão elemento anterior)
 function getPosition(elemento, propriedade, relacao) {
   var propriedade = ((propriedade === "top") || (propriedade === "left")) ? propriedade : "top";
-  var relacao   = (isSet(relacao) === true) ? relacao : false;
+  var relacao = (isSet(relacao) === true) ? relacao : false;
 
   if (relacao === false) {
     var posicao = id(elemento).getBoundingClientRect()[propriedade];
@@ -342,17 +342,17 @@ function carregarPagina(pagina) {
 // @param {String}  separadorDecimal  - Indica qual será a pontuação decimal
 // @param {String}  separadorMilhar   - Indica qual será a pontuação para as casas de milhar, milhão etc...
 function numberFormat(numero, decimais, separadorDecimal, separadorMilhar) {
-  var numero      = toFloat(numero);
-  var decimais      = toInteger(decimais);
-  var separadorDecimal  = (existe(separadorDecimal) == true)  ? separadorDecimal  : ",";
-  var separadorMilhar   = (existe(separadorMilhar) == true)   ? separadorMilhar   : "";
+  var numero = toFloat(numero);
+  var decimais = toInteger(decimais);
+  var separadorDecimal = (existe(separadorDecimal) == true) ? separadorDecimal : ",";
+  var separadorMilhar = (existe(separadorMilhar) == true) ? separadorMilhar : "";
 
-  var fixarDecimaisIE = function(num, decimais) {
+  var fixarDecimaisIE = function (num, decimais) {
     var k = Math.pow(10, decimais);
     return toString(Math.round(num * k) / k);
   };
 
-  var separarMilhar = function(num, milhar) {
+  var separarMilhar = function (num, milhar) {
     var resultado = [];
     while (num.length > 0) {
       inicio = ((num.length - 3) > 0) ? num.length - 3 : 0;
@@ -376,22 +376,22 @@ function numberFormat(numero, decimais, separadorDecimal, separadorMilhar) {
 function sleep(espera) {
   var espera = (existe(espera) == true) ? toInteger(espera) : 5;
   var inicio = new Date().getTime();
-  while (new Date().getTime() < inicio + espera) {};
+  while (new Date().getTime() < inicio + espera) { };
 }
 // Exibir uma descrição das chaves e valores de um array ou objeto
 // @param   {Mixed}   elemento  Elemento a ser utilizado
 // @param   {Boolean}   recursivo   Indica se deve exibir os sub-elementos
 // @param   {String}  espacamento Número de espaços antes de cada elemento
 function varDump(elemento, recursivo, espacamento) {
-  var espacamento = (existe(espacamento) == true) ? espacamento + "  "  : "  ";
-  var recursivo   = (existe(recursivo) == false)  ? true        : recursivo;
+  var espacamento = (existe(espacamento) == true) ? espacamento + "  " : "  ";
+  var recursivo = (existe(recursivo) == false) ? true : recursivo;
 
   each(elemento, function (i, atributo) {
-    if ((recursivo == true) && (typeof(atributo) == "object")) {
-      console.log(espacamento + "[" + i + "] : " + " (" + typeof(atributo) + ") ");
+    if ((recursivo == true) && (typeof (atributo) == "object")) {
+      console.log(espacamento + "[" + i + "] : " + " (" + typeof (atributo) + ") ");
       varDump(atributo, true, espacamento);
     } else {
-      console.log(espacamento + "[" + i + "] : " + " (" + typeof(atributo) + ") " + atributo);
+      console.log(espacamento + "[" + i + "] : " + " (" + typeof (atributo) + ") " + atributo);
     }
   });
 }
@@ -449,52 +449,52 @@ function topo() {
 // @param   {Array}   extraPermitir   Array com caracteres válidos a serem acrescentados (extraNegar é prioridade)
 // @param   {Array}   extraNegar    Array com caracteres inválidos a serem acrescentados
 function validarElemento(tipo, evento, elemento, extraPermitir, extraNegar) {
-  var retorno     = false;
-  var codigo    = (window.document.all)       ? evento.keyCode  : evento.which;
-  var extraPermitir = (existe(extraPermitir) == true) ? extraPermitir   : [];
-  var extraNegar  = (existe(extraNegar) == true)  ? extraNegar    : [];
-  var caractere   = String.fromCharCode(codigo);
-  var tipo      = (toString(tipo)).toUpperCase();
-  var codigos     = {
-    "CEP"     : [45, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "CPF_CNPJ"  : [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "DATE"    : [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "DATA"    : [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+  var retorno = false;
+  var codigo = (window.document.all) ? evento.keyCode : evento.which;
+  var extraPermitir = (existe(extraPermitir) == true) ? extraPermitir : [];
+  var extraNegar = (existe(extraNegar) == true) ? extraNegar : [];
+  var caractere = String.fromCharCode(codigo);
+  var tipo = (toString(tipo)).toUpperCase();
+  var codigos = {
+    "CEP": [45, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+    "CPF_CNPJ": [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+    "DATE": [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+    "DATA": [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
     "DD/MM/AAAA": [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "D/M/Y"   : [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "ESPECIAL"  : [0, 8, 13],
-    "HH:MM:SS" : [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58],
-    "H:I:S"   : [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58],
-    "INTEGER"   : [48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "WEIGHT"  : [44, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "PESO"    : [44, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "STRING"  : [32, 33, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 170, 176, 180, 186, 192, 193, 194, 195, 199, 200, 201, 202, 204, 205, 210, 211, 212, 213, 217, 218, 220, 224, 225, 226, 227, 231, 232, 233, 234, 236, 237, 242, 243, 244, 245, 249, 250, 252],
-    "TELEFONE"  : [32, 40, 41, 45, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "TIME"    : [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58],
-    "VALOR"   : [44, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "MOEDA"   : [44, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-    "PRICE"   : [44, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
+    "D/M/Y": [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+    "ESPECIAL": [0, 8, 13],
+    "HH:MM:SS": [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58],
+    "H:I:S": [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58],
+    "INTEGER": [48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+    "WEIGHT": [44, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+    "PESO": [44, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+    "STRING": [32, 33, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 170, 176, 180, 186, 192, 193, 194, 195, 199, 200, 201, 202, 204, 205, 210, 211, 212, 213, 217, 218, 220, 224, 225, 226, 227, 231, 232, 233, 234, 236, 237, 242, 243, 244, 245, 249, 250, 252],
+    "TELEFONE": [32, 40, 41, 45, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+    "TIME": [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58],
+    "VALOR": [44, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+    "MOEDA": [44, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+    "PRICE": [44, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
   }
 
-  try {topo().RenovaSessao();} catch(e) {}
+  try { topo().RenovaSessao(); } catch (e) { }
 
   each(extraPermitir, function (chave, valor) {
     codigos["ESPECIAL"].push(valor.charCodeAt(0));
   });
 
-  each(codigos["ESPECIAL"], function(chave, valor) {
+  each(codigos["ESPECIAL"], function (chave, valor) {
     retorno = (valor === codigo) ? true : retorno;
   });
 
   if (retorno === false) {
 
-    each(codigos[tipo], function(chave, valor) {
+    each(codigos[tipo], function (chave, valor) {
       retorno = (valor === codigo) ? true : retorno;
     });
 
     if (retorno === true) {
 
-      switch(tipo) {
+      switch (tipo) {
         case "DATE":
         case "DATA":
         case "DD/MM/AAAA":
@@ -512,7 +512,7 @@ function validarElemento(tipo, evento, elemento, extraPermitir, extraNegar) {
           } else if (tamanhoData == 10) {
             returno = false;
           }
-            break;
+          break;
 
         case "TIME":
           if (retorno == true) {
@@ -589,7 +589,7 @@ function validarElemento(tipo, evento, elemento, extraPermitir, extraNegar) {
     }
   }
 
-  each(extraNegar, function(chave, valor) {
+  each(extraNegar, function (chave, valor) {
     retorno = (valor.charCodeAt(0) === codigo) ? false : retorno;
   });
 
@@ -599,13 +599,13 @@ function validarElemento(tipo, evento, elemento, extraPermitir, extraNegar) {
 // @param {InputHtml} elemento - O elemento que será validado
 // @param {String}  mensagem - Indica se deve ou não exibir a mensagem de alerta
 function validarHora(elemento, mensagem) {
-  var horas   = trim(elemento.value, [" ", ":"]);
-  var mensagem  = (existe(mensagem) === true) ? mensagem : true;
+  var horas = trim(elemento.value, [" ", ":"]);
+  var mensagem = (existe(mensagem) === true) ? mensagem : true;
 
   if (horas.length > 0) {
     if (horas.length === 4) {
-      var hora  = toInteger(horas.substr(0, 2));
-      var minuto  = toInteger(horas.substr(2));
+      var hora = toInteger(horas.substr(0, 2));
+      var minuto = toInteger(horas.substr(2));
 
       if ((hora >= 0) && (hora <= 23) && (minuto >= 0) && (minuto <= 59)) {
         elemento.value = strPad(hora, 2, "0", "STR_PAD_LEFT") + ":" + strPad(minuto, 2, "0", "STR_PAD_LEFT");
@@ -613,8 +613,8 @@ function validarHora(elemento, mensagem) {
       }
 
     } else if (horas.length === 6) {
-      var hora  = toInteger(horas.substr(0, 2));
-      var minuto  = toInteger(horas.substr(2, 2));
+      var hora = toInteger(horas.substr(0, 2));
+      var minuto = toInteger(horas.substr(2, 2));
       var segundo = toInteger(horas.substr(4));
 
       if ((hora >= 0) && (hora <= 23) && (minuto >= 0) && (minuto <= 59) && (segundo >= 0) && (segundo <= 59)) {
@@ -637,8 +637,8 @@ function validarHora(elemento, mensagem) {
 // @param {InputHtml} elemento Objeto completo que será testado
 // @param {String}  mensagem Indica se é para exibir os alertas de erro (padrão true)
 function validarData(elemento, mensagem) {
-  var data    = toString(elemento.value);
-  var mensagem  = (existe(mensagem) === true) ? mensagem : true;
+  var data = toString(elemento.value);
+  var mensagem = (existe(mensagem) === true) ? mensagem : true;
 
   if (data.length > 0) {
     data = trim(data, ["/", "-"]);
@@ -667,8 +667,8 @@ function validarData(elemento, mensagem) {
 // @param {String} segundaData  - A segunda data no padrão "dd/mm/aaaa"
 function validarDataSuperior(primeiraData, segundaData) {
   if ((primeiraData.length === 10) && (segundaData.length === 10)) {
-    var intPrimeiraData  = toInteger(toString((primeiraData).split("/")[2]) + toString((primeiraData).split("/")[1]) + toString((primeiraData).split("/")[0]));
-    var intSegundaData   = toInteger(toString((segundaData).split("/")[2]) + toString((segundaData).split("/")[1]) + toString((segundaData).split("/")[0]));
+    var intPrimeiraData = toInteger(toString((primeiraData).split("/")[2]) + toString((primeiraData).split("/")[1]) + toString((primeiraData).split("/")[0]));
+    var intSegundaData = toInteger(toString((segundaData).split("/")[2]) + toString((segundaData).split("/")[1]) + toString((segundaData).split("/")[0]));
 
     if (intPrimeiraData > intSegundaData) {
       return 1;
@@ -684,11 +684,11 @@ function validarDataSuperior(primeiraData, segundaData) {
 // @param {InputHtml} elemento - Elemento completo que será validado
 // @param {String}  mensagem - Indica se deve ou não exibir a mensagem de alerta
 function validarCpfCnpj(elemento, mensagem) {
-  var mensagem  = (existe(mensagem) === true) ? mensagem : true;
-  var cpfCnpj   = trim(elemento.value, [" ", ".", "-", "/"]);
-  var tamanho   = cpfCnpj.length;
-  var soma    = 0;
-  var resto   = 0;
+  var mensagem = (existe(mensagem) === true) ? mensagem : true;
+  var cpfCnpj = trim(elemento.value, [" ", ".", "-", "/"]);
+  var tamanho = cpfCnpj.length;
+  var soma = 0;
+  var resto = 0;
 
   if (tamanho > 0) {
     if ((tamanho === 11) && (cpfCnpj !== "00000000000")) {
@@ -721,9 +721,9 @@ function validarCpfCnpj(elemento, mensagem) {
       tamanho = tamanho - 2;
       numeros = cpfCnpj.substring(0, tamanho);
       digitos = cpfCnpj.substring(tamanho);
-      pos   = tamanho - 7;
+      pos = tamanho - 7;
 
-      for (var i = tamanho; i >= 1;  i = i - 1) {
+      for (var i = tamanho; i >= 1; i = i - 1) {
         soma = soma + (numeros.charAt(tamanho - i) * pos--);
         if (pos < 2) {
           pos = 9;
@@ -733,9 +733,9 @@ function validarCpfCnpj(elemento, mensagem) {
       resultado = ((soma % 11) < 2) ? 0 : (11 - soma % 11);
       if (resultado == toInteger(digitos.charAt(0))) {
         tamanho = tamanho + 1;
-        numeros = cpfCnpj.substring(0,tamanho);
-        pos   = tamanho - 7;
-        soma  = 0;
+        numeros = cpfCnpj.substring(0, tamanho);
+        pos = tamanho - 7;
+        soma = 0;
 
         for (var i = tamanho; i >= 1; i = i - 1) {
           soma = soma + numeros.charAt(tamanho - i) * pos--;
@@ -766,8 +766,8 @@ function validarCpfCnpj(elemento, mensagem) {
 // @param {InputHtml} elemento - Elemento a ser validado
 // @param {String}  mensagem - Indica se deve ou não exibir a mensagem de alerta
 function validarTelefone(elemento, mensagem) {
-  var telefone  = trim(elemento.value, [" ", "-", "(", ")"]);
-  var mensagem  = (existe(mensagem) === true) ? mensagem : true;
+  var telefone = trim(elemento.value, [" ", "-", "(", ")"]);
+  var mensagem = (existe(mensagem) === true) ? mensagem : true;
 
   if (telefone.length > 0) {
     if (telefone.length === 11) {
@@ -795,9 +795,9 @@ function validarTelefone(elemento, mensagem) {
 // @param {Integer}   quantidadeCasa  - Quantidade de casas decimais a validar
 // @param {Boolean}   zerado      - Preenche o valor com zeros caso o número for vazio
 function validarCasasDecimais(elemento, quantidadeCasa, zerado) {
-  var valor       = toFloat(elemento.value);
-  var quantidadeCasa  = (existe(quantidadeCasa) === true) ? quantidadeCasa  : 2;
-  var zerado      = (existe(zerado) === true)     ? zerado      : true;
+  var valor = toFloat(elemento.value);
+  var quantidadeCasa = (existe(quantidadeCasa) === true) ? quantidadeCasa : 2;
+  var zerado = (existe(zerado) === true) ? zerado : true;
 
   elemento.value = ((zerado === false) && (valor === 0)) ? "" : numberFormat(valor, quantidadeCasa, ",", "");
 }
@@ -805,12 +805,12 @@ function validarCasasDecimais(elemento, quantidadeCasa, zerado) {
 // @param {InputHtml} elemento - Elemento a ser validado
 // @param {String}  mensagem - Indica se deve ou não exibir a mensagem de alerta
 function validarCep(elemento, mensagem) {
-  var cep     = strPad(trim(elemento.value, [".", "-"]), "0", 8, "STR_PAD_LEFT");
-  var mensagem  = (existe(mensagem) === true) ? mensagem : true;
+  var cep = strPad(trim(elemento.value, [".", "-"]), "0", 8, "STR_PAD_LEFT");
+  var mensagem = (existe(mensagem) === true) ? mensagem : true;
 
   if (cep.length > 0) {
     if (cep.length === 8) {
-      elemento.value = cep.substr(0, 2) + "." + cep.substr(2, 3) + "-" +  cep.substr(5);
+      elemento.value = cep.substr(0, 2) + "." + cep.substr(2, 3) + "-" + cep.substr(5);
       return true;
     }
     if (mensagem === true) {
@@ -827,9 +827,9 @@ function validarCep(elemento, mensagem) {
 // @param {InputHtml} elemento Elemento a ser validado
 // @param {String}  mensagem Indica se deve ou não exibir a mensagem de alerta
 function validarEmail(elemento, mensagem) {
-  elemento.value  = trim(stripAccents(elemento.value, [" ", ",", ";", "/", "ª", "º", "°", "!", "#", "$", "%", "&", "*", "?", "(", ")", "[", "]", "<", ">", "|", "+", "="]));
-  var email     = elemento.value;
-  var mensagem  = (existe(mensagem) === true) ? mensagem : true;
+  elemento.value = trim(stripAccents(elemento.value, [" ", ",", ";", "/", "ª", "º", "°", "!", "#", "$", "%", "&", "*", "?", "(", ")", "[", "]", "<", ">", "|", "+", "="]));
+  var email = elemento.value;
+  var mensagem = (existe(mensagem) === true) ? mensagem : true;
 
   if ((email.length > 0) && (email.indexOf("@") < 1) && (email.indexOf(".") < 1)) {
     if (mensagem === true) {
@@ -856,7 +856,7 @@ function validarPlaca(elemento, mensagem) {
   var placa = trim(elemento.value.toUpperCase(), ['-']);
   var retorno = false;
   var letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-  var numeros = ['0', '1', '2', '3', '4', '5', '6', '7', '8' , '9'];
+  var numeros = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
   if (mensagem == null) {
     mensagem = true;
   }
@@ -909,17 +909,17 @@ function validarPlaca(elemento, mensagem) {
 function destacarElemento(elemento, cor) {
   var cor = (existe(cor) === true) ? cor : "#FFFF33";
 
-  try { topo().RenovaSessao(); } catch(e) {}
+  try { topo().RenovaSessao(); } catch (e) { }
 
   if ((elemento.type == "text") || (elemento.type == "password") || (elemento.type == "select-one") || (elemento.type == "textarea")) {
     elemento.style.backgroundColor = cor;
 
   } else if (elemento.type === "file") {
-    try { id("dvFundo_" + elemento.id).style.display = "block"; } catch(e) {}
+    try { id("dvFundo_" + elemento.id).style.display = "block"; } catch (e) { }
 
   } else if ((elemento.type === "button") || (elemento.type === "submit")) {
     elemento.style.backgroundImage = "url('Imagens/botao_foco.png')";
-    elemento.onmouseout = function() {
+    elemento.onmouseout = function () {
       apagarElemento(elemento);
     }
     var timerBotao = setTimeout(function () {
@@ -935,7 +935,7 @@ function destacarElemento(elemento, cor) {
 function apagarElemento(elemento, cor) {
   var cor = (existe(cor) === true) ? cor : "#FFFFFF";
 
-  try { topo().RenovaSessao(); } catch(e) {}
+  try { topo().RenovaSessao(); } catch (e) { }
 
   if (existe(elemento) === true) {
     if ((elemento.type === "text") || (elemento.type === "password") || (elemento.type === "select-one") || (elemento.type === "textarea")) {
@@ -962,12 +962,12 @@ function exibirManual(codigo) {
 function exibirDialogo(exibir) {
   if (exibir === true) {
     id("dvCaixaDialogo").style.display = "block";
-    timeOutCentralizar = setInterval(function() {
+    timeOutCentralizar = setInterval(function () {
       id("dvCaixaDialogo").style.top = (50 + toInteger(topo().document.documentElement.scrollTop || topo().document.body.scrollTop)) + "px";
     }, 10);
 
   } else {
-    try {clearInterval(timeOutCentralizar);} catch(e) {}
+    try { clearInterval(timeOutCentralizar); } catch (e) { }
     timeOutCentralizar = null;
 
     id("dvConteudo").innerHTML = "";
@@ -979,7 +979,7 @@ function exibirDialogo(exibir) {
         AO_FECHAR_FLUTUANTE = null;
         eval(aux);
       }
-    } catch(e) {}
+    } catch (e) { }
   }
 }
 // Faço a barra aumentar de tamanho a cada digito do usuário
@@ -1063,7 +1063,7 @@ function exibirCalendario(configuracao) {
     + '&ano=' + configuracao.ano
     + '&id_frame=' + configuracao.idFrame
     + '&id_subframe=' + configuracao.idSubframe
-  ;
+    ;
 
   topo().createModal({
     url: configuracao.url,
@@ -1088,7 +1088,7 @@ function inserirOpcoesSelecao(elemento, dados, opcaoVazia) {
     novaOpcao.text = "---";
     try {
       elemento.add(novaOpcao);
-    } catch(e) {
+    } catch (e) {
       elemento.add(novaOpcao, null);
     }
   }
@@ -1102,7 +1102,7 @@ function inserirOpcoesSelecao(elemento, dados, opcaoVazia) {
 
       try {
         elemento.add(novaOpcao);
-      } catch(e) {
+      } catch (e) {
         elemento.add(novaOpcao, null);
       }
     });
@@ -1113,16 +1113,16 @@ function inserirOpcoesSelecao(elemento, dados, opcaoVazia) {
 // @param {boolean} cabecalho [false] Indica se o cabeçalho será removido também
 // @return {void}
 function limparTabela(idTabela, cabecalho) {
-    var tabela = id(idTabela);
-    var tamanho = tabela.rows.length - 1;
-    var primeiraLinha = 0;
+  var tabela = id(idTabela);
+  var tamanho = tabela.rows.length - 1;
+  var primeiraLinha = 0;
 
-    if (cabecalho) {
-        primeiraLinha = -1;
-    }
-    for (var i = tamanho; i > primeiraLinha; i = i - 1) {
-        tabela.deleteRow(i);
-    }
+  if (cabecalho) {
+    primeiraLinha = -1;
+  }
+  for (var i = tamanho; i > primeiraLinha; i = i - 1) {
+    tabela.deleteRow(i);
+  }
 }
 
 // Insere uma linha na tabela
@@ -1133,38 +1133,38 @@ function limparTabela(idTabela, cabecalho) {
 // @param {list} classes ['TabelaCorpoNormal'] Lista com as classes css das colunas na mesma ordem
 // @return {void}
 function inserirLinhaTabela(conf, colunas, classes) {
-    var tabela = id(conf['idTabela']);
-    var idLinha = '';
-    var classeLinha = '';
-    var quantidade = colunas.length;
-    var index = 0;
-    var linha = null;
-    var coluna = null;
-    var conteudo = '';
-    var classeCss = '';
+  var tabela = id(conf['idTabela']);
+  var idLinha = '';
+  var classeLinha = '';
+  var quantidade = colunas.length;
+  var index = 0;
+  var linha = null;
+  var coluna = null;
+  var conteudo = '';
+  var classeCss = '';
 
-    if (existe(conf['idLinha']) === true) {
-      idLinha = conf['idLinha'];
+  if (existe(conf['idLinha']) === true) {
+    idLinha = conf['idLinha'];
+  }
+  if (existe(conf['classeLinha']) === true) {
+    classeLinha = conf['classeLinha'];
+  }
+  if (existe(classes) === false) {
+    classes = new Array(quantidade).join('TabelaCorpoNormal,').split(',');
+  }
+  linha = tabela.insertRow();
+  linha.setAttribute('id', idLinha);
+  linha.setAttribute('class', classeLinha);
+  for (var index = 0; index < quantidade; index = index + 1) {
+    if (classes[index] !== '') {
+      classeCss = classes[index];
     }
-    if (existe(conf['classeLinha']) === true) {
-      classeLinha = conf['classeLinha'];
-    }
-    if (existe(classes) === false) {
-        classes = new Array(quantidade).join('TabelaCorpoNormal,').split(',');
-    }
-    linha = tabela.insertRow();
-    linha.setAttribute('id', idLinha);
-    linha.setAttribute('class', classeLinha);
-    for (var index = 0; index < quantidade; index = index + 1) {
-        if (classes[index] !== '') {
-            classeCss = classes[index];
-        }
-        coluna = linha.insertCell(index);
-        coluna.className = classeCss;
-        conteudo = document.createElement('div');
-        conteudo.innerHTML = colunas[index];
-        coluna.appendChild(conteudo);
-    }
+    coluna = linha.insertCell(index);
+    coluna.className = classeCss;
+    conteudo = document.createElement('div');
+    conteudo.innerHTML = colunas[index];
+    coluna.appendChild(conteudo);
+  }
 }
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::: Modal :::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -1280,11 +1280,11 @@ function createModal(parameters) {
 
     modalContent.innerHTML = ''
       + '<iframe '
-        + ' name="frame-modal-' + idModal + '"'
-        + ' id="frame-modal-' + idModal + '"'
-        + ' style="padding:0px; margin:0px; background-color:transparent; width: ' + settings.width + 'px; height: ' + settings.height + 'px; overflow-y:scroll; border-top:0px; border-left:0px; border-style:none"'
-        + ' src="' + url + '"'
-        + ' border="0"'
+      + ' name="frame-modal-' + idModal + '"'
+      + ' id="frame-modal-' + idModal + '"'
+      + ' style="padding:0px; margin:0px; background-color:transparent; width: ' + settings.width + 'px; height: ' + settings.height + 'px; overflow-y:scroll; border-top:0px; border-left:0px; border-style:none"'
+      + ' src="' + url + '"'
+      + ' border="0"'
       + ' ></iframe>';
   }
 
@@ -1364,34 +1364,34 @@ function closeModal(modal) {
 // Substitui as tags que estão dentro de {{ }}
 // Obs: usar no máximo 1 espaço entre as tags e o conteúdo
 // @param {Object} objeto O objeto com as chaves e valores a serem substituidos
-String.prototype.format = function(args) {
-    var re = /\{\{ ([^}]+) \}\}/g;
-    var s = this.replace(re, function(_, match){ return args[match]; });
-    var re = /\{\{([^}]+)\}\}/g;
-    return s.replace(re, function(_, match){ return args[match]; });
+String.prototype.format = function (args) {
+  var re = /\{\{ ([^}]+) \}\}/g;
+  var s = this.replace(re, function (_, match) { return args[match]; });
+  var re = /\{\{([^}]+)\}\}/g;
+  return s.replace(re, function (_, match) { return args[match]; });
 };
 
 
-function number_format( numero, decimal, decimal_separador, milhar_separador ){
-            numero = (numero + '').replace(/[^0-9+\-Ee.]/g, '');
-            var n = !isFinite(+numero) ? 0 : +numero,
-                prec = !isFinite(+decimal) ? 0 : Math.abs(decimal),
-                sep = (typeof milhar_separador === 'undefined') ? ',' : milhar_separador,
-                dec = (typeof decimal_separador === 'undefined') ? '.' : decimal_separador,
-                s = '',
-                toFixedFix = function (n, prec) {
-                    var k = Math.pow(10, prec);
-                    return '' + Math.round(n * k) / k;
-                };
-            // Fix para IE: parseFloat(0.55).toFixed(0) = 0;
-            s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
-            if (s[0].length > 3) {
-                s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
-            }
-            if ((s[1] || '').length < prec) {
-                s[1] = s[1] || '';
-                s[1] += new Array(prec - s[1].length + 1).join('0');
-            }
+function number_format(numero, decimal, decimal_separador, milhar_separador) {
+  numero = (numero + '').replace(/[^0-9+\-Ee.]/g, '');
+  var n = !isFinite(+numero) ? 0 : +numero,
+    prec = !isFinite(+decimal) ? 0 : Math.abs(decimal),
+    sep = (typeof milhar_separador === 'undefined') ? ',' : milhar_separador,
+    dec = (typeof decimal_separador === 'undefined') ? '.' : decimal_separador,
+    s = '',
+    toFixedFix = function (n, prec) {
+      var k = Math.pow(10, prec);
+      return '' + Math.round(n * k) / k;
+    };
+  // Fix para IE: parseFloat(0.55).toFixed(0) = 0;
+  s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+  if (s[0].length > 3) {
+    s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+  }
+  if ((s[1] || '').length < prec) {
+    s[1] = s[1] || '';
+    s[1] += new Array(prec - s[1].length + 1).join('0');
+  }
 
-            return s.join(dec);
-        }
+  return s.join(dec);
+}
