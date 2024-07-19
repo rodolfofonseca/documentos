@@ -183,7 +183,6 @@ router_add('index', function () {
     <script>
         window.onload = function() {
             validar_acesso_administrador('<?php echo $_SESSION['tipo_usuario']; ?>');
-            pesquisar_armario();
         }
     </script>
  <?php
@@ -355,19 +354,22 @@ router_add('salvar_alterar_dados', function () {
 
             await pesquisar_organizacao();
 
-            if (CODIGO_ARMARIO != 0) {
-                await sistema.request.post('/armario.php', {
-                    'rota': 'pesquisar_armario',
-                    'codigo_armario': CODIGO_ARMARIO
-                }, function(retorno) {
-                    document.querySelector('#codigo_armario').value = retorno.dados.id_armario;
-                    document.querySelector('#nome_armario').value = retorno.dados.nome_armario;
-                    document.querySelector('#descricao').value = retorno.dados.descricao;
-                    document.querySelector('#forma_visualizacao').value = retorno.dados.forma_visualizacao;
-                    document.querySelector('#codigo_barras').value = retorno.dados.codigo_barras;
-                    document.querySelector('#id_organizacao').value = retorno.dados.id_organizacao;
-                });
-            }
+            window.setTimeout(function(){
+                if (CODIGO_ARMARIO != 0) {
+                    sistema.request.post('/armario.php', {
+                        'rota': 'pesquisar_armario',
+                        'codigo_armario': CODIGO_ARMARIO
+                    }, function(retorno) {
+                        document.querySelector('#codigo_armario').value = retorno.dados.id_armario;
+                        document.querySelector('#nome_armario').value = retorno.dados.nome_armario;
+                        document.querySelector('#descricao').value = retorno.dados.descricao;
+                        document.querySelector('#forma_visualizacao').value = retorno.dados.forma_visualizacao;
+                        document.querySelector('#codigo_barras').value = retorno.dados.codigo_barras;
+                        document.querySelector('#id_organizacao').value = retorno.dados.id_organizacao;
+                    });
+                }
+            }, 500);
+
         }
     </script>
  <?php
@@ -504,7 +506,7 @@ router_add('pesquisar_armario_todos', function () {
     $filtro_todos_publico = (array) [];
     $filtro_todos_privado = (array) [];
 
-    $dados = (array) ['filtro' => (array) [], 'ordenacao' => (array) ['nome_armario' => (bool) true], 'limite' => (int) 10];
+    $dados = (array) ['filtro' => (array) [], 'ordenacao' => (array) ['nome_armario' => (bool) true], 'limite' => (int) 0];
     $modelo = (array) ['id_armario' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'id_organizacao' => (int) 0, 'nome_armario' => (string) '', 'nome_organizacao' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) ''];
     
     $retorno = (array) [];

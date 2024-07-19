@@ -3,21 +3,33 @@ require_once 'Classes/bancoDeDados.php';
 
 class Prateleira{
     private $id_prateleira;
+    private $id_empresa;
+    private $id_usuario;
     private $id_armario;
     private $nome_prateleira;
+    private $descricao;
     private $codigo_barras;
+    private $forma_visualizacao;
 
     private function tabela(){
         return (string) 'prateleira';
     }
 
     private function modelo(){
-        return (array) ['id_prateleira' => (int) 0, 'id_armario' => (int) 0, 'nome_prateleira' => (string) '', 'codigo_barras' => (string) ''];
+        return (array) ['id_prateleira' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'id_armario' => (int) 0, 'nome_prateleira' => (string) '', 'descricao' => (string) '','codigo_barras' => (string) '', 'forma_visualizacao' => (string) 'PUBLICO'];
     }
 
     private function colocar_dados($dados){
         if(array_key_exists('codigo_prateleira', $dados) == true){
             $this->id_prateleira = (int) intval($dados['codigo_prateleira'], 10);
+        }
+
+        if(array_key_exists('codigo_empresa', $dados) == true){
+            $this->id_empresa = (int) intval($dados['codigo_empresa'], 10);
+        }
+
+        if(array_key_exists('codigo_usuario', $dados) == true){
+            $this->id_usuario = (int) $dados['codigo_usuario'];
         }
 
         if(array_key_exists('codigo_armario', $dados) == true){
@@ -28,8 +40,16 @@ class Prateleira{
             $this->nome_prateleira = (string) strtoupper($dados['nome_prateleira']);
         }
 
+        if(array_key_exists('descricao', $dados) == true){
+            $this->descricao = (string) $dados['descricao'];
+        }
+
         if(array_key_exists('codigo_barras', $dados) == true){
             $this->codigo_barras = (string) $dados['codigo_barras'];
+        }
+
+        if(array_key_exists('forma_visualizacao', $dados) == true){
+            $this->forma_visualizacao = (string) $dados['forma_visualizacao'];
         }
     }
 
@@ -40,16 +60,22 @@ class Prateleira{
      */
     public function salvar_dados($dados){
         $this->colocar_dados($dados);
-        $retorno = (bool) false;
-        $checar_existencia = (bool) model_check($this->tabela(), ['id_prateleira', '===', (int) $this->id_prateleira]);
+        $filtro = (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_prateleira', '===', (int) $this->id_prateleira]]];
+        
+        $checar_existencia = (bool) model_check((string) $this->tabela(), (array) $filtro);
 
         if($checar_existencia == true){
-            $retorno = (bool) model_update($this->tabela(), ['id_prateleira', '===', (int) $this->id_prateleira], model_parse($this->modelo(), ['id_prateleira' => (int) $this->id_prateleira, 'id_armario' => (int) $this->id_armario, 'nome_prateleira' => (string) $this->nome_prateleira, 'codigo_barras' => (string) $this->codigo_barras]));
-        }else{
-            $retorno = (bool) model_insert($this->tabela(), model_parse($this->modelo(), ['id_prateleira' => (int) model_next($this->tabela(), 'id_prateleira'), 'id_armario' => (int) $this->id_armario, 'nome_prateleira' => (string) $this->nome_prateleira, 'codigo_barras' => (string) $this->codigo_barras]));
-        }
+            $retorno_pesquisa = (array) model_one((string) $this->tabela(), (array) $filtro);
 
-        return (bool) $retorno;
+            if(empty($retorno_pesquisa) == false){
+                return (bool) model_update((string) $this->tabela(), (array) $filtro, (array) model_parse((array) $retorno_pesquisa, (array) ['id_armario' => (int) $this->id_armario, 'nome_prateleira' => (string) $this->nome_prateleira, 'descricao' => (string) $this->descricao, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
+            }else{
+                return (bool) false;
+            }
+
+        }else{
+            return (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_prateleira' => (int) model_next((string) $this->tabela(), (string)'id_prateleira', (array) $filtro), 'id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario, 'id_armario' => (int) $this->id_armario, 'nome_prateleira' => (string) $this->nome_prateleira, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
+        }
     }
 
     /**
