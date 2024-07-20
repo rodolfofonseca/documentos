@@ -74,7 +74,7 @@ class Prateleira{
             }
 
         }else{
-            return (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_prateleira' => (int) model_next((string) $this->tabela(), (string)'id_prateleira', (array) $filtro), 'id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario, 'id_armario' => (int) $this->id_armario, 'nome_prateleira' => (string) $this->nome_prateleira, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
+            return (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_prateleira' => (int) model_next((string) $this->tabela(), (string)'id_prateleira', (array) ['id_empresa', '===', (int) $this->id_empresa]), 'id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario, 'id_armario' => (int) $this->id_armario, 'nome_prateleira' => (string) $this->nome_prateleira, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
         }
     }
 
