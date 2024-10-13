@@ -106,7 +106,7 @@ router_add('index', function () {
 
                 if (tamanho < 1) {
                     let linha = document.createElement('tr');
-                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM TIPO DE ARQUIVO ENCONTRADO!', 'inner', true, 5));
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA CONFIGURAÇÃO TIPO DE ARQUIVO ENCONTRADO!', 'inner', true, 5));
                     tabela.appendChild(linha);
                 } else {
                     sistema.each(tipo_arquivo, function(contador, arquivo) {
@@ -128,8 +128,8 @@ router_add('index', function () {
         function excluir_tipo_arquivo(id_tipo_arquivo) {
             const swalWithBootstrapButtons = Swal.mixin({
                 customClass: {
-                    confirmButton: "btn btn-success",
-                    cancelButton: "btn btn-danger"
+                    confirmButton: "btn btn-success custom-radius",
+                    cancelButton: "btn btn-danger custom-radius"
                 },
                 buttonsStyling: false
             });
@@ -212,14 +212,14 @@ router_add('index', function () {
                         linha.appendChild(sistema.gerar_td(['text-center'], dados.dns, 'inner'));
 
                         if(dados.usar == 'S'){
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_usar_sim_'+dados.id_cloudinary, 'SIM', ['btn', 'btn-success'], function usar(){}), 'append'));
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_usar_sim_'+dados.id_cloudinary, 'SIM', ['btn', 'btn-success', 'custom-radius'], function usar(){}), 'append'));
                         }else{
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_usar_sim_'+dados.id_cloudinary, 'NÃO', ['btn', 'btn-danger'], function usar(){}), 'append'));
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_usar_sim_'+dados.id_cloudinary, 'NÃO', ['btn', 'btn-danger', 'custom-radius'], function usar(){}), 'append'));
                         }
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_cloudinary_'+dados.id_cloudinary, 'ALTERAR TIPO', ['btn', 'btn-info'], function alterar_usar_cloudinary(){alterar_cloudinary(dados.id_cloudinary, dados.usar);}), 'append'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_dns_cloudinary_'+dados.id_cloudinary, 'ALTERAR DNS', ['btn', 'btn-info'], function alterar_cloudinary_dns(){alterar_dns(dados.id_cloudinary, dados.dns, dados.usar);}), 'append'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_excluir_cloudinary_'+dados.id_cloudinary, 'EXCLUIR',['btn', 'btn-danger'], function excluir_cloudinary_sistema(){excluir_cloudinary(dados.id_cloudinary);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_cloudinary_'+dados.id_cloudinary, 'ALTERAR TIPO', ['btn', 'btn-info', 'custom-radius'], function alterar_usar_cloudinary(){alterar_cloudinary(dados.id_cloudinary, dados.usar);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_dns_cloudinary_'+dados.id_cloudinary, 'ALTERAR DNS', ['btn', 'btn-info', 'custom-radius'], function alterar_cloudinary_dns(){alterar_dns(dados.id_cloudinary, dados.dns, dados.usar);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_excluir_cloudinary_'+dados.id_cloudinary, 'EXCLUIR',['btn', 'btn-danger', 'custom-radius'], function excluir_cloudinary_sistema(){excluir_cloudinary(dados.id_cloudinary);}), 'append'));
 
                         tabela.appendChild(linha);
                     });
@@ -264,7 +264,7 @@ router_add('index', function () {
          * @param {int} id_cloudinary  */
         function excluir_cloudinary(id_cloudinary){
             const swalWithBootstrapButtons = Swal.mixin({
-                customClass: { confirmButton: "btn btn-success", cancelButton: "btn btn-danger"}, buttonsStyling: false
+                customClass: { confirmButton: "btn btn-success custom-radius", cancelButton: "btn btn-danger custom-radius"}, buttonsStyling: false
             });
             swalWithBootstrapButtons.fire({
                 title: "Você tem certeza?",
@@ -330,10 +330,10 @@ router_add('index', function () {
                         </div>
                         <div class="row">
                             <div class="col-4">
-                                <button class="btn btn-info botao_vertical_linha" onclick="salvar_dados();">Salvar Dados</button>
+                                <button class="btn btn-info botao_vertical_linha custom-radius" onclick="salvar_dados();">Salvar Dados</button>
                             </div>
                             <div class="col-4">
-                                <button class="btn btn-secondary botao_vertical_linha" onclick="voltar_dashboard();">Voltar</button>
+                                <button class="btn btn-secondary botao_vertical_linha custom-radius" onclick="voltar_dashboard();">Voltar</button>
                             </div>
                         </div>
                     </div>
@@ -368,10 +368,10 @@ router_add('index', function () {
                                 <input type="text" class="form-control custom-radius" name="endereco_documento" id="endereco_documento" placeholder="C:/documento/word" />
                             </div>
                             <div class="col-2">
-                                <button class="btn btn-info botao_vertical_linha" onclick="salvar_endereco_documento();">Salvar Dados</button>
+                                <button class="btn btn-info botao_vertical_linha custom-radius" onclick="salvar_endereco_documento();">Salvar Dados</button>
                             </div>
                             <div class="col-2">
-                                <button class="btn btn-secondary botao_vertical_linha" onclick="voltar_dashboard();">Voltar</button>
+                                <button class="btn btn-secondary botao_vertical_linha custom-radius" onclick="voltar_dashboard();">Voltar</button>
                             </div>
                         </div>
 
@@ -430,7 +430,7 @@ router_add('index', function () {
                             </select>
                         </div>
                         <div class="col-2">
-                        <button class="btn btn-info botao_vertical_linha" onclick="salvar_dados_cloudinary();">Salvar Dados</button>
+                        <button class="btn btn-info botao_vertical_linha custom-radius" onclick="salvar_dados_cloudinary();">Salvar Dados</button>
                         </div>
                     </div>
                     <br/>

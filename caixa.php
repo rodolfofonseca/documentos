@@ -146,7 +146,7 @@ router_add('index', function () {
                         <br />
                         <div class="row">
                             <div class="push-10 col-2">
-                                <button class="btn btn-info custom-radius btn-lg" onclick="pesquisar_caixa();">Pesquisar</button>
+                                <button class="btn btn-info custom-radius btn-lg botao_grande" onclick="pesquisar_caixa();">Pesquisar</button>
                             </div>
                         </div>
                         <br />

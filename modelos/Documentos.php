@@ -13,6 +13,9 @@ class Documentos
     private $id_tipo_arquivo;
     private $id_organizacao;
     private $id_usuario;
+    private $id_armario;
+    private $id_prateleira;
+
     private $nome_documento;
     private $descricao;
     private $endereco;
@@ -21,6 +24,7 @@ class Documentos
     private $cloudinary;
     private $data_cadastro;
     private $data_alteracao;
+    private $forma_visualizacao;
     private $escolha_usuario;
 
     private function tabela()
@@ -30,7 +34,7 @@ class Documentos
 
     private function modelo()
     {
-        return (array) ['id_documento' => (int) 0, 'id_empresa' => (int) 0,'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_usuario' => (int) 0, 'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date'];
+        return (array) ['id_documento' => (int) 0, 'id_empresa' => (int) 0,'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_armario' => (int) 0, 'id_prateleira' => (int) 0, 'id_usuario' => (int) 0, 'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date', 'forma_visualizacao' => (string) 'PUBLICO'];
     }
 
     private function colocar_dados($dados)
@@ -57,6 +61,14 @@ class Documentos
         
         if (array_key_exists('codigo_organizacao', $dados) == true) {
             $this->id_organizacao = (int) intval($dados['codigo_organizacao'], 10);
+        }
+
+        if(array_key_exists('codigo_armario', $dados) == true){
+            $this->id_armario = (int) intval($dados['codigo_armario'], 10);
+        }
+
+        if(array_key_exists('codigo_prateleira', $dados) == true){
+            $this->id_prateleira = (int) intval($dados['codigo_prateleira'], 10);
         }
 
         if (array_key_exists('nome_documento', $dados) == true) {
@@ -87,6 +99,10 @@ class Documentos
 
         if (array_key_exists('tipo_alteracao', $dados) == true) {
             $this->escolha_usuario = (string) $dados['tipo_alteracao'];
+        }
+
+        if(array_key_exists('forma_visualizacao', $dados) == true){
+            $this->forma_visualizacao = (string) $dados['forma_visualizacao'];
         }
 
     }
@@ -141,9 +157,9 @@ class Documentos
                 if(empty($pesquisa_documento) == false){
                     $retorno_pesquisa_documento = (array) model_one($this->tabela(), ['codigo_barras', '===', (string) $this->codigo_barras]);
 
-                    return (bool) model_update($this->tabela(), (array) ['codigo_barras', '===', (string) $this->codigo_barras], (array) ['id_documento' => (int) $this->id_documento, 'id_empresa' => (int) $this->id_empresa, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $this->id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) $retorno_pesquisa_documento['quantidade_downloads'], 'data_cadastro' => model_date($retorno_pesquisa_documento['data_cadastro']), 'data_alteracao' => model_date()]);
+                    return (bool) model_update($this->tabela(), (array) ['codigo_barras', '===', (string) $this->codigo_barras], (array) ['id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'data_alteracao' => model_date(), 'cloudinary' => (int) $this->cloudinary, 'forma_visualizacao' => (string) $this->forma_visualizacao, 'forma_visualizacao', 'id_armario' => (int) $this->id_armario, 'id_prateleira' => (int) $this->id_prateleira]);
                 }else{
-                    return (bool) model_insert($this->tabela(), (array) model_parse($this->modelo(), (array) ['id_documento' => (int) intval(model_next($this->tabela(), 'id_documento')), 'id_empresa' => (int) $this->id_empresa, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $this->id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'endereco' => (string) $this->endereco, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) 0, 'data_cadastro' => model_date(), 'data_alteracao' => model_date()]));
+                    return (bool) model_insert($this->tabela(), (array) model_parse($this->modelo(), (array) ['id_documento' => (int) intval(model_next((string) $this->tabela(), 'id_documento', (array) ['id_empresa', '===', (int) $this->id_empresa])), 'id_empresa' => (int) $this->id_empresa, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $this->id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'endereco' => (string) $this->endereco, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) 0, 'data_cadastro' => model_date(), 'data_alteracao' => model_date(), 'cloudinary' => (int) $this->cloudinary, 'id_armario' => (int) $this->id_armario, 'id_prateleira' => (int) $this->id_prateleira]));
                 }
             }
         }else{
@@ -193,18 +209,17 @@ class Documentos
 
                 if($this->escolha_usuario != 'ARQUIVOS'){
                     if($retorno_salvamento_arquivo == true){
-                        $checar_existencia_arquivo = (bool) model_check($this->tabela(), (array) ['id_documento', '===', (int) intval($this->id_documento, 10)]);
-        
+                        $checar_existencia_arquivo = (bool) model_check($this->tabela(), (array) ['codigo_barras', '===', (string) $this->codigo_barras]);
                         if($checar_existencia_arquivo == true){
                             $retorno_pesquisa_documento = (array) model_one($this->tabela(), ['codigo_barras', '===', (string) $this->codigo_barras]);
     
                             if(empty($retorno_pesquisa_documento) == false){
-                                return (bool) model_update($this->tabela(), (array) ['codigo_barras', '===', (string) $this->codigo_barras], model_parse($this->modelo(), ['id_documento' => (int) $this->id_documento, 'id_empresa' => (int) $this->id_empresa, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $this->id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'endereco' => (string) $this->endereco, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) $retorno_pesquisa_documento['quantidade_downloads'], 'cloudinary' => (int) $retorno_pesquisa_documento['cloudinary'], 'data_cadastro' => model_date($retorno_pesquisa_documento['data_cadastro']), 'data_alteracao' => model_date()]));
+                                return (bool) model_update((string) $this->tabela(), (array) ['codigo_barras', '===', (string) $this->codigo_barras], model_parse((array) $retorno_pesquisa_documento, (array) ['id_empresa' => (int) $this->id_empresa, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $this->id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'endereco' => (string) $this->endereco, 'codigo_barras' => (string) $this->codigo_barras, 'data_alteracao' => model_date(), 'forma_visualizacao' => (string) $this->forma_visualizacao, 'id_armario' => (int) $this->id_armario, 'id_prateleira' => (int) $this->id_prateleira]));
                             }else{
                                 return (bool) false;
                             }
                         }else{
-                            return (bool) model_insert($this->tabela(), (array) model_parse($this->modelo(), (array) ['id_documento' => (int) intval(model_next($this->tabela(), 'id_documento')), 'id_empresa' => (int) $this->id_empresa, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $this->id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'endereco' => (string) $this->endereco, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) $this->cloudinary, 'data_cadastro' => model_date(), 'data_alteracao' => model_date()]));
+                            return (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_documento' => (int) intval(model_next($this->tabela(), 'id_documento', ['id_empresa', '===', (int) $this->id_empresa])), 'id_empresa' => (int) $this->id_empresa, 'id_caixa' => (int) $this->id_caixa, 'id_tipo_arquivo' => (int) $this->id_tipo_arquivo, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $this->id_usuario, 'nome_documento' => (string) $this->nome_documento, 'descricao' => (string) $this->descricao, 'endereco' => (string) $this->endereco, 'codigo_barras' => (string) $this->codigo_barras, 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) $this->cloudinary, 'data_cadastro' => model_date(), 'data_alteracao' => model_date(), 'forma_visualizacao' => (string) $this->forma_visualizacao, 'id_armario' => (int) $this->id_armario, 'id_prateleira' => (int) $this->id_prateleira]));
                         }
                     }else{
                         return (bool) false;
