@@ -1,5 +1,6 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
+require_once 'prateleira.php';
 
 class Armario{
     private $id_armario;
@@ -80,6 +81,26 @@ class Armario{
 
         }else{
             return (bool) model_insert((string) $this->tabela(), (array) model_parse($this->modelo(), (array) ['id_armario' => (int) intval(model_next((string) $this->tabela(), (string) 'id_armario', (array) ['id_empresa', '===', (int) $this->id_empresa]), 10), 'id_empresa' => (int) $this->id_empresa, 'id_organizacao' => (int) $this->id_organizacao, 'id_usuario' => (int) $this->id_usuario, 'nome_armario' => (string) $this->nome_armario, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
+        }
+    }
+
+    public function excluir($dados){
+        $this->colocar_dados((array) $dados);
+
+        $filtro_pesquisa_prateleira = (array) ['filtro' => (array) ['id_armario', '===', (int) $this->id_armario]];
+        $objeto_prateleira = new Prateleira();
+        $retorno_pesquisa_prateleira = (array) $objeto_prateleira->pesquisar($filtro_pesquisa_prateleira);
+
+        if(empty($retorno_pesquisa_prateleira) == false){
+            return (array) ['titulo' => (string) 'ARMARIO CONTÉM PRATELEIRAS', 'mensagem' => (string) 'Não é possível excluir um armário que contém prateleiras', 'icone' => (string) 'error'];
+        }else{
+            $retorno_exclusao = (bool) model_delete((string) $this->tabela(), (array) ['id_armario', '===', (int) $this->id_armario]);
+
+            if($retorno_exclusao == true){
+                return (array) ['titulo' => (string) 'EXCLUSÃO CONCLUÍDA', 'mensagem' => (string) 'Operação realizada com sucesso!', 'icone' => (string) 'success'];
+            }else{
+                return (array) ['titulo' => (string) 'PROBLEMAS NA EXCLUSÃO', 'mensagem' => (string) 'Não foi possível excluir o armário, aconteceu algum erro desconhecido, por favor tente mais tarde!', 'icone' => (string) 'error'];
+            }
         }
     }
 

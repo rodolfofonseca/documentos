@@ -61,8 +61,7 @@ router_add('index', function () {
                         'codigo_documento': codigo_documento
                     }, function(retorno) {}, false);
 
-                    pesquisar_documento();
-
+                    
                     swalWithBootstrapButtons.fire({
                         title: "Deletado!",
                         text: "O documento foi excluído com sucesso.",
@@ -77,6 +76,8 @@ router_add('index', function () {
                         icon: "error"
                     });
                 }
+                
+                pesquisar_documento();
             });
         }
 
@@ -1008,6 +1009,7 @@ router_add('pesquisar_documentos_todos', function () {
             $modelo['tipo'] = (string) $documento['forma_visualizacao'];
             $modelo['quantidade_downloads'] = (int) $documento['quantidade_downloads'];
             $modelo['codigo_barras'] = (string) $documento['codigo_barras'];
+            $modelo['endereco'] = (string) $documento['endereco'];
 
             $objeto_organizacao = new Organizacao();
             $retorno_organizacao = (array) $objeto_organizacao->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['id_organizacao', '===', (int) $documento['id_organizacao']], (array) ['id_empresa', '===', (int) $id_empresa]]]]);

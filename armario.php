@@ -95,12 +95,23 @@ router_add('index', function () {
                         linha.appendChild(sistema.gerar_td(['text-center'], armario.nome_organizacao, 'inner'));
 
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('imprimir_codigo_barra_armario_' + armario.id_armario, armario.codigo_barras, ['btn', 'btn-success'], function impressao() {imprimir_codigo_barra_armario(armario.id_armario)}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('excluir_armario_sistema_'+armario.id_armario, 'EXCLUIR', ['btn', 'btn-danger'], function botao_excluir_armario(){excluir_armario_sistema(armario.id_armario);}), 'append'));
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_armario_' + armario.id_armario, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar() {cadastro_armario(armario.id_armario)}), 'append'));
                         
                         tabela.appendChild(linha);
                     });
                 }
             }, false);
+        }
+
+        /**
+         * Função responsável por realizar a exclusão do armário no sistema
+         */
+        function excluir_armario_sistema(id_armario){
+            sistema.request.post('/armario.php', {'rota':'excluir_armario', 'codigo_armario':id_armario}, function(retorno){
+                validar_retorno(retorno, '', 1);
+                pesquisar_armario();
+            });
         }
 
         function imprimir_codigo_barra_armario(codigo_armario) {
@@ -162,12 +173,13 @@ router_add('index', function () {
                                                 <th scope="col">Descrição</th>
                                                 <th scope="col">Organização</th>
                                                 <th scope="col">Código Barras</th>
+                                                <th scope="col">Excluir</th>
                                                 <th scope="col">Visualização</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="6" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                                <td colspan="7" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -549,6 +561,16 @@ router_add('pesquisar_armario_todos', function () {
     }
 
     echo json_encode(['dados' => (array) $retorno], JSON_UNESCAPED_UNICODE);
+    exit;
+});
+
+//@audit excluir_armario
+/**
+ * Rota responsável por excluir o armário no banco de dados...
+ */
+router_add('excluir_armario', function(){
+    $ojeto_armario = new Armario();
+    echo json_encode((array) $ojeto_armario->excluir($_REQUEST), flags: JSON_UNESCAPED_UNICODE);
     exit;
 });
 ?>

@@ -1,5 +1,6 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
+require_once 'Caixa.php';
 
 class Prateleira{
     private $id_prateleira;
@@ -94,6 +95,31 @@ class Prateleira{
      */
     public function pesquisar_todos($dados){
         return (array) model_all($this->tabela(), $dados['filtro'], $dados['ordenacao'], $dados['limite']);
+    }
+
+    /**
+     * Função responsável por excluir a prateleira do sistema
+     * @param mixed $dados contendo as informações da prateleira para montar o filtro de pesquisa
+     * @return array contendo a mensagem para apresentação ao usuário
+     */
+    public function excluir($dados){
+        $this->colocar_dados((array) $dados);
+        
+        $filtro_pesquisa_caixa = (array) ['filtro' => (array) ['id_prateleira', '===', (int) $this->id_prateleira]];
+        $objeto_caixa = new Caixa();
+        $retorno_pesquisa_caixa = (array) $objeto_caixa->pesquisar((array) $filtro_pesquisa_caixa);
+
+        if(empty($retorno_pesquisa_caixa) == false){
+            return (array) ['titulo' => (string) 'PRATELEIRA CONTÉM CAIXAS', 'mensagem' => (string) 'Não é possível excluir uma prateleira que contém caixas!', 'icone' => (string) 'error'];
+        }else{
+            $retorno_exclusao = (bool) model_delete((string) $this->tabela(), (array)  ['id_prateleira', '===', (int) $this->id_prateleira]);
+
+            if($retorno_exclusao == true){
+                return (array) ['titulo' => (string) 'EXCLUSÃO CONCLUÍDA', 'mensagem' => (string) 'Operação realizada com sucesso!', 'icone' => (string) 'success'];
+            }else{
+                return (array) ['titulo' => (string) 'PROBLEMAS NA EXCLUSÃO', 'mensagem' => (string) 'Não foi possível excluir a prateleira, aconteceu algum erro desconhecido por favor tente mais tarde!', 'icone' => (string) 'error'];
+            }
+        }
     }
 }
 ?>

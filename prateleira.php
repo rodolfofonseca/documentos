@@ -118,6 +118,11 @@ router_add('index', function () {
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('imprimir_codigo_barras_prateleira_' + prateleiras.id_prateleira, prateleiras.codigo_barras, ['btn', 'btn-success'], function impressao() {
                             imprimir_codigo_barras_prateleiras(prateleiras.id_prateleira)
                         }), 'append'));
+
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('excluir_prateleira_sistema_'+prateleiras.id_prateleira, 'EXCLUIR', ['btn', 'btn-danger'],
+                            function excluir_prateleira_sistema(){
+                                excluir_prateleira(prateleiras.id_prateleira);
+                            }),'append'));
                         
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_prateleira_' + prateleiras.id_prateleira, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar() {
                             cadastro_prateleira(prateleiras.id_prateleira);
@@ -135,6 +140,16 @@ router_add('index', function () {
                 'rota': 'impressao_codigo_barras_prateleira',
                 'codigo_prateleira': codigo_prateleira
             }), 'Impressão de código de barras', 'width=740px, height=500px, scrollbars=yes');
+        }
+
+        /**
+         * Função responsável por chamar a rota de excluir prateleira do sistema e depois realizar a validação.
+         */
+        function excluir_prateleira(codigo_prateleira){
+            sistema.request.post('/prateleira.php', {'rota':'excluir_prateleira', 'codigo_prateleira':codigo_prateleira}, function(retorno){
+                validar_retorno(retorno, '', 1);
+                pesquisar_prateleiras();
+            });
         }
     </script>
     <div class="container-fluid">
@@ -202,12 +217,13 @@ router_add('index', function () {
                                                 <th scope="col">Armário</th>
                                                 <th scope="col">Forma Visualização</th>
                                                 <th scope="col">Código Barras</th>
+                                                <th scope="col">Excluir</th>
                                                 <th scope="col">Ação</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="7" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                                <td colspan="8" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -552,7 +568,7 @@ router_add('impressao_codigo_barras_prateleira', function () {
     }
 
     require_once 'includes/head_relatorio.php';
-?>
+    ?>
     <script>
         const CODIGO_BARRAS = "<?php echo $codigo_barras; ?>";
 
@@ -618,7 +634,17 @@ router_add('impressao_codigo_barras_prateleira', function () {
             gerar_codigo_barras();
         }
     </script>
-<?php
+    <?php
     require_once 'includes/footer_relatorio.php';
+});
+
+/**
+ * Rota responsável por pegar as informações  vindas da model e converter para passar a modelo e então realizar a exclusão da prateleira.
+ */
+router_add('excluir_prateleira', function(){
+    $objeto_prateleira = new Prateleira();
+
+    echo json_encode((array) $objeto_prateleira->excluir($_REQUEST), JSON_UNESCAPED_UNICODE);
+    exit;
 });
 ?>

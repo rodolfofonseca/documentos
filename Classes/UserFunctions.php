@@ -7,65 +7,67 @@ require_once 'Sistema/db.php';
  * @param Float $quantidade a quantidade do item
  * @param Int $casas_decimais a quantidade de casas decimais que deseja que a função retorne 
  */
-function arredondar($valor, $operacao = '', $quantidade = null, $casas_decimais = 2){
+function arredondar($valor, $operacao = '', $quantidade = null, $casas_decimais = 2)
+{
   //  converte a quantidade que foi recebida pelo parâmetro em float para garantir que estaja no tipo correto
   $valor = (float) floatval($valor);
   $quantidade = (float) floatval($quantidade);
-  
-  //Se a quantidade for maior que zero realiza o cálculo de acordo com a operação que foi recebida por parâmetro.
-  if($quantidade != null && $operacao != ''){
-      //Realiza o cálculo de acordo com o parâmetro que foi recebido.
-      if($operacao == '*'){
-          $valor = $quantidade * $valor;
-      }else if($operacao == '+'){
-          $valor = $valor + $quantidade;
-      }else if($operacao == '-'){
-          $valor = $valor - $quantidade;
-      }else if($operacao == '/'){
-          $valor = $valor / $quantidade;
-      }
 
-      //O valor precisa ser formatado para calcular corretamente quando for por ex: 15.549888888880;
-      $valor = (float) formatar_numero($valor, 4, '.', '');
+  //Se a quantidade for maior que zero realiza o cálculo de acordo com a operação que foi recebida por parâmetro.
+  if ($quantidade != null && $operacao != '') {
+    //Realiza o cálculo de acordo com o parâmetro que foi recebido.
+    if ($operacao == '*') {
+      $valor = $quantidade * $valor;
+    } else if ($operacao == '+') {
+      $valor = $valor + $quantidade;
+    } else if ($operacao == '-') {
+      $valor = $valor - $quantidade;
+    } else if ($operacao == '/') {
+      $valor = $valor / $quantidade;
+    }
+
+    //O valor precisa ser formatado para calcular corretamente quando for por ex: 15.549888888880;
+    $valor = (float) formatar_numero($valor, 4, '.', '');
   }
   // verifica se o valor será um inteiro, para retorná-lo de forma direta, sem tratamento
-  if (mb_strpos(strval($valor), '.')){
+  if (mb_strpos(strval($valor), '.')) {
     $auxPrecisao = (int) 3;
-    $auxComparacao = (float) 5 * pow(10, $auxPrecisao-1);
+    $auxComparacao = (float) 5 * pow(10, $auxPrecisao - 1);
 
     $ultimoPonto = strripos($valor, '.') + 1;
-    $valor = substr($valor,0,$ultimoPonto) . substr($valor,$ultimoPonto,4); // <- deixo o número com 4 casas decimais, caso vier a mais ou a menos
-    $numeroInteiro = str_pad($valor,($casas_decimais+$auxPrecisao+$ultimoPonto),"0",STR_PAD_RIGHT);
-    $numeroInteiro = (int) intval(str_replace('.','',$numeroInteiro));
+    $valor = substr($valor, 0, $ultimoPonto) . substr($valor, $ultimoPonto, 4); // <- deixo o número com 4 casas decimais, caso vier a mais ou a menos
+    $numeroInteiro = str_pad($valor, ($casas_decimais + $auxPrecisao + $ultimoPonto), "0", STR_PAD_RIGHT);
+    $numeroInteiro = (int) intval(str_replace('.', '', $numeroInteiro));
 
     $sobra = intval(substr(($numeroInteiro), -$auxPrecisao), 10);
     $numero = intval(substr(($numeroInteiro), 0, (strlen($numeroInteiro) - $auxPrecisao)), 10);
 
     if ($numero % 2 == 0) {
-      if ($sobra > $auxComparacao){
-      $numero++;
+      if ($sobra > $auxComparacao) {
+        $numero++;
       }
     } else {
-      if ($sobra >= $auxComparacao){
-      $numero++;
+      if ($sobra >= $auxComparacao) {
+        $numero++;
       }
     }
-    
+
     $numero = (float) round(($numero / pow(10, $casas_decimais)), $casas_decimais);
     return floatval($numero);
   }
   return $valor;
 }
-  
-  
-  /** FORMATAR NÚMERO
-   * - Responsável por alterar a formatação do valor passado
-   * @param Integer $numero Deve ser informado o número a ser formatado
-   * @param Integer $decimais Pode ser informado a quantidade de números decimais
-   * @param String $decimal Pode ser informado o separador do decimal
-   * @param String $milhar Pode ser informado o separador dos milhares
-   */
-function formatar_numero($numero, $decimais = 2, $decimal = ',', $milhar = ''){
+
+
+/** FORMATAR NÚMERO
+ * - Responsável por alterar a formatação do valor passado
+ * @param Integer $numero Deve ser informado o número a ser formatado
+ * @param Integer $decimais Pode ser informado a quantidade de números decimais
+ * @param String $decimal Pode ser informado o separador do decimal
+ * @param String $milhar Pode ser informado o separador dos milhares
+ */
+function formatar_numero($numero, $decimais = 2, $decimal = ',', $milhar = '')
+{
   $numero = (float) arredondar($numero, '', 0, $decimais);
   return (string) number_format($numero, $decimais, $decimal, $milhar);
 }
@@ -74,30 +76,31 @@ function formatar_numero($numero, $decimais = 2, $decimal = ',', $milhar = ''){
  * Função responsável por ler as informações presentes no arquivo de configuração e retornar as informações
  * @return array informações do arquivo
  */
-function ler_arquivo_configuracao($tipo = 'BANCO'){
+function ler_arquivo_configuracao($tipo = 'BANCO')
+{
   //NOME DO ARQUIVO DE CONFIGURAÇÃO
   $arquivo_configuracao = (string) 'configuracao.ini';
 
-  if($tipo == 'BANCO'){
+  if ($tipo == 'BANCO') {
     //CRIO UM ARRAY COM AS CHAVES COM INFORMAÇÕES GENÉRICAS
     $retorno = (array) ['nome_banco' => (string) 'sex_shop', 'dns' => (string) 'mongodb://localhost:27017'];
     //VERIFICO SE EXISTE O ARQUIVO DE CONFIGURACAO
-    if(file_exists($arquivo_configuracao) == true){
+    if (file_exists($arquivo_configuracao) == true) {
       //CONVERTO O CONTEÚDO DO ARQUIVO DE CONFIGURAÇÃO EM UM ARRAY
       $configuracao = (array) parse_ini_file($arquivo_configuracao, true);
       //VERIFICO SE TEM A CHAVE QUE RECEBE O NOME DO BANCO DE DADOS, POIS POR ALGUM MOTIVO DESCONHECIDO PODE ACONTECER DE NÃO TER
-      if(isset($configuracao['DB']['db']) == true){
+      if (isset($configuracao['DB']['db']) == true) {
         $retorno['nome_banco'] = (string) $configuracao['DB']['db'];
       }
       //FAÇO A MESMA VERIFICAÇÃO AQUI TAMBÉM
-      if(isset($configuracao['DB']['dns']) == true){
+      if (isset($configuracao['DB']['dns']) == true) {
         $retorno['dns'] = (string) $configuracao['DB']['dns'];
       }
     }
-  
+
     return (array) $retorno;
-  }else{
-    if(file_exists($arquivo_configuracao) == true){
+  } else {
+    if (file_exists($arquivo_configuracao) == true) {
       $configuracao = (array) parse_ini_file($arquivo_configuracao, true);
 
       return (array) $configuracao;
@@ -110,7 +113,8 @@ function ler_arquivo_configuracao($tipo = 'BANCO'){
 /**
  * Função responsável por retornar o código de barras para cadastro ou alteração de componentes.
  */
-function codigo_barras(){
+function codigo_barras()
+{
   $codigo = (string) microtime(true);
   $codigo = (string) str_replace('.', '', $codigo);
   $codigo = (string) str_replace(' ', '', $codigo);
@@ -124,11 +128,26 @@ function codigo_barras(){
  * @param array $pipeline (SQL) da forma como o mongo entende
  * @return object com o retorno
  */
-function pesquisa_banco_aggregate($tabela, $pipeline){
+function pesquisa_banco_aggregate($tabela, $pipeline)
+{
   $classe = new DB();
   $retorno = $classe->connect($tabela);
   $connection = $classe->connection;
 
   return $connection->aggregate($pipeline, ['allowDiskUse' => TRUE]);
+}
+
+/**
+ * Função responsável por verificar a conexão do usuário com a internet, caso o mesmo não esteja conectado a uma rede, redireciona o mesmo para uma página de erro.
+ * Caso esteja continua seguindo o fluxo.
+ * @return void
+ */
+function verificar_conexao_internet()
+{
+  exec('ping 8.8.8.8', $saida, $retorno);
+  $quantidade = (int) intval(count($saida), 10);
+  if ($quantidade <= 10) {
+    header('location:sem_internet.php');
+  }
 }
 ?>

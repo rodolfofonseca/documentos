@@ -1,5 +1,6 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
+require_once 'armario.php';
 
 class Organizacao{
     private $id_organizacao;
@@ -69,7 +70,15 @@ class Organizacao{
 
             return (bool) model_update((string) $this->tabela(), (array) $filtro, (array) model_parse((array) $retorno_pesquisa, (array) ['nome_organizacao' => (string) $this->nome_organizacao, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
         }else{
-            return (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_organizacao' => (int) intval(model_next((string) $this->tabela(), 'id_organizacao', (array) ['id_empresa', '===', (int) $this->id_empresa]), 10), 'id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario,'nome_organizacao' => (string) $this->nome_organizacao, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
+            $filtro = (array) ['and' => (array) [(array) ['nome_organizacao', '===', (string) $this->nome_organizacao], ['id_empresa', '===', (int) $this->id_empresa]]];
+
+            $checar_existencia = (bool) model_check((string) $this->tabela(), (array) $filtro);
+
+            if($checar_existencia == true){
+                return (bool) false;
+            }else{
+                return (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_organizacao' => (int) intval(model_next((string) $this->tabela(), 'id_organizacao', (array) ['id_empresa', '===', (int) $this->id_empresa]), 10), 'id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario,'nome_organizacao' => (string) $this->nome_organizacao, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
+            }
         }
     }
     public function pesquisar($dados){
@@ -78,6 +87,31 @@ class Organizacao{
 
     public function pesquisar_todos($dados){
         return (array) model_all($this->tabela(), $dados['filtro'], $dados['ordenacao'], $dados['limite']);
+    }
+
+    /**
+     * Função responsável por receber o codigo_organizacao e realizar as validações necessárias para saber se pode realizar a exclusão das informações do banco de dados ou não.
+     * @param array $dados
+     * @return array 
+     */
+    public function excluir_organizacao($dados){
+        $this->colocar_dados($dados);
+        
+        $filtro_pesquisa_armario = (array) ['filtro' => (array) ['id_organizacao', '===', (int) $this->id_organizacao]];
+        $objeto_armario = new Armario();
+        $retorno_pesquisa_armario = (array) $objeto_armario->pesquisar($filtro_pesquisa_armario);
+
+        if(empty($retorno_pesquisa_armario) == false){
+            return (array) ['titulo' => (string) 'ORGANIZAÇÃO CONTÉM ARMÁRIOS', 'mensagem' => (string) 'Não é possível excluir organização que contenha armários cadastrados', 'icone' => (string) 'error'];
+        }else{
+            $retorno_exclusao =  (bool) model_delete((string) $this->tabela(), (array) ['id_organizacao', '===', (int) $this->id_organizacao]);
+            
+            if($retorno_exclusao == true){
+                return (array) ['titulo' => (string) 'EXCLUSÃO CONCLUÍDA', 'mensagem' => (string) 'Operação de exclusão foi realizada com sucesso!', 'icone' => (string) 'success'];
+            }else{
+                return (array) ['titulo' => (string) 'PROBLEMAS NA EXCLUSÃO', 'mensagem' => (string) 'Aconteceu um erro desconhecido durante o processo de exclusão da organização', 'icone' => (string) 'error'];
+            }
+        }
     }
 }
 ?>

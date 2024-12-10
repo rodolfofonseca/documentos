@@ -7,6 +7,7 @@ require_once 'modelos/Sistema.php';
  * Rota responsável por capturar as informações de login do usuário, e caso o banco de dados do usuário não possui nenhuma empresa cadastrada redirecionar o usuário para o formulário onde o mesmo irá realizar o cadastro de sua empresa.
  */
 router_add('index', function(){
+  verificar_conexao_internet();
   $retorno = (bool) false;
   $retorno_dados = model_one('sistema');
 
@@ -87,4 +88,5 @@ router_add('buscar_codigo_barras', function(){
   echo json_encode((array) ['codigo_barras' => (string) codigo_barras()], JSON_UNESCAPED_UNICODE);
   exit;
 });
+
 ?>

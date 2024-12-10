@@ -5,6 +5,7 @@ require_once 'Modelos/Clima.php';
 require_once 'Modelos/Contas.php';
 
 router_add('index', function () {
+	verificar_conexao_internet();
 	require_once 'includes/head.php';
 	$objeto_documento = new Documentos();
 	$objeto_clima = new Clima();

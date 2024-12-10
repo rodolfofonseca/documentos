@@ -68,9 +68,11 @@ router_add('index', function(){
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_imprimir_codigo_barras_'+organizacao.id_organizacao, organizacao.codigo_barras, ['btn', 'btn-success'], function imprimir_codigo_barras(){imprimir_codigo(organizacao.codigo_barras, organizacao.nome_organizacao);}), 'append'));
 
                         if(ID_USUARIO == organizacao.id_usuario){
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_excluir_organizacao_'+organizacao.id_organizacao, 'EXCLUIR', ['btn', 'btn-danger'], function botao_excluir_organizacao(){excluir_organizacao(organizacao.id_organizacao);}), 'append'));
                             linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_tipo_organizacao_'+organizacao.id_organizacao, 'ALT. TIPO', ['btn', 'btn-primary'], function alterar_tipo_organizacao(){alterar_tipo(organizacao.id_organizacao, organizacao.forma_visualizacao, organizacao.descricao, organizacao.codigo_barras, organizacao.nome_organizacao);}), 'append'));
                             linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_organizacao_'+organizacao.id_organizacao, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar(){cadastro_organizacao(organizacao.id_organizacao)}),'append'));
                         }else{
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_excluir_organizacao_'+organizacao.id_organizacao, 'EXCLUIR', ['btn', 'btn-danger', 'disabled'], function excluir_organizacao(){}), 'append'));
                             linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_tipo_organizacao_'+organizacao.id_organizacao, 'ALT. TIPO', ['btn', 'btn-primary', 'disabled'], function alterar_tipo_organizacao(){}), 'append'));
                             linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_organizacao_'+organizacao.id_organizacao, 'VISUALIZAR', ['btn', 'btn-info', 'disabled'], function visualizar(){}),'append'));
                         }
@@ -112,6 +114,16 @@ router_add('index', function(){
 
             sistema.request.post('/organizacao.php', {'rota':'enviar_dados', 'codigo_organizacao': id_organizacao, 'codigo_empresa': ID_EMPRESA, 'codigo_usuario': ID_USUARIO, 'nome_organizacao':nome_organizacao, 'descricao':descricao, 'codigo_barras':codigo_barras, 'forma_visualizacao':forma_visualizacao}, function(retorno){
                 validar_retorno(retorno);
+                pesquisar_organizacao();
+            });
+        }
+
+        /**
+         * Função responsável por excluir do sistema as organizações cadastradas.
+         */
+        function excluir_organizacao(codigo_organizacao){
+            sistema.request.post('/organizacao.php', {'rota': 'excluir_organizacao', 'codigo_organizacao':codigo_organizacao}, function(retorno){
+                validar_retorno(retorno, '', 1);
                 pesquisar_organizacao();
             });
         }
@@ -165,11 +177,12 @@ router_add('index', function(){
                                                 <th scope="col">Descrição</th>
                                                 <th scope="col">Tipo</th>
                                                 <th scope="col">Código Barras</th>
+                                                <th scope="col">Excluir</th>
                                                 <th scope="col">Alt. Tipo</th>
                                                 <th scope="col">Alt. Dados</th>
                                             </tr>
                                         </thead>
-                                        <tbody><tr><td colspan="7" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td></tr></tbody>
+                                        <tbody><tr><td colspan="8" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td></tr></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -503,6 +516,13 @@ router_add('enviar_dados', function(){
     $objeto_organizacao = new Organizacao();
     
     echo json_encode(['status' => (bool) $objeto_organizacao->salvar($_REQUEST)], JSON_UNESCAPED_UNICODE);
+    exit;
+});
+
+//@audit excluir_organizacao
+router_add('excluir_organizacao', function(){
+    $objeto_organizacao = new Organizacao();
+    echo json_encode( (array) $objeto_organizacao->excluir_organizacao($_REQUEST), JSON_UNESCAPED_UNICODE);
     exit;
 });
 ?>
