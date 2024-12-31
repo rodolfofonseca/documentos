@@ -1,4 +1,7 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
 require_once 'Sistema/db.php';
 /**
  * Função responsável por realizar o arredondamento de cálculos
@@ -61,10 +64,10 @@ function arredondar($valor, $operacao = '', $quantidade = null, $casas_decimais 
 
 /** FORMATAR NÚMERO
  * - Responsável por alterar a formatação do valor passado
- * @param Integer $numero Deve ser informado o número a ser formatado
- * @param Integer $decimais Pode ser informado a quantidade de números decimais
- * @param String $decimal Pode ser informado o separador do decimal
- * @param String $milhar Pode ser informado o separador dos milhares
+ * @param $numero Deve ser informado o número a ser formatado
+ * @param $decimais Pode ser informado a quantidade de números decimais
+ * @param $decimal Pode ser informado o separador do decimal
+ * @param $milhar Pode ser informado o separador dos milhares
  */
 function formatar_numero($numero, $decimais = 2, $decimal = ',', $milhar = '')
 {
@@ -149,5 +152,16 @@ function verificar_conexao_internet()
   if ($quantidade <= 10) {
     header('location:sem_internet.php');
   }
+}
+
+/**
+ * Função responsável por montar o array de retorno e retornar o mesmo formatado, sempre que for solicitado
+ * @param mixed $titulo
+ * @param mixed $mensagem
+ * @param mixed $icone
+ * @return array
+ */
+function mensagem_retorno($titulo, $mensagem, $icone){
+  return (array) ['titulo' => (string) $titulo, 'mensagem' => (string) $mensagem, 'icone' => (string) $icone];
 }
 ?>

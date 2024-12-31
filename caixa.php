@@ -50,12 +50,23 @@ router_add('index', function () {
 
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('imprimir_codigo_barra_' + caixa.id_caixa, caixa.codigo_barras, ['btn', 'btn-success'], function imprimir_caixa() {caixa_imprimir_codigo_barras(caixa.id_caixa);}), 'append'));
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('alterar_tipo_caixa_'+caixa.id_caixa, 'ALTERAR', ['btn', 'btn-info'], function alterar_tipo_caixa(){alterar_forma_visualizacao_caixa(caixa.id_caixa, caixa.id_empresa, caixa.forma_visualizacao)}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('excluir_caixa_banco_dados_'+caixa.id_caixa, 'EXCLUIR', ['btn', 'btn-danger'], function excluir_caixa_banco_dados(){excluir_caixa(caixa.id_caixa)}), 'append'));
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_caixa_' + caixa.id_caixa, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar_caixa() {cadastrar_caixa(caixa.id_caixa);}), 'append'));
 
                         tabela.appendChild(linha);
                     });
                 }
             }, false);
+        }
+
+        /**
+         * Função responsável por excluir a caixa do banco de dados.
+        */
+        function excluir_caixa(id_caixa){
+            sistema.request.post('/caixa.php', {'rota':'excluir_caixa', 'codigo_caixa':id_caixa}, function(retorno){
+                validar_retorno(retorno, '', 1);
+                pesquisar_caixa();
+            });
         }
 
         /** 
@@ -163,12 +174,13 @@ router_add('index', function () {
                                                 <th scope="col">Tipo</th>
                                                 <th scope="col">Código de barras</th>
                                                 <th scope="col">Alt. Tipo</th>
+                                                <th scope="col">Excluir</th>
                                                 <th scope="col">Ação</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="8" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                                <td colspan="9" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -565,6 +577,15 @@ router_add('alterar_tipo_caixa', function(){
     $objeto_caixa = new Caixa();
     
     echo json_encode(['status' => (bool) $objeto_caixa->alterar_forma_visualizacao($_REQUEST)], JSON_UNESCAPED_UNICODE);
+    exit;
+});
+
+/**
+ * Rota responsável por realizar a exclusão da caixa no banco de dados, quando a mesma não possuir documentos.
+ */
+router_add('excluir_caixa', function(){
+    $objeto_caixa = new Caixa();
+    echo json_encode((array) $objeto_caixa->excluir($_REQUEST), JSON_UNESCAPED_UNICODE);
     exit;
 });
 ?>

@@ -1,6 +1,7 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
 require_once 'Modelos/Prateleira.php';
+require_once 'Modelos/Documentos.php';
 
 class Caixa{
     private $id_caixa;
@@ -91,7 +92,7 @@ class Caixa{
      * @param array $dados filtro montado de pesquisa
      * @param int $id_empresa identificador da empresa.
      * @param array $retorno variável utilizada para armazenar as informações para que possa ser retornado.
-     * @return arrat $retorno com as informações formatadas.
+     * @return array $retorno com as informações formatadas.
      */
     public function validar_dados_pesquisa_caixa($dados, $id_empresa, $retorno){
         $retorno_pesquisa = (array) $this->pesquisar_todos($dados);
@@ -118,7 +119,7 @@ class Caixa{
     /**
      * Função responsável por verificar qual a forma de visualização atual da caixa e realizar a alteração de acordo com esta forma
      * @param array $dados contendo todas as informações necessária para a relização da alteração
-     * @return boo contando true ou false de acordo com o resultado da função.
+     * @return bool contando true ou false de acordo com o resultado da função.
      */
     public function alterar_forma_visualizacao($dados){
         $this->colocar_dados($dados);
@@ -129,6 +130,33 @@ class Caixa{
             return (bool) model_update((string) $this->tabela(), (array) $filtro, (array) ['forma_visualizacao' => (string) 'PRIVADO']);
         }else{
             return (bool) model_update((string) $this->tabela(), (array) $filtro, (array) ['forma_visualizacao' => (string) 'PUBLICO']);
+        }
+    }
+
+    /**
+     * Função responsável por realizar a pesquisa se é possível realizar a exclusão da caixa e caso seja possível exclui a mesma do banco de dados.
+     * @param mixed $dados
+     * @return array
+     */
+    public function excluir($dados){
+        $this->colocar_dados((array) $dados);
+
+        $array_filtro = (array) ['id_caixa', '===', (int) $this->id_caixa];
+
+        $filtro_pesquisa_documento = (array) ['filtro' => (array) $array_filtro];
+        $objeto_documento = new Documentos();
+        $retorno_pesquisa = (array) $objeto_documento->pesquisar_documento($filtro_pesquisa_documento);
+
+        if(empty($retorno_pesquisa) == false){
+            return (array) mensagem_retorno('NÃO É POSSÍVEL EXCLUIR', 'Não é possível excluir uma caixa que contenha documentos cadastrados', 'error');
+        }else{
+            $retorno_operacao = (bool) model_delete($this->tabela(), $array_filtro);
+
+            if($retorno_operacao == true){
+                return (array) mensagem_retorno('SUCESSO NA OPERAÇÃO', 'Operação realizada com sucesso!', 'success');
+            }else{
+                return (array) mensagem_retorno('ERRO DESCONHECIDO', 'Aconteceu algum erro desconhecido \n no processo de exclusão!\n por favor tente mais tarde', 'error');
+            }
         }
     }
 }

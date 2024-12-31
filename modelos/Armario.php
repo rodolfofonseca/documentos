@@ -1,6 +1,6 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
-require_once 'prateleira.php';
+require_once 'Modelos/Prateleira.php';
 
 class Armario{
     private $id_armario;
