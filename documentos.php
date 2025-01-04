@@ -518,7 +518,7 @@ router_add('salvar_dados_documentos', function () {
                                 <div class="col-2 text-center">
                                     <label class="text">Forma Visulização</label>
                                     <select class="form-control custom-radius" id="forma_visualizacao" name="forma_visualizacao">
-                                        <option value="">Selecione uma opção</option>
+                                        <option value="PUBLICO">Selecione uma opção</option>
                                         <option value="PUBLICO">PÚBLICO</option>
                                         <option value="PRIVADO">PRIVADO</option>
                                     </select>

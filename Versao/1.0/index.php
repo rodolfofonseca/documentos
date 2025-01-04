@@ -87,56 +87,58 @@ router_add('index', function(){
         </div>
       </div>
       <?php
-        $atualizacao->exibir_mensagem('Começando a atualização do sistema');
+        $atualizacao->exibir_mensagem('Começando a instalação do sistema');
         
-        // $atualizacao->criar_tabela_banco_dados('usuario', (array) ['id_usuario' => (int) 0, 'nome_usuario' => (string) '', 'login' => (string) '', 'senha_usuario' => (string) '', 'tipo' => (string) '']);
+        //CRIANDO A TABELA USUÁRIO NO BANCO DE DADOS
+        $atualizacao->exibir_mensagem('Criando tabela usuário no banco de dados');
+        $atualizacao->criar_tabela_banco_dados('usuario', (array) ['id_usuario' => (int) 0, 'id_empresa' => (int) 0, 'nome_usuario' => (string) '', 'login' => (string) '', 'senha_usuario' => (string) '', 'tipo' => (string) '', 'status' => (string) '']);
+        $atualizacao->exibir_mensagem('Tabela usuário criada com sucesso!');
         
-        // $usuario_adm = (array) ['id_usuario' => (int) model_next('usuario', 'id_usuario'), 'nome_usuario' => (string) 'ADMINITRADOR MASTER', 'login' => (string) 'adm', 'senha_usuario' => (string) password_hash('adm', PASSWORD_DEFAULT, ['const' => 8]), 'tipo' => (string)'ADMINISTRADOR'];
-        // $retorno = (bool) model_insert('usuario', $usuario_adm);
+        //CRIANDO A TABELA TIPO DE ARQUIVO NO BANCO DE DADOS
+        $atualizacao->exibir_mensagem('Criando tabela tipo de arquivo no banco de dados!');
+        $atualizacao->criar_tabela_banco_dados('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) 0, 'id_empresa' => (int) 0, 'descricao' => (string) '', 'tipo_arquivo' => (string) '', 'usar' => (string) '', 'endereco_documento' => (string) '']);
+        $atualizacao->exibir_mensagem('Tabela tipo de arquivo criada com sucesso!');
+        
+        //CRIANDO TABELA SISTEMA NO BANCO DE DADOS
+        $atualizacao->exibir_mensagem('Criando tabela sistema no banco de dados!');
+        $atualizacao->criar_tabela_banco_dados((string) 'sistema', (array) ['id_sistema' => (int) 0, 'id_empresa' => (int) 0, 'versao_sistema' => (string) '', 'chave_api' => (string) '', 'cidade' => (string) '']);
+        $atualizacao->exibir_mensagem('Tabela Sistema criada com sucesso!');
 
-        // if($retorno == true){
-        //   $atualizacao->exibir_mensagem('Usuario administrador cadastrado com sucesso!');
-        // }else{
-        //   $atualizacao->exibir_mensagem('Falha ao cadastrar o usuário administrador!');
-        // }
+        //CRIANDO TABELA PRATELEIRA NO BANCO DE DADOS
+        $atualizacao->exibir_mensagem((string) 'Criando tabela prateleira no banco de dados');
+        $atualizacao->criar_tabela_banco_dados((string) 'prateleira', (array) ['id_prateleira' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'id_armario' => (int) 0, 'nome_prateleira' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) '']);
+        $atualizacao->exibir_mensagem((string) 'Tabela prateleira criada com sucesso!');
 
-        // $atualizacao->criar_tabela_banco_dados('sistema', (array) ['id_sistema' => (int) 0, 'versao_sistema' => (string) '', 'chave_api' => (string) '', 'cidade' => (string) '']);
+        //CRIANDO A TABELA DE ORGANIZACAO
+        $atualizacao->exibir_mensagem((string) 'Criando a tabela de organização no banco de dados');
+        $atualizacao->criar_tabela_banco_dados((string) 'organizacao', (array) ['id_organizacao' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'nome_organizacao' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) '']);
+        $atualizacao->exibir_mensagem((string) 'Tabela de organização criada com sucesso!');
 
-        // model_insert('sistema', ['id_sistema' => (int) model_next('sistema', 'id_sistema'), 'versao_sistema' => (string) '1.0', 'chave_api' => (string) '', 'cidade' => (string) '']);
+        //CRIANDO TABELA EMPRESA
+        $atualizacao->exibir_mensagem((string) 'Criando a tabela empresa no banco de dados');
+        $atualizacao->criar_tabela_banco_dados((string) 'empresa', (array) ['id_empresa' => (int) 0, 'nome_empresa' => (string) '', 'representante' => (string) '', 'informacao_contato' => (string) '']);
+        $atualizacao->exibir_mensagem((string) 'Tabela empresa criada com sucesso!');
 
-        // $atualizacao->criar_tabela_banco_dados('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) 0, 'descricao' => (string) '', 'tipo_arquivo' => (string) '', 'usar' => (string) '', 'endereco_documento' => (string) '']);
+        //CRIANDO TABELA DOCUMENTOS
+        $atualizacao->exibir_mensagem((string) 'Criando tabela de documentos no banco de dados!');
+        $atualizacao->criar_tabela_banco_dados((string) 'documentos', (array) ['id_documento' => (int) 0, 'id_empresa' => (int) 0, 'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_armario' => (int) 0, 'id_prateleira' => (int) 0, 'id_usuario' => (int) 0, 'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date', 'forma_visualizacao' => (string) '']);
+        $atualizacao->exibir_mensagem((string) 'Tabela de documentos criada com sucesso!');
 
-        // $atualizacao->criar_tabela_banco_dados('armario', (array) ['id_armario' => (int) 0, 'nome_armario' => (string) '', 'codigo_barras' => (string) '']);
+        //CRIANDO TABELA CLOUDINARY
+        $atualizacao->exibir_mensagem((string) 'Criando tabela cloudinary no banco de dados!');
+        $atualizacao->criar_tabela_banco_dados((string) 'cloudinary', (array) ['id_cloudinary' => (int) 0, 'id_empresa' => (int) 0, 'dns' => (string) '', 'usar' => (string) '']);
+        $atualizacao->exibir_mensagem((string) 'Tabela cloudinary criada com sucesso!');
 
-        // $atualizacao->criar_tabela_banco_dados('caixa', (array) ['id_caixa' => (int) 0, 'id_prateleira' => (int) 0, 'nome_caixa' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '']);
+        //CRIANDO TABELA CAIXA
+        $atualizacao->exibir_mensagem((string) 'Criando tabela Caixa');
+        $atualizacao->criar_tabela_banco_dados((string) 'caixa', (array) ['id_caixa' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'id_prateleira' => (int) 0, 'nome_caixa' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) '']);
+        $atualizacao->exibir_mensagem((string) 'tabela Caixa Criada com sucesso!');
+        
+        //CRIANDO TABELA ARMARIO
+        $atualizacao->exibir_mensagem((string) 'Craindo Tabela Armário');
+        $atualizacao->criar_tabela_banco_dados((string) 'armario', (array) ['id_armario' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'id_organizacao' => (int) 0, 'nome_armario' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) '']);
+        $atualizacao->exibir_mensagem((string) 'tabela Armário Criada com sucesso!');
 
-        // $atualizacao->criar_tabela_banco_dados('documentos', (array) ['id_documento' => (int) 0, 'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_usuario' => (int) 0,'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date']);
-
-        // $atualizacao->criar_tabela_banco_dados('organizacao', (array) ['id_organizacao' => (int) 0, 'nome_organizacao' => (string) '']);
-
-        // $atualizacao->criar_tabela_banco_dados('prateleira', (array) ['id_prateleira' => (int) 0, 'id_armario' => (int) 0, 'nome_prateleira' => (string) '', 'codigo_barras' => (string) '']);
-
-        // $atualizacao->criar_tabela_banco_dados('cloudinary', (array) ['id_cloudinary' => (int) 0, 'id_empresa' => (int) 0, 'dns' => (string) '', 'usar' => (string) '']);
-
-        // $atualizacao->exibir_mensagem('Preparando para adicionar tipo de arquivos ao banco de dados!');
-
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WINRAR', 'tipo_arquivo' => (string) '.rar', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'BIN', 'tipo_arquivo' => (string) '.bin', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'IMAGEM', 'tipo_arquivo' => (string) '.jpeg', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WINRAR', 'tipo_arquivo' => (string) '.zip', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'IMAGEM', 'tipo_arquivo' => (string) '.jpg', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'PDF', 'tipo_arquivo' => (string) '.pdf', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WORD', 'tipo_arquivo' => (string) '.doc', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WORD', 'tipo_arquivo' => (string) '.odt', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'ASTAH', 'tipo_arquivo' => (string) '.asta', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'WORD', 'tipo_arquivo' => (string) '.docx', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'IAMGEM', 'tipo_arquivo' => (string) '.png', 'endereco_icone' => (string) '']);
-        // model_insert('tipo_arquivo', (array) ['id_tipo_arquivo' => (int) model_next('tipo_arquivo', 'id_tipo_arquivo'), 'descricao' => (string) 'PHOTOSHOP', 'tipo_arquivo' => (string) '.psd', 'endereco_icone' => (string) '']);
-
-        // $atualizacao->exibir_mensagem('Tipo de arquivos cadastrados com sucesso!');
-
-        // model_delete('usuario', (array) ['id_usuario', '===', (int) 2]);
-        // model_delete('sistema', (array) ['id_sistema', '===', (int) 2]);
       ?>
       <input type="hidden" id="mensagens" value='<?= json_encode($mensagens) ?>' />
     </body>
