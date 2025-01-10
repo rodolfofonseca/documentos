@@ -1,0 +1,7 @@
+    <strong>Atualização concluída com sucesso!</strong>
+    /modelo/tipoArquivo.php -> Adição do tipo de arquivo .xlsx
+    /modelo/Preferencia.php -> Criação do modelo prefência para armazenar informações de filtros ou outras informações que deva ser amazenado em cachê de sistema
+    /documentos.php -> 
+        Criação de preferências do usuário para facilitar a visualização dos documentos dentro do sistema.
+        Correção dos filtros de pesquisa que antes não funcionava de maneira adequada
+        Adicionado funcionalidade para que o usuário possa selecionar a quantidade de documentos que deseja que o sistema apresente na tela.
