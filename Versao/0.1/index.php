@@ -88,6 +88,8 @@ router_add('index', function(){
       </div>
       <?php
         $atualizacao->exibir_mensagem('Começando a atualização do sistema.');
+
+        $atualizacao->executar_atualizacao();
         
         $atualizacao->exibir_mensagem('Criando tabela preferencia_usuario');
         $atualizacao->criar_tabela_banco_dados((string) 'preferencia_usuario', (array) ['id_usuario' => (int) 0, 'id_sistema' => (int) 0, 'nome_preferencia' => (string) '', 'preferencia' => (string) '']);
@@ -99,16 +101,45 @@ router_add('index', function(){
 
         $atualizacao->exibir_mensagem('Gerando backup dos documentos cadastrados.');
         $atualizacao->criar_backup('documentos');
-        $atualizacao->alterar_validacao('documentos', ['id_documento' => (int) 0, 'id_empresa' => (int) 0,'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_armario' => (int) 0, 'id_prateleira' => (int) 0, 'id_usuario' => (int) 0, 'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date', 'forma_visualizacao' => (string) '', 'tipo_arquivo' => (string) '', 'tamanho_arquivo' => (int) 0]);
-        model_update('documentos', [], ['tipo_arquivo' => (string) 'DOCUMENTO', 'tamanho_arquivo' => (float) floatval(0)]);
+        $atualizacao->alterar_validacao('documentos', ['id_documento' => (int) 0, 'id_empresa' => (int) 0,'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_armario' => (int) 0, 'id_prateleira' => (int) 0, 'id_usuario' => (int) 0, 'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date', 'forma_visualizacao' => (string) '', 'tipo_arquivo' => (string) '', 'tamanho_arquivo' => (double) 0]);
+
+        $documentos_cadastrados = (array) model_all('documentos', []);
+
+        if(empty($documentos_cadastrados) == false){
+          foreach($documentos_cadastrados as $documentos){
+            $documentos['tipo_arquivo'] = (string) 'DOCUMENTO';
+            $documentos['tamanho_arquivo'] = (double) doubleval(0);
+            
+
+            $retorno = (bool) model_update('documentos', (array) ['id_documento', '===', (int) intval($documentos['id_documento'], 10)], $documentos);
+
+            $atualizacao->exibir_mensagem(('Atualizou o documento de identificador = '.$documentos['id_documento']));
+          }
+        }
+
+        // model_update('documentos', [], ['tipo_arquivo' => (string) 'DOCUMENTO', 'tamanho_arquivo' => (float) floatval(0)]);
         
         $atualizacao->exibir_mensagem('Alterou as informações da tabela com sucesso!');
         
         $atualizacao->exibir_mensagem('Alterar tabela sistema!');
+        $atualizacao->criar_backup('sistema');
         $atualizacao->alterar_validacao('sistema', ['id_sistema' => (int) 0, 'id_empresa' => (int) 0,'versao_sistema' => (string) '0.0', 'chave_api' => (string) '', 'cidade' => (string) '', 'tamanho_arquivo' => (double) 0]);
         $atualizacao->exibir_mensagem('Alterou as informações da tabela com sucesso!');
 
-        model_update((string) 'sistema', (array) [] ,(array) ['versao_sistema' => (string) '0.1']);
+        $sistema_pesquisa = (array) model_all('sistema', []);
+
+        if(empty($sistema_pesquisa) == false){
+          foreach($sistema_pesquisa as $sistema){
+            $sistema['tamanho_arquivo'] = (double) doubleval(40);
+            $sistema['versao_sistema'] = (string) '0.1';
+
+            $retorno = (bool) model_update('sistema', ['id_sistema', '===', (int) intval($sistema['id_sistema'], 10)], $sistema);
+
+            $atualizacao->exibir_mensagem('Atualizou o sistema de identificador = '.$sistema['id_sistema']);
+          }
+        }
+
+        // model_update((string) 'sistema', (array) [] ,(array) ['versao_sistema' => (string) '0.1']);
 
       ?>
       <input type="hidden" id="mensagens" value='<?= json_encode($mensagens) ?>' />
@@ -163,6 +194,7 @@ router_add('exibir_notas', function(){
 
 class Atualizacoes{
   private $versao;
+  private $versao_atualizacao;
   private $nome_banco;
   private $dns;
   private $dns_password;
@@ -176,10 +208,11 @@ class Atualizacoes{
 
   function __construct(){
     $this->versao = (string) basename(dirname(__FILE__));
+    $this->versao_atualizacao = (string) '0.1';
     $this->nome_banco = (string) 'documentos';
     $this->dns = (string) 'mongodb://127.0.0.1';
-    $this->titulo_atualizacao = (string) 'ATUALIZAÇÃO VERSÃO V1.0';
-    $this->arquivo_atualizacao = (string) 'Versao/vX.XX/index.php';
+    $this->titulo_atualizacao = (string) 'ATUALIZAÇÃO VERSÃO V0.1';
+    $this->arquivo_atualizacao = (string) 'Versao/0.1/index.php';
   }
 
   public function get_titulo(){
@@ -312,7 +345,7 @@ class Atualizacoes{
   public function notas(){
     $notas = (string) file_get_contents('notas_atualizacao.txt');
     $notas = (string) str_replace("\n", '<br/>', $notas);
-    $notas = (string) str_replace('{versao}', $this->versao, $notas);
+    $notas = (string) str_replace('{versao}', $this->versao_atualizacao, $notas);
 
     return $notas;
   }
