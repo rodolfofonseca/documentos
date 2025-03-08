@@ -1,0 +1,102 @@
+    <strong>Atualização concluída com sucesso!</strong>
+
+    /classes/UsarFuncions.php ->
+        Correção da função de arredondamento, que antes a variável $casasDecimais não estava formatada.
+        Desenvolvimento de função que converte o tamanho de arquivo de bytes para Megabytes e vice versa.
+
+    /dist/js/sistema.js ->
+        Alterado quantidade de catacteres da mascara de código para receber 50 caracteres. Podendo assim receber o código de barras do sistema.
+    
+    /js/mensagens.js ->
+        Alteração da rota de retorno para o sistema retornar ao index de forma correta.
+    
+    /includes/modais_cadastro_documento.php -> 
+        Separação dos modais de cadastro de documentos em outro arquivo para que seja possível a reutilização do código, juntamente com a diminuição do arquivo.
+        De forma que fique mais fácil a manutenção do sistema.
+        
+    /includes/formulario_pesquisa_localizacao_documento.php ->
+        Retirado da rota de cadastro e adicionado em um arquivo a parte para que fique mais fácil de ser reutilizado em outro local do sistema.
+        Juntamente com os métodos javascript para que não seja necessário realizar a reprogramação dos mesmo.
+
+    /includes/footer.php ->
+        Alteração do nome da empresa para RAVF
+
+    /includes/head.php ->
+        Alteração do Autor do sistema para a empresa RAVF
+        Alteração dos icones para a nova identidade do sistema.
+
+    /includes/modal_organizacao.php ->
+        Contém todos os itens necessários para pesquisar no banco de dados a organização que o usuário logado possui privilégio para estar pesquisando
+    /includes/modal_armario.php ->
+        Contém todos os itens necessários para pesquisar no banco de dados o armário que o usuário logado no sistema possui privilégio para estar pesquisando.
+
+    /includes/modal_caixa.php ->
+        Contém todos os itens necessários para pesquisar no banco de dados a caixa que o usuário que está logado no sistema possui privilégio.
+
+    /imagens ->
+        Adicionado novas imagens e icone do sistema, para que o mesmo fique com a identidade visual correta.
+
+    /js/sistema.js ->
+        Alterado quantidade de catacteres da mascara de código para receber 50 caracteres. Podendo assim receber o código de barras do sistema.
+    
+    /js/basics.js ->
+        Desenvolvido função para verificar se é para abrir o modal ou não.
+
+    /modelos/Armario.php ->
+        Adicionado sistema para salvar Log na base de dados.
+
+    /modelos/Caixa.php ->
+        Adicionado sistema para salvar log na base de dados.
+
+    /modelos/Dashboard.php ->
+        Arquivo contendo todos os relatórios e outras informações que são apresentadas na dashboard do sistema.
+
+    /modelos/Documentos.php ->
+        Adicionado sistema para salvar log na base de dados. 
+
+    /modelos/Organizacao.php ->
+        Adicionado sistema para salvar log no base de dados.
+    
+    /modelo/Prateleira.php ->
+        Adicionado sistema para salvar o log na base de dados.
+    
+    /modelos/tipoArquivo.php -> 
+        Adição do tipo de arquivo .xlsx
+    
+    /modelos/Preferencia.php -> 
+        Criação do modelo prefência para armazenar informações de filtros ou outras informações que deva ser amazenado em cachê de sistema
+
+    /modelo/LogSistema.php
+        Criaçõa do modelo que armazena os logs de tudo que foi realizado no sistema pelos usuários.
+    
+    /documentos.php -> 
+        Criação de preferências do usuário para facilitar a visualização dos documentos dentro do sistema.
+        Correção dos filtros de pesquisa que antes não funcionava de maneira adequada
+        Adicionado funcionalidade para que o usuário possa selecionar a quantidade de documentos que deseja que o sistema apresente na tela.
+        Adicionado sistema para adicioanr logs 
+    
+    /armario.php ->
+        Adição do filtro de pesquisa por id_organizacao
+
+    /index.php ->
+        Correção do login, para o sistema apresentar uma mensagem quando o usuário erra o usuário ou senha no método de login.
+    /log_sistema.php ->
+        Desenvolvido nova funcionalidaade onde os usuário marcados como administradores de sistema podem visualizar tudo o que aconteceu no sistema durante o dia ou um período de datas.
+    
+    /organizacao.php ->
+        Adicionado sistema de geração de log do sistema
+
+    /usuario.php ->
+        Alterado sistema para que o usuário administrador possa escolher o que deseja visualizar de relatório na dasboard do sistema
+
+
+    BANCO DE DADOS 
+    
+    Desenvolvimento da tabela preferencia, responsável por armazenar no banco de dados as preferências do usuário em relação a pesquisas no sistema.
+    Desenvolvimento da tabela log_sistema, responsável por armazenar no banco de dados os logs de tudo que foi realizado no sistema.
+    Alteração na tabela documentos adicionando novos campos
+    Alteração na tebal sistema para receber o tamnho de arquivo que o usuário deseja cadastrar no sistema.
+
+
+    OUTRAS ATUALIZAÇÕES
+    Adicionado um novo tipo de classe, para que o sistema possa estar realizando o desenvolvimento de arquivos .pdf

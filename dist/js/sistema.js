@@ -460,7 +460,7 @@ var sistema = (function (window) {
                 var sltd = window.getSelection().toString();
                 var max = sistema.integer(this.getAttribute('maxlength'));
                 if (max == 0) {
-                    max = 11;
+                    max = 50;
                 }
                 if ((sltd == this.value) && ['Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key) === false) {
                     this.value = '';
