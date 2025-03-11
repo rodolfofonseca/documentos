@@ -48,8 +48,8 @@ class Dashboard
         foreach($retorno as $documento){
             $array_temporario = (array) [];
             $array_temporario['id_tipo_arquivo'] = (int) intval($documento['id_tipo_arquivo'], 10);
-            $array_temporario['SUM(tamanho_arquivo)'] = (float) floatval($documento['SUM(tamanho_arquivo)']);
-            $array_temporario['tamanho_convertido'] = (float) round(converter_tamanho_arquivo($array_temporario['SUM(tamanho_arquivo)'], true), 2, PHP_ROUND_HALF_UP);
+            $array_temporario['tamanho_arquivo'] = (float) floatval($documento['SUM(tamanho_arquivo)']);
+            $array_temporario['tamanho_convertido'] = (float) round(converter_tamanho_arquivo($array_temporario['tamanho_arquivo'], true), 2, PHP_ROUND_HALF_UP);
 
             $objeto_tipo_arquivo = new TipoArquivo();
             $retorno_tipo_arquivo = $objeto_tipo_arquivo->pesquisar((array) ['filtro' => (array) ['id_tipo_arquivo', '===', (int) intval($array_temporario['id_tipo_arquivo'], 10)]]);

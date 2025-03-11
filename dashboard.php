@@ -103,7 +103,7 @@ router_add('index', function () {
 
 			var opcoes = {'height': 200, 'width': 450};
 			sistema.each(dados, function(contador, informacao){
-				tabela_relatorio.addRow([informacao.tipo_arquivo, informacao.tamanho_convertido]);
+				tabela_relatorio.addRow([informacao.tipo_arquivo, informacao.tamanho_arquivo]);
 			});
 
 			var grafico_tamanho_arquivo = new google.visualization.PieChart(document.getElementById('relatorio_tamanho_total_arquivos_cadastrados'));
