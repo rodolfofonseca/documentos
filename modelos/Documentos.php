@@ -6,6 +6,7 @@ require_once 'modelos/TipoArquivo.php';
 require_once 'modelos/Cloudinary.php';
 require_once 'modelos/Usuario.php';
 require_once 'modelos/Sistema.php';
+require_once 'Modelos/Notificacoes.php';
 
 class Documentos
 {
@@ -166,6 +167,7 @@ class Documentos
         $objeto_log = new LogSistema();
         $objeto_usuario = new Usuario();
         $objeto_sistema = new Sistema();
+        $objeto_notificacao = new Notificacoes();
 
         $retorno_operacao = (bool) false;
         $descricao_log = (string) '';
@@ -282,6 +284,10 @@ class Documentos
 
         if($retorno_operacao == true){
             $retorno_log = (bool) $objeto_log->salvar_dados((array) ['id_empresa' => (int) intval($this->id_empresa, 10), 'usuario' => (string) $retorno_usuario['login'], 'codigo_barras' => (string) $this->codigo_barras, 'modulo' => (string) 'DOCUMENTO', 'descricao' => (string) $descricao_log]);
+
+            if($this->forma_visualizacao == 'PUBLICO'){
+                $retorno_objeto_notificacao = (array) $objeto_notificacao->salvar_dados((array) ['titulo_notificacao' => (string) 'Cadastrou um novo documento', 'mensagem_longa' => (string) 'O documento '.$this->nome_documento.' foi cadastrado no sistema!', 'mensagem_curta' => (string) 'Um novo documento foi cadastrado no sistema']);
+            }
 
             return (bool) true;
         }else{

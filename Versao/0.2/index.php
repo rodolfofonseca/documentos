@@ -91,55 +91,23 @@ router_add('index', function(){
 
         $atualizacao->executar_atualizacao();
         
-        $atualizacao->exibir_mensagem('Criando tabela preferencia_usuario');
-        $atualizacao->criar_tabela_banco_dados((string) 'preferencia_usuario', (array) ['id_usuario' => (int) 0, 'id_sistema' => (int) 0, 'nome_preferencia' => (string) '', 'preferencia' => (string) '']);
-        $atualizacao->exibir_mensagem('Tabela preferencia_usuario criada com sucesso!');
-
-        $atualizacao->exibir_mensagem('Criando tabela log_sistema');
-        $atualizacao->criar_tabela_banco_dados((string) 'log_sistema', (array) ['id_log' => (int) 0, 'id_empresa' => (int) 0,'usuario' => (string) '', 'codigo_barras' => (string) '', 'modulo' => (string) '', 'descricao' => (string) '', 'data_log' => 'date']);
-        $atualizacao->exibir_mensagem('Tabela log_sistema criada com sucesso!');
-
-        $atualizacao->exibir_mensagem('Gerando backup dos documentos cadastrados.');
-        $atualizacao->criar_backup('documentos');
-        $atualizacao->alterar_validacao('documentos', ['id_documento' => (int) 0, 'id_empresa' => (int) 0,'id_caixa' => (int) 0, 'id_tipo_arquivo' => (int) 0, 'id_organizacao' => (int) 0, 'id_armario' => (int) 0, 'id_prateleira' => (int) 0, 'id_usuario' => (int) 0, 'nome_documento' => (string) '', 'descricao' => (string) '', 'endereco' => (string) '', 'codigo_barras' => (string) '', 'quantidade_downloads' => (int) 0, 'cloudinary' => (int) 0, 'data_cadastro' => 'date', 'data_alteracao' => 'date', 'forma_visualizacao' => (string) '', 'tipo_arquivo' => (string) '', 'tamanho_arquivo' => (double) 0]);
-
-        $documentos_cadastrados = (array) model_all('documentos', []);
-
-        if(empty($documentos_cadastrados) == false){
-          foreach($documentos_cadastrados as $documentos){
-            $documentos['tipo_arquivo'] = (string) 'DOCUMENTO';
-            $documentos['tamanho_arquivo'] = (double) doubleval(0);
-            
-
-            $retorno = (bool) model_update('documentos', (array) ['id_documento', '===', (int) intval($documentos['id_documento'], 10)], $documentos);
-
-            $atualizacao->exibir_mensagem(('Atualizou o documento de identificador = '.$documentos['id_documento']));
-          }
-        }
-
-        // model_update('documentos', [], ['tipo_arquivo' => (string) 'DOCUMENTO', 'tamanho_arquivo' => (float) floatval(0)]);
         
-        $atualizacao->exibir_mensagem('Alterou as informações da tabela com sucesso!');
+        $atualizacao->alterar_validacao('usuario', (array) ['id_usuario' => (int) 0, 'id_empresa' => (int) 0, 'nome_usuario' => (string) '', 'login' => (string) '', 'senha_usuario' => (string) '', 'tipo' => (string)'COMUM', 'status' => (string) 'ATIVO', 'email' => (string) '']);
+        $atualizacao->alterar_validacao('empresa', (array) ['id_empresa' => (int) 0, 'nome_empresa' => (string) '', 'representante' => (string) '', 'informacao_contato' => (string) '', 'chave_sistema' => (string) '', 'data_hora_ativacao' => 'date', 'data_hora_bloqueio' => 'date']);
         
-        $atualizacao->exibir_mensagem('Alterar tabela sistema!');
-        $atualizacao->criar_backup('sistema');
-        $atualizacao->alterar_validacao('sistema', ['id_sistema' => (int) 0, 'id_empresa' => (int) 0,'versao_sistema' => (string) '0.0', 'chave_api' => (string) '', 'cidade' => (string) '', 'tamanho_arquivo' => (int) 0]);
-        $atualizacao->exibir_mensagem('Alterou as informações da tabela com sucesso!');
+        $atualizacao->criar_tabela_banco_dados((string) 'notificacoes', (array) ['id_notificacao' => (int) 0, 'id_usuario' => (int) 0, 'data_feather' => (string) '', 'titulo_notificacao' => (string) '', 'mensagem_curta' => (string) '', 'mensagem_longa' => (string) '', 'data_notificacao' => 'date', 'data_leitura' => 'date', 'status_leitura' => (string) '']);
 
         $sistema_pesquisa = (array) model_all('sistema', []);
 
         if(empty($sistema_pesquisa) == false){
           foreach($sistema_pesquisa as $sistema){
-            $sistema['tamanho_arquivo'] = (int) intval(40, 10);
-            $sistema['versao_sistema'] = (string) '0.1';
+            $sistema['versao_sistema'] = (string) '0.2';
 
             $retorno = (bool) model_update('sistema', ['id_sistema', '===', (int) intval($sistema['id_sistema'], 10)], $sistema);
 
             $atualizacao->exibir_mensagem('Atualizou o sistema de identificador = '.$sistema['id_sistema']);
           }
         }
-
-        // model_update((string) 'sistema', (array) [] ,(array) ['versao_sistema' => (string) '0.1']);
 
       ?>
       <input type="hidden" id="mensagens" value='<?= json_encode($mensagens) ?>' />
