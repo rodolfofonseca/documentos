@@ -3,20 +3,18 @@
      * Função responsável por pesquisar os armários no sistema
      */
     function pesquisar_armario() {
-        let codigo_armario = sistema.int(document.querySelector('#codigo_modal_armario').value);
         let nome_armario = document.querySelector('#nome_modal_armario').value;
         let descricao = document.querySelector('#descricao_modal_armario').value;
         let forma_visualizacao = document.querySelector('#visualizacao_modal_armario').value;
 
         sistema.request.post('/armario.php', {
             'rota': 'pesquisar_armario_todos',
-            'codigo_usuario': CODIGO_USUARIO,
-            'codigo_empresa': CODIGO_EMPRESA,
-            'codigo_organizacao': CODIGO_ORGANIZACAO,
-            'codigo_armario': codigo_armario,
+            'usuario': CODIGO_USUARIO,
+            'empresa': CODIGO_EMPRESA,
+            'organizacao': CODIGO_ORGANIZACAO,
             'nome_armario': nome_armario,
             'descricao': descricao,
-            'forma_visualizacao': forma_visualizacao
+            'tipo': forma_visualizacao
         }, function (retorno) {
             let tabela = document.querySelector('#tabela_modal_armario tbody');
 
@@ -27,16 +25,15 @@
 
             if (tamanho_retorno < 1) {
                 let linha = document.createElement('tr');
-                linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM ARMÁRIO ENCONTRADO!', 'inner', true, 3));
+                linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM ARMÁRIO ENCONTRADO!', 'inner', true, 2));
                 tabela.appendChild(linha);
             } else {
                 sistema.each(armarios, function (index, armario) {
                     let linha = document.createElement('tr');
 
-                    linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(armario.id_armario, 3, '0'), 'inner'));
                     linha.appendChild(sistema.gerar_td(['text-left'], armario.nome_armario, 'inner'));
-                    linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_armario_' + armario.id_armario, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_armario() {
-                        selecionar_informacao_armario(armario.id_armario);
+                    linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_armario_' + armario._id.$oid, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_armario() {
+                        selecionar_informacao_armario(armario._id.$oid);
                     }), 'append'));
 
                     tabela.appendChild(linha);
@@ -46,9 +43,9 @@
     }
 
     function selecionar_informacao_armario(valor){
-        let codigo_organizacao = sistema.int(document.querySelector('#codigo_organizacao').value);
+        let codigo_organizacao = document.querySelector('#codigo_organizacao').value;
 
-            if (codigo_organizacao == 0) {
+            if (codigo_organizacao == '') {
                 Swal.fire({
                     title: "Erro de validação",
                     text: "É necessário primeiro selecionar uma organização",
@@ -58,7 +55,7 @@
                 document.querySelector('#codigo_armario').value = valor;
                 let botao_fechar = document.querySelector('#botao_fechar_modal_armario');
 
-                CODIGO_ARMARIO = parseInt(valor);
+                CODIGO_ARMARIO = valor;
 
                 botao_fechar.click();
             }
@@ -70,7 +67,7 @@
         <div class="row">
             <div class="col-6">
                 <input type="text" class="form-control custom-radius text-center" id="codigo_armario"
-                    name="codigo_armario" value="0" readonly="true" />
+                    name="codigo_armario" readonly="true" />
             </div>
             <div class="col-6">
                 <button class="btn btn-info  custom-radius botao_grande btn-lg" data-toggle="modal"
@@ -92,11 +89,7 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-2 text-center">
-                        <label class="text" for="codigo_modal_armario">Código</label>
-                        <input type="text" class="form-control custom-radius text-center" id="codigo_modal_armario" placeholder="Código" sistema-mask="codigo" onkeyup="pesquisar_armario();"/>
-                    </div>
-                    <div class="col-2 text-center">
+                    <div class="col-4 text-center">
                         <label class="text" for="nome_modal_armario">Nome</label>
                         <input type="text" class="form-control custom-radius text-center" id="nome_modal_armario" placeholder="Nome" onkeyup="pesquisar_armario();"/>
                     </div>
@@ -125,14 +118,13 @@
                             <table class="table table-hover table-striped" id="tabela_modal_armario">
                                 <thead class="bg-info text-white">
                                     <tr class="text-center">
-                                        <th scope="col">#</th>
                                         <th scope="col">Nome</th>
                                         <th scope="col">Ação</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colspan="3" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA
+                                        <td colspan="2" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA
                                             PESQUISA</td>
                                     </tr>
                                 </tbody>

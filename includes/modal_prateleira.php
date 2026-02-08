@@ -3,21 +3,19 @@
      * Função responsável por pesquisar as organizações que estão cadastradas no sistema.
     */
     function pesquisar_prateleira() {
-        let codigo_armario = sistema.int(document.querySelector('#codigo_armario').value);
-        let codigo_prateleira = sistema.int(document.querySelector('#codigo_modal_prateleira').value);
+        let codigo_armario = document.querySelector('#codigo_armario').value;
         let nome_prateleira = document.querySelector('#nome_modal_prateleira').value;
         let descricao_prateleira = document.querySelector('#descricao_modal_prateleira').value;
         let visualizacao = document.querySelector('#visualizacao_modal_prateleira').value;
 
         sistema.request.post('/prateleira.php', {
             'rota': 'pesquisar_prateleira_todas',
-            'codigo_armario': codigo_armario,
-            'codigo_prateleira': codigo_prateleira,
+            'armario': codigo_armario,
             'nome_prateleira': nome_prateleira,
             'descricao': descricao_prateleira,
             'forma_visualizacao': visualizacao,
-            'codigo_usuario': CODIGO_USUARIO,
-            'codigo_empresa': CODIGO_EMPRESA
+            'usuario': CODIGO_USUARIO,
+            'empresa': CODIGO_EMPRESA
         }, function (retorno) {
             let tabela = document.querySelector('#tabela_modal_prateleira tbody');
             let prateleiras = retorno.dados;
@@ -27,16 +25,15 @@
 
             if (tamanho_retorno < 1) {
                 let linha = document.createElement('tr');
-                linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA PRATELEIRA ENCONTRADO!', 'inner', true, 3));
+                linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA PRATELEIRA ENCONTRADO!', 'inner', true, 2));
                 tabela.appendChild(linha);
             } else {
                 sistema.each(prateleiras, function (index, prateleira) {
                     let linha = document.createElement('tr');
 
-                    linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(prateleira.id_prateleira, 3, '0'), 'inner'));
                     linha.appendChild(sistema.gerar_td(['text-left'], prateleira.nome_prateleira, 'inner'));
-                    linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_prateleira_' + prateleira.id_prateleira, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_prateleira() {
-                        selecionar_informacao_prateleira(prateleira.id_prateleira);
+                    linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_prateleira_' + prateleira._id.$oid, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_prateleira() {
+                        selecionar_informacao_prateleira(prateleira._id.$oid);
                     }), 'append'));
 
                     tabela.appendChild(linha);
@@ -59,7 +56,7 @@
     <div class="row">
         <div class="col-6">
             <input type="text" class="form-control custom-radius text-center" id="codigo_prateleira"
-                name="codigo_prateleira" value="0" readonly="true" />
+                name="codigo_prateleira" value="" readonly="true" />
         </div>
         <div class="col-6">
             <button class="btn btn-info  custom-radius botao_grande btn-lg" data-toggle="modal"
@@ -81,12 +78,7 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-2 text-center">
-                        <label class="text" for="codigo_modal_prateleira">Código</label>
-                        <input type="text" class="form-control custom-radius text-center" id="codigo_modal_prateleira"
-                            placeholder="Código" sistema-mask="codigo" onkeyup="pesquisar_prateleira();" />
-                    </div>
-                    <div class="col-2 tex-center">
+                    <div class="col-4 tex-center">
                         <label class="text" for="nome_modal_prateleira">Nome</label>
                         <input type="text" class="form-control custom-radius" id="nome_modal_prateleira"
                             placeholder="Nome" onkeyup="pesquisar_prateleira();" />
@@ -116,14 +108,13 @@
                             <table class="table table-hover table-striped" id="tabela_modal_prateleira">
                                 <thead class="bg-info text-white">
                                     <tr class="text-center">
-                                        <th scope="col">#</th>
                                         <th scope="col">Nome</th>
                                         <th scope="col">Ação</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colspan="3" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA
+                                        <td colspan="2" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA
                                             PESQUISA</td>
                                     </tr>
                                 </tbody>

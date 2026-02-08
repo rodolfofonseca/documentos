@@ -1,9 +1,9 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
-require_once 'Template.php';
+require_once 'Interface.php';
 require_once 'Usuario.php';
 
-class Notificacoes implements Template{
+class Notificacoes implements InterfaceModelo{
     private $id_notificacao;
     private $id_usuario;
     private $data_feather;

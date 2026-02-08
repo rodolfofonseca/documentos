@@ -48,21 +48,21 @@ router_add('index', function () {
     $preferencia_usuario_tamanho_total_arquivos = (string) 'CHECKED';
 
     //MONTANDO FILTRO DE PESQUISA PARA SABER SE O USUÁRIO LOGADO NO SISTEMA PREFERE VER O RELATÓRIO DE QUANTIDADE DE DOCUMENTOS POR TIPO DE ARQUIVO
-    $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval(CODIGO_SISTEMA, 10)], ['id_usuario', '===', (int) intval(CODIGO_USUARIO, 10)], ['nome_preferencia', '===', (string) 'USUARIO_PREFERENCIA_RELATORIO_QUANTIDADE_DOCUMENTOS_POR_EXTENSAO']]];
-    $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
+    // $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval(CODIGO_SISTEMA, 10)], ['id_usuario', '===', (int) intval(CODIGO_USUARIO, 10)], ['nome_preferencia', '===', (string) 'USUARIO_PREFERENCIA_RELATORIO_QUANTIDADE_DOCUMENTOS_POR_EXTENSAO']]];
+    // $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
-    if(empty($retorno_pesquisa_preferencia) == true){
-        $preferencia_usuario_quantidade_documentos_por_extensao = (string) '';
-    }
+    // if(empty($retorno_pesquisa_preferencia) == true){
+    //     $preferencia_usuario_quantidade_documentos_por_extensao = (string) '';
+    // }
 
-    //MONTANDO FILTRO DE PESQUISA PARA SABER SE O USUÁRIO LOGADO NO SISTEMA PREFERE VER O RELATÓRIO DE TAMANHO TOTAL DE ARQUIVOS CADASTRADOS NO SISTEMA
+    // //MONTANDO FILTRO DE PESQUISA PARA SABER SE O USUÁRIO LOGADO NO SISTEMA PREFERE VER O RELATÓRIO DE TAMANHO TOTAL DE ARQUIVOS CADASTRADOS NO SISTEMA
 
-    $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) CODIGO_SISTEMA], ['id_usuario', '===', (int) CODIGO_USUARIO], ['nome_preferencia', '===', (string) 'USUARIO_PREFRENCIA_RELATORIO_TAMANHO_TOTAL_ARQUIVO']]];
-    $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
+    // $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) CODIGO_SISTEMA], ['id_usuario', '===', (int) CODIGO_USUARIO], ['nome_preferencia', '===', (string) 'USUARIO_PREFRENCIA_RELATORIO_TAMANHO_TOTAL_ARQUIVO']]];
+    // $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
-    if(empty($retorno_pesquisa_preferencia) == true){
-        $preferencia_usuario_tamanho_total_arquivos = (string) '';
-    }
+    // if(empty($retorno_pesquisa_preferencia) == true){
+    //     $preferencia_usuario_tamanho_total_arquivos = (string) '';
+    // }
 	?>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<script>
@@ -84,7 +84,7 @@ router_add('index', function () {
 			};
 
 			sistema.each(dados, function (contador, informacao) {
-				tabela.addRow([informacao.tipo_arquivo, informacao.quantidade_documentos]);
+				tabela.addRow([informacao.tipo_arquivo, informacao.quantidade]);
 			});
 
 			var grafico = new google.visualization.PieChart(document.getElementById('relatorio_quantidade_documento_por_tipo_arquivo'));
@@ -103,9 +103,7 @@ router_add('index', function () {
 
 			var opcoes = {'height': 200, 'width': 450};
 			sistema.each(dados, function(contador, informacao){
-				if(informacao.id_tipo_arquivo != 0){
-					tabela_relatorio.addRow([informacao.tipo_arquivo, informacao.tamanho_arquivo]);
-				}
+					tabela_relatorio.addRow([informacao.nome_extensao, informacao.tamanho_total]);
 			});
 
 			var grafico_tamanho_arquivo = new google.visualization.PieChart(document.getElementById('relatorio_tamanho_total_arquivos_cadastrados'));

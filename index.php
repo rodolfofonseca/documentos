@@ -10,7 +10,9 @@ require_once 'modelos/Empresa.php';
 router_add('index', function(){
   verificar_conexao_internet();
   $retorno_login = (string) (isset($_REQUEST['retorno']) ? (string) $_REQUEST['retorno']: 'true');
-  $retorno_dados = model_one('sistema');
+
+  $objeto_sistema = new Sistema();
+  $retorno_dados = $objeto_sistema->pesquisar((array) ['filtro' => (array) []]);
 
   if(empty($retorno_dados) == false){
     $retorno_dados = (bool) true;
@@ -70,26 +72,23 @@ router_add('validar_login', function(){
 
   $usuario = (array) $objeto_usuario->login_sistema($_REQUEST);
 
+  
   if($usuario != []){
     session_start();
-    $_SESSION['id_usuario'] = (int) $usuario['id_usuario'];
-    $_SESSION['login'] = (string) $usuario['login'];
+    $_SESSION['id_usuario'] = $usuario['_id'];
+    $_SESSION['login'] = (string) $usuario['login_usuario'];
     $_SESSION['senha'] = (string) $usuario['senha_usuario'];
-    $_SESSION['tipo_usuario'] = (string) $usuario['tipo'];
+    $_SESSION['tipo_usuario'] = (string) $usuario['tipo_usuario'];
     $_SESSION['versao_sistema'] = (string) 'v0.0';
-    $_SESSION['id_empresa'] = (int) $usuario['id_empresa'];
-    $_SESSION['id_sistema'] = (int) 0;
+    $_SESSION['id_empresa'] = $usuario['empresa'];
+    $_SESSION['id_sistema'] = '';
     $_SESSION['versao_sistema'] = (string) '0.00';
-
-    $filtro_sistema['filtro'] = (array) ['id_empresa', '===', (int) $usuario['id_empresa']];
+    
+    $filtro_sistema['filtro'] = (array) ['empresa', '===', convert_id($usuario['empresa'])];
     $retorno_sistema = (array) $objeto_sistema->pesquisar($filtro_sistema);
-
-    $retorno_empresa_ativacao_empresa = (bool) $objeto_empresa->verificar_ativacao((array) ['codigo_empresa' => (int) intval($usuario['id_empresa'], 10)]);
-
-    $_SESSION['ativacao_empresa'] = (bool) $retorno_empresa_ativacao_empresa;
-
+    
     if(empty($retorno_sistema) == false){
-      $_SESSION['id_sistema'] = (int) $retorno_sistema['id_sistema'];
+      $_SESSION['id_sistema'] = $retorno_sistema['_id'];
       $_SESSION['versao_sistema'] = (string) $retorno_sistema['versao_sistema'];
       
       header('location:dashboard.php');

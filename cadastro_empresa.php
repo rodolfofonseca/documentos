@@ -29,12 +29,10 @@ router_add('index', function () {
                     sistema.each(empresa, function(index, empresa) {
                         let linha = document.createElement('tr');
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(empresa.id_empresa, 3, '0'), 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-left'], empresa.nome_empresa, 'inner'));
-                        linha.appendChild(sistema.gerar_td(['text-left'], empresa.representante, 'inner'));
-                        linha.appendChild(sistema.gerar_td(['text-left'], empresa.informacao_contato, 'inner'));
-                        linha.appendChild(sistema.gerar_td(['center-center'], sistema.gerar_botao('botao_cadastrar_usuario_' + empresa.id_empresa, 'CADASTRO USUÁRIO', ['btn', 'btn-success'], function abrir_cadastro_usuario() {
-                            abril_modal_cadastro_usuario(empresa.id_empresa, empresa.nome_empresa, empresa.representante, empresa.informacao_contato);
+                        linha.appendChild(sistema.gerar_td(['text-left'], empresa.status, 'inner'));
+                        linha.appendChild(sistema.gerar_td(['center-center'], sistema.gerar_botao('botao_cadastrar_usuario_' + empresa._id.$oid, 'CADASTRO USUÁRIO', ['btn', 'btn-success'], function abrir_cadastro_usuario() {
+                            abril_modal_cadastro_usuario(empresa._id.$oid, empresa.nome_empresa, empresa.status);
                         }), 'append'));
 
                         tabela.appendChild(linha);
@@ -46,13 +44,12 @@ router_add('index', function () {
         /** 
          * Função responsável por abrir o modal de cadatro de usuários.
          */
-        function abril_modal_cadastro_usuario(id_empresa, nome_empresa, representante, informacao_contato) {
+        function abril_modal_cadastro_usuario(id_empresa, nome_empresa, status) {
             window.location.href = sistema.url('/cadastro_empresa.php', {
                 'rota': 'cadastro_usuario',
                 'id_empresa': id_empresa,
                 'nome_empresa': nome_empresa,
-                'representante': representante,
-                'informacao_contato': informacao_contato
+                'status': status,
             });
         }
 
@@ -60,16 +57,11 @@ router_add('index', function () {
          * Função responsável por capturar as informações preenxidas pelo usuário no formulário e enviar para a dao, para que a mesma possa realizar a validação das informações e fazer a pensistência na base de dados.
          */
         function salvar_dados_empresa() {
-            let id_empresa = parseInt(document.querySelector('#id_empresa').value, 10);
             let nome_empresa = document.querySelector('#nome_empresa').value;
-            let representante = document.querySelector('#representante').value;
-            let informacao_contato = document.querySelector('#informacao_contato').value;
-
-            if(isNaN(id_empresa) == true){
-                id_empresa = 0;
-            }
-
-            sistema.request.post('/cadastro_empresa.php', {'rota': 'salvar_dados_empresa', 'codigo_empresa': id_empresa, 'nome_empresa': nome_empresa, 'representante': representante, 'informacao_contato': informacao_contato}, function(retorno) {
+            let cnpj = document.querySelector('#cnpj').value;
+            let status = document.querySelector('#status').value;
+            
+            sistema.request.post('/cadastro_empresa.php', {'rota': 'salvar_dados_empresa', 'nome_empresa': nome_empresa, 'cnpj': cnpj, 'status': status}, function(retorno) {
                 validar_retorno(retorno, '/cadastro_empresa.php');
             });
         }
@@ -79,6 +71,10 @@ router_add('index', function () {
          */
         function retornar(){
             window.location.href = sistema.url('/index.php', {'rota': 'index'});
+        }
+
+        function validar_cnpj() {
+            validarCpfCnpj(document.getElementById('cnpj'), true);
         }
     </script>
     <div class="container-fluid">
@@ -108,16 +104,14 @@ router_add('index', function () {
                                     <table class="table table-hover table-striped" id="tabela_empresa">
                                         <thead class="bg-info text-white">
                                             <tr class="text-center">
-                                                <th scope="col">#</th>
                                                 <th scope="col">NOME EMPRESA</th>
-                                                <th scope="col">REPRESENTANTE</th>
-                                                <th scope="col">INFORMAÇÃO</th>
+                                                <th scope="col">STATUS</th>
                                                 <th scope="col">CADASTRO USUÁRIO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="5" class="text-center">NENHUMA EMPRESA ENCONTRADA!</td>
+                                                <td colspan="3" class="text-center">NENHUMA EMPRESA ENCONTRADA!</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -142,18 +136,14 @@ router_add('index', function () {
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <input type="hidden" id="id_empresa" name="id_empresa" value="0" />
-                        <div class="col-4 text-center">
+                        <input type="hidden" id="status" name="status" value="ATIVO" />
+                        <div class="col-6 text-center">
                             <label class="text" for="nome_empresa">Nome Empresa</label>
                             <input type="text" class="form-control custom-radius text-uppercase" id="nome_empresa" name="nome_empresa" placeholder="Nome Empresa" />
                         </div>
-                        <div class="col-4 text-center">
-                            <label class="text" for="representante">Representante</label>
-                            <input type="text" class="form-control custom-radius text-uppercase" id="representante" name="representante" placeholder="Representante" />
-                        </div>
-                        <div class="col-4 text-center">
-                            <label class="text" for="informacao_contato">Informação de Contato</label>
-                            <input type="text" class="form-control custom-radius text-uppercase" id="informacao_contato" name="informacao_contato" placeholder="Informação de Contato" />
+                        <div class="col-6 text-center">
+                            <label class="text" for="cnpj">CNPJ</label>
+                            <input type="text" class="form-control custom-radius text-uppercase" id="cnpj" name="cnpj" placeholder="CNPJ" onblur="validar_cnpj()" />
                         </div>
                     </div>
                     <br />
@@ -182,11 +172,9 @@ router_add('index', function () {
  * Rota responsável por listar e cadastrar usuários para as empresas cadastradas no sistema.
  */
 router_add('cadastro_usuario', function () {
-    $id_empresa = (isset($_REQUEST['id_empresa']) ? (int) intval($_REQUEST['id_empresa'], 10) : 0);
+    $id_empresa = (isset($_REQUEST['id_empresa']) ? $_REQUEST['id_empresa'] : '');
     $nome_empresa = (isset($_REQUEST['nome_empresa']) ? (string) $_REQUEST['nome_empresa'] : '');
-    $representante = (isset($_REQUEST['representante']) ? (string) $_REQUEST['representante'] : '');
-    $informacao_contato = (isset($_REQUEST['informacao_contato']) ? (string) $_REQUEST['informacao_contato'] : '');
-    $email = (isset($_REQUEST['email']) ? (string) $_REQUEST['email']:'');
+    $status = (isset($_REQUEST['status']) ? (string) $_REQUEST['status'] : '');
 
     require_once 'includes/head_relatorio.php';
     ?>
@@ -195,16 +183,15 @@ router_add('cadastro_usuario', function () {
              * Função responsável por pesquisar os usuários cadastrados para a empresa e colocar a informação na tabela
              */
             function pesquisar_usuario() {
-                let codigo_empresa = parseInt(document.querySelector('#id_empresa').value, 10);
-
-                if (isNaN(codigo_empresa)) {
-                    codigo_empresa = 0;
-                }
+                let codigo_empresa = document.querySelector('#id_empresa').value;
 
                 sistema.request.post('/cadastro_empresa.php', {
                     'rota': 'pesquisar_usuario',
                     'codigo_empresa': codigo_empresa
                 }, function(retorno) {
+
+                    console.log(retorno);
+
                     let tabela = document.querySelector('#tabela_dados_usuario tbody');
                     tabela = sistema.remover_linha_tabela(tabela);
 
@@ -219,12 +206,12 @@ router_add('cadastro_usuario', function () {
                         sistema.each(retorno.dados, function(index, usuario) {
                             let linha = document.createElement('tr');
 
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(usuario.id_usuario, 3, '0', 'STR_PAD_LEFT'), 'inner'));
                             linha.appendChild(sistema.gerar_td(['text-left'], usuario.nome_usuario, 'inner'));
-                            linha.appendChild(sistema.gerar_td(['text-left'], usuario.login, 'inner'));
-                            linha.appendChild(sistema.gerar_td(['text-left'], usuario.tipo, 'inner'));
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('alterar_informacao_usuario_' + usuario.id_usuario, 'ALTERAR', ['btn', 'btn-success'], function retornar_dados() {
-                                colocar_dados_input(usuario.id_usuario, usuario.nome_usuario, usuario.login, usuario.tipo, usuario.email);
+                            linha.appendChild(sistema.gerar_td(['text-left'], usuario.login_usuario, 'inner'));
+                            linha.appendChild(sistema.gerar_td(['text-left'], usuario.tipo_usuario, 'inner'));
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('alterar_informacao_usuario_' + usuario._id.$oid, 'ALTERAR', ['btn', 'btn-success'], function retornar_dados() {
+                                console.log(usuario._id.$oid);
+                                colocar_dados_input(usuario._id.$oid, usuario.nome_usuario, usuario.login_usuario, usuario.tipo_usuario);
                             }), 'append'));
 
                             tabela.appendChild(linha);
@@ -236,35 +223,25 @@ router_add('cadastro_usuario', function () {
             /**
              * Função responsável por colocar as informações do usuário nos inputs para alteração
              */
-            function colocar_dados_input(id_usuario, nome_usuario, login, tipo, email) {
-                document.querySelector('#id_usuario').value = sistema.str_pad(id_usuario, 3, '0', 'STR_PAD_LEFT');
+            function colocar_dados_input(id_usuario, nome_usuario, login, tipo) {
+                document.querySelector('#id_usuario').value = id_usuario;
                 document.querySelector('#nome_usuario').value = nome_usuario;
                 document.querySelector('#login').value = login;
                 document.querySelector('#tipo_usuario').value = tipo;
-                document.querySelector('#email').value = email;
             }
 
             /**
              * Função responsável por enviar os dados para a modelos para a mesma realizar o cadatro ou alteração das informações do usuário.
              */
             function enviar_dados() {
-                let codigo_empresa = sistema.int(document.querySelector('#id_empresa').value);
-                let codigo_usuario = sistema.int(document.querySelector('#id_usuario').value);
+                let codigo_usuario = document.querySelector('#id_usuario').value;
+                let codigo_empresa = document.querySelector('#id_empresa').value;
                 let nome_usuario = document.querySelector('#nome_usuario').value;
                 let login = document.querySelector('#login').value;
                 let senha_usuario = document.querySelector('#senha_usuario').value;
                 let tipo = document.querySelector('#tipo_usuario').value;
-                let email = document.querySelector('#email').value;
 
-                if (isNaN(codigo_empresa)) {
-                    codigo_empresa = 0;
-                }
-
-                if (isNaN(codigo_usuario)) {
-                    codigo_usuario = 0;
-                }
-
-                sistema.request.post('/cadastro_empresa.php', {'rota': 'salvar_dados_usuario', 'codigo_usuario': codigo_usuario, 'codigo_empresa': codigo_empresa, 'nome_usuario': nome_usuario, 'login': login, 'senha_usuario': senha_usuario, 'tipo': tipo, 'email':email}, function(retorno) {
+                sistema.request.post('/cadastro_empresa.php', {'rota': 'salvar_dados_usuario', 'codigo_usuario': codigo_usuario, 'codigo_empresa': codigo_empresa, 'nome_usuario': nome_usuario, 'login': login, 'senha_usuario': senha_usuario, 'tipo': tipo}, function(retorno) {
                     sistema.verificar_status(retorno.status);
 
                     pesquisar_usuario();
@@ -282,27 +259,23 @@ router_add('cadastro_usuario', function () {
                         <div class="card-title text-center">
                             <div class="row">
                                 <div class="col-12">
-                                    <h1>DADOS EMRPRESA</h1>
+                                    <h1>DADOS EMPRESA</h1>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-3 text-center">
+                                <div class="col-4 text-center">
                                     <label>CÓDIGO</label>
-                                    <input type="text" class="form-control custom-radius text-center" name="id_empresa" id="id_empresa" value="<?php echo str_pad($id_empresa, 3, '0', STR_PAD_LEFT); ?>" readonly />
+                                    <input type="text" class="form-control custom-radius text-center" name="id_empresa" id="id_empresa" value="<?php echo $id_empresa; ?>" readonly />
                                 </div>
-                                <div class="col-3 text-center">
+                                <div class="col-4 text-center">
                                     <label>NOME EMPRESA</label>
                                     <input type="text" class="form-control custom-radius text-center" name="nome_empresa" id="nome_empresa" value="<?php echo $nome_empresa; ?>" readonly />
                                 </div>
-                                <div class="col-3 text-center">
-                                    <label>REPPRESENTANTE</label>
-                                    <input type="text" class="form-control custom-radius text-center" name="representante" id="representante" value="<?php echo $representante; ?>" readonly />
-                                </div>
-                                <div class="col-3 text-center">
-                                    <label>INFORMAÇÃO CONTATO</label>
-                                    <input type="text" class="form-control custom-radius text-center" name="informacao_contato" id="informacao_contato" value="<?php echo $informacao_contato; ?>" readonly />
+                                <div class="col-4 text-center">
+                                    <label>STATUS</label>
+                                    <input type="text" class="form-control custom-radius text-center" name="status_empresa" id="status_empresa" value="<?php echo $status; ?>" readonly />
                                 </div>
                             </div>
                             <br />
@@ -324,11 +297,11 @@ router_add('cadastro_usuario', function () {
                             <div class="row">
                                 <div class="col-1 text-center">
                                     <label>ID USUÁRIO</label>
-                                    <input type="text" class="form-control custom-radius text-center" name="id_usuario" id="id_usuario" value="000" readonly />
+                                    <input type="text" class="form-control custom-radius text-center" name="id_usuario" id="id_usuario" value="" readonly />
                                 </div>
-                                <div class="col-2 text-center">
+                                <div class="col-5 text-center">
                                     <label>NOME USUÁRIO</label>
-                                    <input type="text" class="form-control custom-radius text-uppercase" name="nome_usuairo" id="nome_usuario" placeholder="NOME USUÁRIO" />
+                                    <input type="text" class="form-control custom-radius text-uppercase" name="nome_usuario" id="nome_usuario" placeholder="NOME USUÁRIO" />
                                 </div>
                                 <div class="col-2 text-center">
                                     <label>LOGIN</label>
@@ -344,10 +317,6 @@ router_add('cadastro_usuario', function () {
                                         <option value="ADMINISTRADOR">ADMINISTRADOR</option>
                                         <option value="COMUM">COMUM</option>
                                     </select>
-                                </div>
-                                <div class="col-3 text-center">
-                                    <label>EMAIL</label>
-                                    <input type="email" class="form-control custom-radius" id="email" name="email"/>
                                 </div>
                             </div>
                             <br />
@@ -369,7 +338,6 @@ router_add('cadastro_usuario', function () {
                         <table class="table table-hover table-striped" id="tabela_dados_usuario">
                             <thead class="bg-info text-white">
                                 <tr class="text-center">
-                                    <th scope="col">#</th>
                                     <th scope="col">NOME</th>
                                     <th scope="col">LOGIN</th>
                                     <th scope="col">TIPO</th>
@@ -378,7 +346,7 @@ router_add('cadastro_usuario', function () {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="5" class="text-center">NENHUM USUÁRIO ENCONTRADO!</td>
+                                    <td colspan="4" class="text-center">NENHUM USUÁRIO ENCONTRADO!</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -402,7 +370,7 @@ router_add('cadastro_usuario', function () {
  */
 router_add('pesquisar_empresas', function () {
     $objeto_empresa = new Empresa();
-    $filtro = (array) ['filtro' => (array) [], 'ordenacao' => (array) ['id_empresa' => (bool) false], 'limite' => (int) 0];
+    $filtro = (array) ['filtro' => (array) [], 'ordenacao' => (array) ['nome_empresa' => (bool) false], 'limite' => (int) 0];
 
     echo json_encode((array) ['dados' => (array) $objeto_empresa->pesquisar_todos($filtro)], JSON_UNESCAPED_UNICODE);
     exit;
@@ -413,41 +381,10 @@ router_add('pesquisar_empresas', function () {
  */
 router_add('salvar_dados_empresa', function () {
     $objeto_empresa = new Empresa();
-    $objeto_sistema = new Sistema();
-    $versao_sistema = (string) '0';
-    $id_empresa = (int) 0;
-    $retorno_cadastro = (bool) false;
-    $nome_empresa = (string) (isset($_REQUEST['nome_empresa']) ? (string) strtoupper($_REQUEST['nome_empresa']):'');
 
     $retorno_cadastro_empresa = (bool) $objeto_empresa->salvar_dados($_REQUEST);
 
-    if($retorno_cadastro_empresa == true){
-        $arquivo_versao_sistema = (string) 'versao_sistema.ini';
-        
-        if(file_exists($arquivo_versao_sistema) == true){
-            $configuracao_aquivo = (array) parse_ini_file($arquivo_versao_sistema, true);
-
-            if(isset($configuracao_aquivo['sistema']['versao_sistema']) == true){
-                $versao_sistema = (string) $configuracao_aquivo['sistema']['versao_sistema'];
-            }
-        }
-
-        $pesquisa_dados_empresa = (array) $objeto_empresa->pesquisar((array) ['filtro' => (array) ['nome_empresa', '===', (string) $nome_empresa]]);
-
-        if(empty($pesquisa_dados_empresa) == false){
-            $id_empresa = (int) intval($pesquisa_dados_empresa['id_empresa'], 10);
-
-            $retorno_cadastro = (bool) $objeto_sistema->salvar_dados((array) ['codigo_empresa' => (int) $id_empresa, 'versao_sistema' => (string) $versao_sistema]);
-        }
-    }
-
-    if($retorno_cadastro == false){
-        $retorno = $objeto_empresa->excluir((array) ['codigo_emmpresa' => (int) $id_empresa]);
-
-        $retorno_cadastro = (bool) false;
-    }
-
-    echo json_encode((array) ['status' => (bool) $retorno_cadastro], JSON_UNESCAPED_UNICODE);
+    echo json_encode((array) ['status' => (bool) $retorno_cadastro_empresa], JSON_UNESCAPED_UNICODE);
     exit;
 });
 
@@ -456,9 +393,9 @@ router_add('salvar_dados_empresa', function () {
  */
 router_add('pesquisar_usuario', function () {
     $objeto_usuario = new Usuario();
-    $id_empresa = (int) (isset($_REQUEST['codigo_empresa']) ? (int) intval($_REQUEST['codigo_empresa'], 10) : 0);
+    $id_empresa = (string) (isset($_REQUEST['codigo_empresa']) ? $_REQUEST['codigo_empresa'] : '');
 
-    $filtro['filtro'] = (array) ['id_empresa', '===', (int) $id_empresa];
+    $filtro['filtro'] = (array) ['empresa', '===', convert_id($id_empresa)];
     $filtro['ordenacao'] = (array) ['login' => false];
     $filtro['limite'] = (int) 0;
 
@@ -479,9 +416,9 @@ router_add('salvar_dados_usuario', function () {
  * Rota responsável por pesquisar o usuário através do seu identificador 
  */
 router_add('pesquisar_usuario_id', function () {
-    $id_usuario = (isset($_REQUEST['codigo_usuario']) ? (int) intval($_REQUEST['codigo_usuario'], 10) : 0);
+    $id_usuario = (isset($_REQUEST['codigo_usuario']) ? (string) $_REQUEST['codigo_usuario'] : '');
     $objeto_usuario = new Usuario();
-    $filtro = (array) ['filtro' => (array) ['id_usuario', '===', (int) $id_usuario]];
+    $filtro = (array) ['filtro' => (array) ['id_usuario', '===', convert_id($id_usuario)]];
 
     echo json_encode((array) $objeto_usuario->pesquisar($filtro), JSON_UNESCAPED_UNICODE);
     exit;

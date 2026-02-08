@@ -1,31 +1,36 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
+require_once 'modelos/Interface.php';
 
 class TipoArquivo
 {
 
     private $id_tipo_arquivo;
-    private $id_empresa;
+    private $empresa;
     private $descricao;
     private $tipo_arquivo;
     private $usar;
     private $endereco_documento;
 
-    private function tabela(){
+    public function tabela(){
         return (string) 'tipo_arquivo';
     }
 
-    private function modelo(){
-        return (array) ['id_tipo_arquivo' => (int) 0, 'id_empresa' => (int) 0, 'descricao' => (string) '', 'tipo_arquivo' => (string) '', 'usar' => (string) 'S', 'endereco_documento' => (string) ''];
-    }
-
-    private function colocar_dados($dados){
+    public function colocar_dados($dados){
         if(array_key_exists('id_tipo_arquivo', $dados)){
-            $this->id_tipo_arquivo = (int) intval($dados['id_tipo_arquivo'], 10);
+            if($dados['id_tip_arquivo'] != ''){
+                $this->id_tipo_arquivo = (string) convert_id($dados['id_tipo_arquivo']);
+            }else{
+                $this->id_tipo_arquivo = null;
+            }
+        }else{
+            $this->id_tipo_arquivo = null;
         }
 
         if(array_key_exists('id_empresa', $dados)){
-            $this->id_empresa = (int) intval($dados['id_empresa'], 10);
+            if($dados['id_empresa'] != ''){
+                $this->empresa = (string) convert_id($dados['id_empresa']);
+            }
         }
 
         if(array_key_exists('descricao', $dados)){
@@ -47,35 +52,14 @@ class TipoArquivo
         }
     }
 
-    public function salvar_dados($dados){
-        $return_salvar_dados = (bool) false;
-        $dados_tipo_arquivo = (array) [];
-        
+    public function salvar_dados($dados){        
         $this->colocar_dados($dados);
 
-        $check_tipo_arquivo = (bool) model_check($this->tabela(), (array) ['and' => [['tipo_arquivo', '===', (string) $this->tipo_arquivo], ['id_empresa', '===', (int) $this->id_empresa]]]);
-
-        $dados_tipo_arquivo['id_empresa'] = (int) $this->id_empresa;
-        $dados_tipo_arquivo['descricao'] = (string) $this->descricao;
-        $dados_tipo_arquivo['tipo_arquivo'] = (string) $this->tipo_arquivo;
-        $dados_tipo_arquivo['usar'] = (string) $this->usar;
-        $dados_tipo_arquivo['endereco_documento'] = (string) $this->endereco_documento;
-
-        if($check_tipo_arquivo == true){
-            $dados_tipo_arquivo = (array) model_one($this->tabela(), (array) ['id_tipo_arquivo' => (string) $this->id_tipo_arquivo]);
-
-            if(array_key_exists('id_tipo_arquivo', $dados_tipo_arquivo['id_tipo_arquivo'])){
-                $this->tipo_arquivo = (int) $dados_tipo_arquivo['id_tipo_arquivo'];
-            }
-
-            $return_salvar_dados = (bool) model_update($this->tabela(), (array) ['id_tipo_arquivo' => (int) $this->tipo_arquivo], (array) model_parse($this->modelo(), $dados_tipo_arquivo));
-        }else{         
-            $dados_tipo_arquivo['id_tipo_arquivo'] = (int) intval(model_next($this->tabela(), 'id_tipo_arquivo'), 10);
-            
-            $return_salvar_dados = (bool) model_insert($this->tabela(), (array) model_parse($this->modelo(), $dados_tipo_arquivo));
+        if($this->id_tipo_arquivo != null){
+            return (bool) model_update((string) $this->tabela(), ['_id', '===', convert_id($this->id_tipo_arquivo)], (array) ['descricao' => (string) $this->descricao, 'tipo_arquivo' => (string) $this->tipo_arquivo, 'usar' => (string) $this->usar, 'endereco_documento' => (string) $this->endereco_documento]);
+        }else{
+            return (bool) model_insert((string) $this->tabela(), (array) ['empresa' => convert_id($this->empresa), 'descricao' => (string) $this->descricao, 'tipo_arquivo' => (string) $this->tipo_arquivo, 'usar' => (string) $this->usar, 'endereco_documento' => (string) $this->endereco_documento]);
         }
-
-        return (bool) $return_salvar_dados;
     }
 
     public function pesquisar($dados){
@@ -86,18 +70,10 @@ class TipoArquivo
         return (array) model_all($this->tabela(), $filtro['condicao'], $filtro['ordenacao'], $filtro['limite']);
     }
 
-    /**
-     * Função responsável por pesquisar e montar o componente de visualização, onde o usuário pode configurar os tipos de documentos aceitos pela empresa e onde o mesmo deseja que seja salvo.
-     */
-    public function montar_array_tipo_arquivo()
-    {
-        return (array) ravf_corp_model_all('extensao_arquivo', (array) [], [], 0);
-    }
-
     public function deletar($dados){
         $this->colocar_dados($dados);
 
-        $return_deletar = (bool) model_delete($this->tabela(), (array) ['id_tipo_arquivo', '===' ,(int) $this->id_tipo_arquivo]);
+        $return_deletar = (bool) model_delete($this->tabela(), (array) ['_id', '===' , convert_id($this->id_tipo_arquivo)]);
         
         return (bool) $return_deletar;
     }

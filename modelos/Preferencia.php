@@ -1,31 +1,45 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
 require_once 'Classes/Sistema/db.php';
-class Preferencia{
-    private $id_usuario;
-    private $id_sistema;
+require_once 'Interface.php';
+
+class Preferencia implements InterfaceModelo{
+    private $usuario;
+    private $sistema;
     private $nome_preferencia;
     private $preferencia;
 
-    private function tabela(){
+    public function tabela(){
         return (string) 'preferencia_usuario';
     }
 
-    private function modelo(){
-        return (array) ['id_usuario' => (int) 0, 'id_sistema' => (int) 0, 'nome_preferencia' => (string) '', 'preferencia' => (string) ''];
+    public function modelo(){
+        return (array) ['id_usuario' => convert_id(''), 'id_sistema' => convert_id(''), 'nome_preferencia' => (string) '', 'preferencia' => (string) ''];
     }
 
-    private function colocar_dados($dados){
+    public function colocar_dados($dados){
         if(array_key_exists('codigo_usuario', $dados) == true){
-            $this->id_usuario = (int) intval($dados['codigo_usuario'], 10);
-        }else{
-            $this->id_usuario = (int) 0;
+            if($dados['codigo_usuario'] != ''){
+                $this->usuario = convert_id($dados['codigo_usuario']);
+            }
         }
 
         if(array_key_exists('codigo_sistema', $dados) == true){
-            $this->id_sistema = (int) intval($dados['codigo_sistema'], 10);
-        }else{
-            $this->id_sistema = (int) 0;
+            if($dados['codigo_sistema'] != ''){
+                $this->sistema = convert_id($dados['codigo_sistema']);
+            }
+        }
+
+        if(array_key_exists('usuario', $dados) == true){
+            if($dados['usuario'] != ''){
+                $this->usuario = convert_id($dados['usuario']);
+            }
+        }
+
+        if(array_key_exists('sistema', $dados) == true){
+            if($dados['sistema'] != ''){
+                $this->sistema = convert_id($dados['sistema']);
+            }
         }
 
         if(array_key_exists('nome_preferencia', $dados) == true){
@@ -46,18 +60,18 @@ class Preferencia{
      * @param array $dados
      * @return bool
      */
-    public function salvar_dados( array $dados){
+    public function salvar_dados($dados){
         $this->colocar_dados($dados);
 
-        $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) $this->id_sistema], ['id_usuario', '===', (int) $this->id_usuario], ['nome_preferencia', '===', (string) $this->nome_preferencia]]];
+        $filtro_pesquisa = (array) ['and' => (array) [['sistema', '===', $this->sistema], ['usuario', '===', $this->usuario], ['nome_preferencia', '===', (string) $this->nome_preferencia]]];
         $filtro = (array) ['filtro' => (array) $filtro_pesquisa];
 
         $retorno_pesquisa = (array) $this->pesquisar((array) $filtro);
 
         if(empty($retorno_pesquisa) == true){
-            return (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_sistema' => (int) $this->id_sistema, 'id_usuario' => (int) $this->id_usuario, 'nome_preferencia' => (string) $this->nome_preferencia, 'preferencia' => (string) $this->preferencia]));
+            return (bool) model_insert((string) $this->tabela(), (array) ['sistema' => $this->sistema, 'usuario' => $this->usuario, 'nome_preferencia' => (string) $this->nome_preferencia, 'preferencia' => (string) $this->preferencia]);
         }else{
-            return (bool) model_update((string) $this->tabela(), (array) $filtro_pesquisa, (array) model_parse((array) $this->modelo(), (array) ['id_sistema' => (int) $this->id_sistema, 'id_usuario' => (int) $this->id_usuario, 'nome_preferencia' => (string) $this->nome_preferencia, 'preferencia' => (string) $this->preferencia]));
+            return (bool) model_update((string) $this->tabela(), (array) $filtro_pesquisa, (array) ['sistema' => $this->sistema, 'usuario' => $this->usuario, 'nome_preferencia' => (string) $this->nome_preferencia, 'preferencia' => (string) $this->preferencia]);
         }
 
     }
@@ -70,7 +84,7 @@ class Preferencia{
     public function excluir(array $dados){
         $this->colocar_dados($dados);
         
-        $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) $this->id_sistema], ['id_usuario', '===', (int) $this->id_usuario], ['nome_preferencia', '===', (string) $this->nome_preferencia]]];
+        $filtro_pesquisa = (array) ['and' => (array) [['sistema', '===', $this->sistema], ['usuario', '===', $this->usuario], ['nome_preferencia', '===', (string) $this->nome_preferencia]]];
 
         return (bool) model_delete((string) $this->tabela(), (array) $filtro_pesquisa);
     }
@@ -80,7 +94,7 @@ class Preferencia{
      * @param array $dados
      * @return array
      */
-    public function pesquisar(array $dados){
+    public function pesquisar($dados){
         return (array) model_one((string) $this->tabela(), $dados['filtro']);
     }
 
@@ -89,7 +103,7 @@ class Preferencia{
      * @param array $dados
      * @return void
      */
-    public function pesquisar_todos(array $dados){
+    public function pesquisar_todos($dados){
 
     }
 
@@ -103,10 +117,10 @@ class Preferencia{
      * @param int $codigo_sistema
      * @return void
      */
-    public function alterar_quantidade_retorno(int $limite_preferencia_usuario, int $limite_retorno, string $nome_preferencia, int $codigo_usuario, int $codigo_sistema){
+    public function alterar_quantidade_retorno(int $limite_preferencia_usuario, int $limite_retorno, string $nome_preferencia, string $codigo_usuario, string $codigo_sistema){
         if($limite_preferencia_usuario != $limite_retorno){
-            $retorno_preferencia = (bool) $this->excluir((array) ['nome_preferencia' => (string) $nome_preferencia, 'codigo_usuario' => (int) $codigo_usuario, 'codigo_sistema' => (int) $codigo_sistema]);
-            $retorno_preferencia = (bool) $this->salvar_dados((array) ['codigo_usuario' => (int) $codigo_usuario, 'codigo_sistema' => (int) $codigo_sistema, 'nome_preferencia' => (string) $nome_preferencia, 'preferencia' => (string) $limite_preferencia_usuario]);
+            $retorno_preferencia = (bool) $this->excluir((array) ['nome_preferencia' => (string) $nome_preferencia, 'usuario' => convert_id($codigo_usuario), 'sistema' => convert_id($codigo_sistema)]);
+            $retorno_preferencia = (bool) $this->salvar_dados((array) ['usuario' => (string) $codigo_usuario, 'sistema' => (string) $codigo_sistema, 'nome_preferencia' => (string) $nome_preferencia, 'preferencia' => (string) $limite_preferencia_usuario]);
         }
     }
 
@@ -115,10 +129,10 @@ class Preferencia{
      * @param array $dados
      * @return string
      */
-    public function pesquisar_preferencia_usuario(array $dados){
+    public function pesquisar_preferencia_usuario($dados){
         $this->colocar_dados($dados);
 
-        $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) $this->id_sistema], ['id_usuario', '===', (int) $this->id_usuario], ['nome_preferencia', '===', (string) $this->nome_preferencia]]];
+        $filtro_pesquisa = (array) ['and' => (array) [['sistema', '===', convert_id($this->sistema)], ['usuario', '===', convert_id($this->usuario)], ['nome_preferencia', '===', (string) $this->nome_preferencia]]];
         $retorno_pesquisa_preferencia = (array) $this->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
         if(empty($retorno_pesquisa_preferencia) == true){
@@ -137,10 +151,10 @@ class Preferencia{
      * @param array $dados
      * @return int
      */
-    public function pesquisar_preferencia_quantidade_retorno(array $dados){
+    public function pesquisar_preferencia_quantidade_retorno($dados){
         $this->colocar_dados($dados);
 
-        $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) $this->id_sistema], ['id_usuario', '===', (int) $this->id_usuario], ['nome_preferencia', '===', (string) $this->nome_preferencia]]];
+        $filtro_pesquisa = (array) ['and' => (array) [['sistema', '===', $this->sistema], ['usuario', '===', $this->usuario], ['nome_preferencia', '===', (string) $this->nome_preferencia]]];
         $retorno_pesquisa = (array) $this->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
         if(empty($retorno_pesquisa) == true){

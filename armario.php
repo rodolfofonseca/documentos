@@ -5,35 +5,6 @@ require_once 'Modelos/Organizacao.php';
 require_once 'Modelos/Preferencia.php';
 
 /**
- * Função responsável por valdiar as informações do armário pesquisados no banco de dados e montar um array com todos os dados que serão necessários para apresentação em tela.
- * @param array $retorno_pesquisa Array contendo todos os dados brutos dos armários pesquisados no banco de dados
- * @param array $modelo Array contendo o modelo com todos os campos que o usuário precisa para visualizar.
- * @param int $id_empresa Identificador da empresa que o usuário pertence
- * @param array $retorno Array onde será armazenado os novos campos formatados.
- * @return array $retorno Array com todas as informações já montados pronto para visualização em tela.
- */
-function validar_dados_pesquisa($retorno_pesquisa, $modelo, $id_empresa, $retorno){
-    if(empty($retorno_pesquisa) == false){
-        foreach($retorno_pesquisa as $retorno_pesquisa){
-            $retorno_temporario = (array) model_parse($modelo, $retorno_pesquisa);
-
-            $objeto_organizacao = new Organizacao();
-            $dados_organizacao = (array) $objeto_organizacao->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['id_organizacao', '===', (int) $retorno_temporario['id_organizacao']], (array) ['id_empresa', '===', (int) $id_empresa]]]]);
-
-            if(empty($dados_organizacao) == false){
-                if(array_key_exists('nome_organizacao', $dados_organizacao) == true){
-                    $retorno_temporario['nome_organizacao'] = (string) $dados_organizacao['nome_organizacao'];
-                }
-            }
-
-            array_push($retorno, $retorno_temporario);
-        }
-    }
-
-    return (array) $retorno;
-}
-
-/**
  * Rota index
  * TODO primeira rota dentro do sistema
  */
@@ -46,7 +17,7 @@ router_add('index', function () {
     $usuario_preferencia_pesquisar_armario_automaticamente = (string) 'CHECKED';
     $usuario_preferencia_quantidade_armario = (int) intval(25, 10);
     
-    $dados_usuario_logado_sistema = (array) ['codigo_usuario' => (int) intval($_SESSION['id_usuario'], 10), 'codigo_sistema' => (int) intval($_SESSION['id_sistema'], 10), 'nome_preferencia' => (string) ''];
+    $dados_usuario_logado_sistema = (array) ['usuario' => convert_id($_SESSION['id_usuario']), 'sistema' => convert_id($_SESSION['id_sistema']), 'nome_preferencia' => (string) ''];
 
     $dados_usuario_logado_sistema['nome_preferencia'] = (string) 'NOME_COMPLETO_ARMARIO';
     $usuario_preferencia_nome_armario = (string) $objeto_preferencia->pesquisar_preferencia_usuario($dados_usuario_logado_sistema);
@@ -56,12 +27,16 @@ router_add('index', function () {
 
     $dados_usuario_logado_sistema['nome_preferencia'] = (string) 'QUANTIDADE_LIMITE_ARMARIO';
     $usuario_preferencia_quantidade_armario = (int) intval($objeto_preferencia->pesquisar_preferencia_usuario($dados_usuario_logado_sistema), 10);
+
+    if($usuario_preferencia_quantidade_armario == 0 || $usuario_preferencia_quantidade_armario == 50 || $usuario_preferencia_quantidade_armario == 75 || $usuario_preferencia_quantidade_armario == 100){
+        $usuario_preferencia_quantidade_armario = 25;
+    }
  
     ?>
     <script>
-        const CODIGO_EMPRESA = <?php echo $_SESSION['id_empresa']; ?>;
-        const CODIGO_USUARIO = <?php echo $_SESSION['id_usuario'];?>;
-        const CODIGO_SISTEMA = <?php echo $_SESSION['id_sistema']; ?>;
+        const CODIGO_EMPRESA = "<?php echo $_SESSION['id_empresa']; ?>";
+        const CODIGO_USUARIO = "<?php echo $_SESSION['id_usuario'];?>";
+        const CODIGO_SISTEMA = "<?php echo $_SESSION['id_sistema']; ?>";
         const PREFERENCIA_QUANTIDADE_ARMARIO = <?php echo intval($usuario_preferencia_quantidade_armario, 10); ?>;
         const PESQUISAR_ARMARIO_AUTOMATICAMENTE = "<?php echo $usuario_preferencia_pesquisar_armario_automaticamente; ?>";
         
@@ -76,34 +51,32 @@ router_add('index', function () {
          * Função responsável por enviar todos os dados para o a rota que realiza a validação dos dados.
          */
         function pesquisar_armario() {
-            let codigo_armario = parseInt(document.querySelector('#codigo_armario').value, 10);
-            let codigo_organizacao = parseInt(document.querySelector('#codigo_organizacao').value, 10);
+            let codigo_organizacao = document.querySelector('#codigo_organizacao').value;
 
             let nome_armario = document.querySelector('#nome_armario').value;
             let descricao = document.querySelector('#descricao').value;
-            let forma_visualizacao = document.querySelector('#forma_visualizacao').value;
+            let forma_visualizacao = document.querySelector('#tipo').value;
             let codigo_barras = document.querySelector('#codigo_barras').value;
+            let status = document.querySelector('#status').value;
 
             let limite_retorno = sistema.int(document.querySelector('#limite_retorno').value);
             let visualizar_nome_armario_completo = document.querySelector('#visualizar_nome_armario_completo');
 
-            if (isNaN(codigo_armario)) {
-                codigo_armario = 0;
-            }
-
             sistema.request.post('/armario.php', {
                 'rota': 'pesquisar_armario_todos',
-                'codigo_armario': codigo_armario,
-                'codigo_empresa':CODIGO_EMPRESA,
-                'codigo_usuario':CODIGO_USUARIO,
-                'codigo_organizacao': codigo_organizacao,
+                'empresa':CODIGO_EMPRESA,
+                'usuario':CODIGO_USUARIO,
+                'sistema':CODIGO_SISTEMA,
+                'organizacao': codigo_organizacao,
                 'nome_armario': nome_armario,
                 'descricao':descricao,
-                'forma_visualizacao':forma_visualizacao,
+                'tipo':forma_visualizacao,
                 'codigo_barras': codigo_barras,
+                'status':status,
                 'limite_retorno': limite_retorno,
                 'preferencia_usuario_retorno': PREFERENCIA_QUANTIDADE_ARMARIO
             }, function(retorno) {
+
                 let retorno_armario = retorno.dados;
                 let tamanho_retorno = retorno_armario.length;
                 let tabela = document.querySelector('#tabela_armario tbody');
@@ -120,7 +93,6 @@ router_add('index', function () {
                 } else {
                     sistema.each(retorno_armario, function(contador, armario) {
                         let linha = document.createElement('tr');
-                        linha.appendChild(sistema.gerar_td(['text-center'], str_pad(armario.id_armario, 3, '0'), 'inner'));
 
                         if(visualizar_nome_armario_completo.checked == true){
                             linha.appendChild(sistema.gerar_td(['text-left'], armario.nome_armario, 'inner'));
@@ -141,8 +113,6 @@ router_add('index', function () {
                         } else {
                             linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_tipo_armario_' + armario.codigo_barras, 'PRIVADO', ['btn', 'btn-secondary'], function tipo_armario_tipo() { }), 'append'));
                         }
-
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('excluir_armario_sistema_'+armario.id_armario, 'EXCLUIR', ['btn', 'btn-danger'], function botao_excluir_armario(){excluir_armario_sistema(armario.id_armario);}), 'append'));
 
                         linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_armario_' + armario.id_armario, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar() {cadastro_armario(armario.id_armario)}), 'append'));
                         
@@ -217,16 +187,12 @@ router_add('index', function () {
                         <h4 class="card-title text-center">Pesquisa de Armários</h4>
                         <div class="row">
                             <div class="col-3">
-                                <button class="btn btn-secondary custom-radius btn-lg" onclick="cadastro_armario(0);">Cadastro de Armários</button>
+                                <button class="btn btn-secondary custom-radius btn-lg" onclick="cadastro_armario('');">Cadastro de Armários</button>
                             </div>
                         </div>
                         <br />
                         <div class="row">
-                            <div class="col-1 text-center">
-                                <label class="text">Código</label>
-                                <input type="text" sistema-mask="codigo" class="form-control custom-radius" id="codigo_armario" placeholder="Código" onkeyup="pesquisar_armario();" />
-                            </div>
-                            <div class="col-7 text-center">
+                            <div class="col-6 text-center">
                                 <label class="text">Nome Armário</label>
                                 <input type="text" class="form-control custom-radius text-uppercase" id="nome_armario" placeholder="Nome Armário" onkeyup="pesquisar_armario();" />
                             </div>
@@ -235,8 +201,16 @@ router_add('index', function () {
                                 <input type="text" class="form-control custom-radius" sistema-mask="codigo" id="codigo_barras" placeholder="Código Barras" onkeyup="pesquisar_armario();"/>
                             </div>
                             <div class="col-2 text-center">
+                                <label class="text>">Status</label>
+                                <select class="form-control custom-radius" id="status" onchange="pesquisar_armario();">
+                                    <option value="TODOS">TODOS</option>
+                                    <option value="ATIVO">ATIVO</option>
+                                    <option value="INATIVO">INATIVO</option>
+                                </select>
+                            </div>
+                            <div class="col-2 text-center">
                                 <label class="text">Forma de Visualização</label>
-                                <select class="form-control custom-radius" id="forma_visualizacao">
+                                <select class="form-control custom-radius" id="tipo" onchange="pesquisar_armario();">
                                     <option value="TODOS">TODOS</option>
                                     <option value="PUBLICO">PÚBLICO</option>
                                     <option value="PRIVADO">PRIVADO</option>
@@ -290,19 +264,17 @@ router_add('index', function () {
                                     <table class="table table-hover table-striped" id="tabela_armario">
                                         <thead class="bg-info text-white">
                                             <tr class="text-center">
-                                                <th scope="col">#</th>
                                                 <th scope="col">Nome</th>
                                                 <th scope="col">Descrição</th>
                                                 <th scope="col">Organização</th>
                                                 <th scope="col">Código Barras</th>
                                                 <th scope="col">Visualização</th>
-                                                <th scope="col">Excluir</th>
                                                 <th scope="col">Visualização</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="8" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                                <td colspan="6" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -331,57 +303,47 @@ router_add('index', function () {
 
 //@note salvar_alterar_dados
 router_add('salvar_alterar_dados', function () {
-    $id_armario = (int) (isset($_REQUEST['codigo_armario']) ? (int) intval($_REQUEST['codigo_armario'], 10) : 0);
+    $id_armario = (string) (isset($_REQUEST['codigo_armario']) ? (string) $_REQUEST['codigo_armario']: '');
 
     require_once 'includes/head.php';
  ?>
     <script>
-        const CODIGO_EMPRESA = <?php echo $_SESSION['id_empresa']; ?>;
-        const CODIGO_USUARIO = <?php echo $_SESSION['id_usuario']; ?>;
+        const CODIGO_EMPRESA = "<?php echo $_SESSION['id_empresa']; ?>";
+        const CODIGO_USUARIO = "<?php echo $_SESSION['id_usuario']; ?>";
 
-        let CODIGO_ARMARIO = <?php echo $id_armario; ?>;
+        let CODIGO_ARMARIO = "<?php echo $id_armario; ?>";
 
         /** 
          * Função responsável por pegar as informaçõe informadas pelo usuário e preparar em um objeto para então enviar para o back para ser salvo no banco de dados.
          */
         function salvar_dados() {
-            CODIGO_ARMARIO = parseInt(document.querySelector('#codigo_armario').value, 10);
-            let codigo_organizacao = parseInt(document.querySelector('#codigo_organizacao').value, 10);
+            CODIGO_ARMARIO = document.querySelector('#codigo_armario').value;
+            let codigo_organizacao = document.querySelector('#codigo_organizacao').value;
             let nome_armario = document.querySelector('#nome_armario').value;
             let descricao = document.querySelector('#descricao').value;
+            let status = document.querySelector('#status').value;
             let codigo_barras = document.querySelector('#codigo_barras').value;
-            let forma_visualizacao = document.querySelector('#forma_visualizacao').value;
+            let forma_visualizacao = document.querySelector('#tipo').value;
 
-            if (isNaN(CODIGO_ARMARIO)) {
-                CODIGO_ARMARIO = 0;
-            }
-
-            if (isNaN(codigo_organizacao)) {
-                codigo_organizacao = 0;
-            }
-
-            if (codigo_organizacao != 0) {
+            if (codigo_organizacao != '') {
                 sistema.request.post('/armario.php', {
                     'rota': 'salvar_dados',
                     'codigo_armario': CODIGO_ARMARIO,
-                    'codigo_empresa': CODIGO_EMPRESA,
-                    'codigo_usuario': CODIGO_USUARIO,
-                    'codigo_organizacao': codigo_organizacao,
+                    'empresa': CODIGO_EMPRESA,
+                    'usuario': CODIGO_USUARIO,
+                    'organizacao': codigo_organizacao,
                     'nome_armario': nome_armario,
                     'descricao': descricao,
+                    'status':status,
                     'codigo_barras': codigo_barras,
-                    'forma_visualizacao': forma_visualizacao
+                    'tipo': forma_visualizacao
                 }, function(retorno) {
                     sistema.verificar_status(retorno.status, sistema.url('/armario.php', {
                         'rota': 'index'
                     }));
                 });
             } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "O código da organização não pode ser vazio!"
-                });
+                Swal.fire({icon: "error", title: "Oops...", text: "O código da organização não pode ser vazio!"});
             }
 
         }
@@ -416,17 +378,22 @@ router_add('salvar_alterar_dados', function () {
                     <div class="card-body">
                         <h4 class="card-title text-center">Cadastro de Armário</h4>
                         <div class="row">
-                            <div class="col-1 text-center">
-                                <label class="text">Código</label>
-                                <input type="text" class="form-control custom-radius text-center" id="codigo_armario" placeholder="Código" readonly="true" />
-                            </div>
-                            <div class="col-7 text-center">
+                            <input type="hidden" class="form-control custom-radius text-center" id="codigo_armario" placeholder="Código" readonly="true" />
+                            <div class="col-6 text-center">
                                 <label class="text">Nome Armário</label>
                                 <input type="text" id="nome_armario" class="form-control custom-radius text-uppercase" placeholder="Nome Armário" />
                             </div>
+                            <div class="col-2">
+                                <label class="text">Status</label>
+                                <select class="form-control custom-radius" id="status">
+                                    <option value="">Selecione uma opção</option>
+                                    <option value="ATIVO">ATIVO</option>
+                                    <option value="INATIVO">INATIVO</option>
+                                </select>
+                            </div>
                             <div class="col-2 text-center">
                                 <label class="text">Forma Visualização</label>
-                                <select class="form-control custom-radius" id="forma_visualizacao">
+                                <select class="form-control custom-radius" id="tipo">
                                     <option value="">Selecione uma opção</option>
                                     <option value="PUBLICO">PÚBLICO</option>
                                     <option value="PRIVADO">PRIVADO</option>
@@ -464,7 +431,7 @@ router_add('salvar_alterar_dados', function () {
             validar_acesso_administrador('<?php echo $_SESSION['tipo_usuario']; ?>');
 
             window.setTimeout(function(){
-                if (CODIGO_ARMARIO != 0) {
+                if (CODIGO_ARMARIO != '') {
                     sistema.request.post('/armario.php', {
                         'rota': 'pesquisar_armario',
                         'codigo_armario': CODIGO_ARMARIO
@@ -603,51 +570,45 @@ router_add('pesquisar_armario', function () {
  */
 router_add('pesquisar_armario_todos', function () {
     $objeto_armario = new Armario();
+    $objeto_preferencia = new Preferencia();
     
-    //IDENTIFICADORES DO SISTEMA
-    $id_armario = (int) (isset($_REQUEST['codigo_armario']) ? (int) intval($_REQUEST['codigo_armario'], 10) : 0);
-    $id_empresa = (int) (isset($_REQUEST['codigo_empresa']) ? (int) intval($_REQUEST['codigo_empresa'], 10):0);
-    $id_usuario = (int) (isset($_REQUEST['codigo_usuario']) ? (int) intval($_REQUEST['codigo_usuario'], 10):0);
-    $id_organizacao = (int) (isset($_REQUEST['codigo_organizacao']) ? (int) intval($_REQUEST['codigo_organizacao'], 10):0);
+    $id_empresa = (string) (isset($_REQUEST['empresa']) ? (string) $_REQUEST['empresa']:'');
+    $id_usuario = (string) (isset($_REQUEST['usuario']) ? (string) $_REQUEST['usuario']:'');
+    $id_organizacao = (string) (isset($_REQUEST['organizacao']) ? (string) $_REQUEST['organizacao']:'');
+    $id_sistema = (string) (isset($_REQUEST['sistema']) ? (string) $_REQUEST['sistema']:'');
 
     $nome_armario = (string) (isset($_REQUEST['nome_armario']) ? (string) strtoupper($_REQUEST['nome_armario']) : '');
     $descricao = (string) (isset($_REQUEST['descricao']) ? (string) $_REQUEST['descricao']:'');
-    $forma_visualizacao = (string) (isset($_REQUEST['forma_visualizacao']) ? (string) $_REQUEST['forma_visualizacao'] : 'TODOS');
+    $tipo = (string) (isset($_REQUEST['tipo']) ? (string) $_REQUEST['tipo'] : 'TODOS');
     $codigo_barras = (string) (isset($_REQUEST['codigo_barras']) ? (string) $_REQUEST['codigo_barras']:'');
+    $status = (string) (isset($_REQUEST['status']) ? (string) $_REQUEST['status']:'TODOS');
 
-    $limite_retorno = (int) (isset($_REQUEST['limite_retorno']) ? (int) intval($_REQUEST['limite_retorno'], 10):0);
-    $preferencia_usuario_retorno = (int) (isset($_REQUEST['preferencia_usuario_retorno'])? (int) intval($_REQUEST['preferencia_usuario_retorno'], 10):0);
+    $limite_retorno = (int) (isset($_REQUEST['limite_retorno']) ? (int) intval($_REQUEST['limite_retorno'], 25):0);
+    $preferencia_usuario_retorno = (int) (isset($_REQUEST['preferencia_usuario_retorno'])? (int) intval($_REQUEST['preferencia_usuario_retorno'], 25):0);
     
     $filtro = (array) [];
     $filtro_todos_publico = (array) [];
     $filtro_todos_privado = (array) [];
 
     $dados = (array) ['filtro' => (array) [], 'ordenacao' => (array) ['nome_armario' => (bool) true], 'limite' => (int) $limite_retorno];
-    $modelo = (array) ['id_armario' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'id_organizacao' => (int) 0, 'nome_armario' => (string) '', 'nome_organizacao' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) ''];
     
     $retorno = (array) [];
 
-    if ($id_armario != 0) {
-        array_push($filtro, (array) ['id_armario', '===', (int) $id_armario]);
-        array_push($filtro_todos_publico, (array) ['id_armario', '===', (int) $id_armario]);
-        array_push($filtro_todos_privado, (array) ['id_armario', '===', (int) $id_armario]);
-    }
-
-    if($id_empresa != 0){
-        array_push($filtro_todos_publico, (array) ['id_empresa', '===', (int) $id_empresa]);
-        array_push($filtro_todos_privado, (array) ['id_empresa', '===', (int) $id_empresa]);
-        array_push($filtro, (array) ['id_empresa', '===', (int) $id_empresa]);
+    if($id_empresa != ''){
+        array_push($filtro_todos_publico, (array) ['empresa', '===', convert_id($id_empresa)]);
+        array_push($filtro_todos_privado, (array) ['empresa', '===', convert_id($id_empresa)]);
+        array_push($filtro, (array) ['empresa', '===', convert_id($id_empresa)]);
     }
     
-    if($id_organizacao != 0){
-        array_push($filtro_todos_publico, (array) ['id_organizacao', '===', (int) $id_organizacao]);
-        array_push($filtro_todos_privado, (array) ['id_organizacao', '===', (int) $id_organizacao]);
-        array_push($filtro, (array) ['id_organizacao', '===', (int) $id_organizacao]);
+    if($id_organizacao != ''){
+        array_push($filtro_todos_publico, (array) ['organizacao', '===', convert_id($id_organizacao)]);
+        array_push($filtro_todos_privado, (array) ['organizacao', '===', convert_id($id_organizacao)]);
+        array_push($filtro, (array) ['organizacao', '===', convert_id($id_organizacao)]);
     }
 
-    array_push($filtro, (array) ['nome_armario', '=', (string) $nome_armario]);
-    array_push($filtro_todos_publico, (array) ['nome_armario', '=', (string) $nome_armario]);
-    array_push($filtro_todos_privado, (array) ['nome_armario', '=', (string) $nome_armario]);
+    array_push($filtro, (array) ['nome_armario', '=', (string) strtoupper($nome_armario)]);
+    array_push($filtro_todos_publico, (array) ['nome_armario', '=', (string) strtoupper($nome_armario)]);
+    array_push($filtro_todos_privado, (array) ['nome_armario', '=', (string) strtoupper($nome_armario)]);
     
     array_push($filtro, (array) ['descricao', '=', (string) $descricao]);
     array_push($filtro_todos_publico, (array) ['descricao', '=', (string) $descricao]);
@@ -659,20 +620,27 @@ router_add('pesquisar_armario_todos', function () {
         array_push($filtro_todos_privado, (array) ['codigo_barras', '=', (string) $codigo_barras]);
     }
     
-    if($forma_visualizacao == 'PRIVADO'){
-        array_push($filtro, (array) ['id_usuario', '===', (int) $id_usuario]);
+    if($tipo == 'PRIVADO'){
+        array_push($filtro, (array) ['usuario', '===', convert_id($id_usuario)]);
+    }
+
+    if($status != 'TODOS'){
+        array_push($filtro, (array) ['status', '===', (string) $status]);
     }
     
-    if($forma_visualizacao == 'PRIVADO' || $forma_visualizacao == 'PUBLICO'){
-        array_push($filtro, ['forma_visualizacao', '===', (string) $forma_visualizacao]);
+    if($tipo == 'PRIVADO' || $tipo == 'PUBLICO'){
+        array_push($filtro, ['tipo', '===', (string) $tipo]);
 
         $dados['filtro'] = (array) ['and' => (array) $filtro];
-        $retorno_pesquisa = (array) $objeto_armario->pesquisar_todos($dados);
-        $retorno = (array) validar_dados_pesquisa($retorno_pesquisa, $modelo, $id_empresa, $retorno);
+        $retorno_pesquisa_todos = (array) $objeto_armario->pesquisar_todos($dados);
+
+        if(empty($retorno_pesquisa_todos) == false){
+           $retorno = (array) $objeto_armario->validar_campos_filtro($retorno_pesquisa_todos, $retorno);
+        }
     }else{
-        array_push($filtro_todos_privado, (array) ['id_usuario', '===', (int) $id_usuario]);
-        array_push($filtro_todos_privado, (array) ['forma_visualizacao', '===', (string) 'PRIVADO']);
-        array_push($filtro_todos_publico, (array) ['forma_visualizacao', '===', (string) 'PUBLICO']);
+        array_push($filtro_todos_privado, (array) ['usuario', '===', convert_id($id_usuario)]);
+        array_push($filtro_todos_privado, (array) ['tipo', '===', (string) 'PRIVADO']);
+        array_push($filtro_todos_publico, (array) ['tipo', '===', (string) 'PUBLICO']);
 
         $dados['filtro'] = (array) ['and' => (array) $filtro_todos_privado];
         $retorno_pesquisa_privado = (array) $objeto_armario->pesquisar_todos($dados);
@@ -680,21 +648,18 @@ router_add('pesquisar_armario_todos', function () {
         $dados['filtro'] = (array) ['and' => (array) $filtro_todos_publico];
         $retorno_pesquisa_publico = (array) $objeto_armario->pesquisar_todos((array) $dados);
 
-        $retorno = (array) validar_dados_pesquisa($retorno_pesquisa_privado, $modelo, $id_empresa, $retorno);
-        $retorno = (array) validar_dados_pesquisa($retorno_pesquisa_publico, $modelo, $id_empresa, $retorno);
+        if(empty($retorno_pesquisa_privado) == false){
+            $retorno = (array) $objeto_armario->validar_campos_filtro($retorno_pesquisa_privado, $retorno);
+        }
+
+        if(empty($retorno_pesquisa_publico) == false){
+           $retorno = (array) $objeto_armario->validar_campos_filtro($retorno_pesquisa_publico, $retorno);
+        }
     }
 
-    echo json_encode(['dados' => (array) $retorno], JSON_UNESCAPED_UNICODE);
-    exit;
-});
+    $objeto_preferencia->alterar_quantidade_retorno($preferencia_usuario_retorno, $limite_retorno, 'QUANTIDADE_LIMITE_ARMARIO', $id_usuario, $id_sistema);
 
-//@audit excluir_armario
-/**
- * Rota responsável por excluir o armário no banco de dados...
- */
-router_add('excluir_armario', function(){
-    $ojeto_armario = new Armario();
-    echo json_encode((array) $ojeto_armario->excluir($_REQUEST), flags: JSON_UNESCAPED_UNICODE);
+    echo json_encode(['dados' => (array) $retorno], JSON_UNESCAPED_UNICODE);
     exit;
 });
 ?>

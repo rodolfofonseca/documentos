@@ -4,7 +4,8 @@ require_once 'Armario.php';
 require_once 'LogSistema.php';
 require_once 'Notificacoes.php';
 
-class Organizacao{
+class Organizacao implements InterfaceModelo
+{
     private $id_organizacao;
     private $id_empresa;
     private $id_usuario;
@@ -12,132 +13,152 @@ class Organizacao{
     private $descricao;
     private $codigo_barras;
     private $forma_visualizacao;
-    
-    private function tabela(){
-        return (string) 'organizacao';
+    private $status_organizacao;
+    private $data_cadastro;
+
+    public function tabela()
+    {
+        return (string) 'organizacoes';
     }
 
-    private function modelo(){
-        return (array) ['id_organizacao' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'nome_organizacao' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) 'PUBLICO'];
+    public function modelo()
+    {
+        return (array) ['_id' => convert_id(''), 'empresa' => convert_id(''), 'usuario' => convert_id(''), 'nome_organizacao' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) 'PUBLICO', 'status_organizacao' => (string) '', 'data_cadastro' => model_date()];
     }
 
-    private function colocar_dados($dados){
-        if(array_key_exists('codigo_organizacao', $dados) == true){
-            $this->id_organizacao = (int) intval($dados['codigo_organizacao'], 10);
-        }else{
-            $this->id_organizacao = (int) 0;
+    public function colocar_dados($dados)
+    {
+        if (array_key_exists('codigo_organizacao', $dados) == true) {
+            if ($dados['codigo_organizacao'] != '') {
+                $this->id_organizacao = convert_id($dados['codigo_organizacao']);
+            }
+        } else {
+            $this->id_organizacao = null;
         }
 
-        if(array_key_exists('codigo_empresa', $dados) == true){
-            $this->id_empresa = (int) intval($dados['codigo_empresa'], 10);
-        }else{
-            $this->id_empresa = (int) 0;
+        if (array_key_exists('codigo_empresa', $dados) == true) {
+            if ($dados['codigo_empresa'] != '') {
+                $this->id_empresa = convert_id($dados['codigo_empresa']);
+            }
+        } else {
+            $this->id_empresa = null;
         }
 
-        if(array_key_exists('codigo_usuario', $dados) == true){
-            $this->id_usuario = (int) intval($dados['codigo_usuario'], 10);
-        }else{
-            $this->id_usuario = (int) 0;
+        if (array_key_exists('codigo_usuario', $dados) == true) {
+            if ($dados['codigo_usuario'] != '') {
+                $this->id_usuario = convert_id($dados['codigo_usuario']);
+            }
+        } else {
+            $this->id_usuario = null;
         }
 
-        if(array_key_exists('nome_organizacao', $dados) == true){
+        if (array_key_exists('nome_organizacao', $dados) == true) {
             $this->nome_organizacao = (string) strtoupper($dados['nome_organizacao']);
+        } else {
+            $this->nome_organizacao = (string) '';
         }
 
-        if(array_key_exists('descricao', $dados) == true){
+        if (array_key_exists('descricao', $dados) == true) {
             $this->descricao = (string) $dados['descricao'];
-        }
-        
-        if(array_key_exists('codigo_barras', $dados) == true){
-            $this->codigo_barras = (string) $dados['codigo_barras'];
-        }else{
-            $this->codigo_barras = (string) '';
+        } else {
+            $this->descricao = (string) '';
         }
 
-        if(array_key_exists('forma_visualizacao', $dados) == true){
+        if (array_key_exists('codigo_barras', $dados) == true) {
+            $this->codigo_barras = (string) $dados['codigo_barras'];
+        } else {
+            $this->codigo_barras = (string) codigo_barras();
+        }
+
+        if (array_key_exists('forma_visualizacao', $dados) == true) {
             $this->forma_visualizacao = (string) $dados['forma_visualizacao'];
-        }else{
+        } else {
             $this->forma_visualizacao = (string) 'PUBLICO';
         }
+
+        if (array_key_exists('status_organizacao', $dados) == true) {
+            $this->status_organizacao = (string) $dados['status_organizacao'];
+        } else {
+            $this->status_organizacao = (string) 'ATIVO';
+        }
+
+        if (array_key_exists('data_cadastro', $dados) == true) {
+            $this->data_cadastro = model_date($dados['data_cadastro']);
+        } else {
+            $this->data_cadastro = model_date();
+        }
     }
-    
-    public function salvar($dados){
-        $objeto_log = new LogSistema();
-        $objeto_notificacao = new Notificacoes();
 
-        $retorno_operacao = (bool) false;
-        
+    public function salvar_dados($dados)
+    {
+        $objeto_log_sitema = new LogSistema();
+
         $this->colocar_dados($dados);
-        
-        $filtro = (array) ['and' => (array) [(array) ['id_organizacao', '===', (int) $this->id_organizacao], ['id_empresa', '===', (int) $this->id_empresa]]];
+        $retorno = (bool) false;
+        $retorno_log_sistema = (bool) false;
 
-        $checar_existencia = (bool) model_check((string) $this->tabela(), (array) $filtro);
+        if ($this->id_empresa == null && $this->id_organizacao == null || $this->id_usuario == null && $this->id_organizacao == null) {
+            return false;
+        } else {
+            if ($this->id_organizacao != null) {
+                $checar_existencia = (bool) model_check($this->tabela(), ['_id', '===', $this->id_organizacao]);
 
-        if($checar_existencia == true){
-            $retorno_pesquisa = (array) model_one((string) $this->tabela(), (array) $filtro);
+                if ($checar_existencia == true) {
+                    $retorno = (bool) model_update((string) $this->tabela(), (array) ['_id', '===', $this->id_organizacao], (array) ['nome_organizacao' => (string) $this->nome_organizacao, 'descricao' => (string) $this->descricao, 'forma_visualizacao' => (string) $this->forma_visualizacao]);
 
-            $retorno_log = (bool) $objeto_log->salvar_dados((array) ['id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario, 'codigo_barras' => (string) $this->codigo_barras, 'modulo' => (string) 'ORGANIZACAO', 'descricao' => (string) 'Alterou a organização '.$this->nome_organizacao]);
-            
-            $retorno_operacao = (bool) model_update((string) $this->tabela(), (array) $filtro, (array) model_parse((array) $retorno_pesquisa, (array) ['nome_organizacao' => (string) $this->nome_organizacao, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
-        }else{
-            $filtro = (array) ['and' => (array) [(array) ['nome_organizacao', '===', (string) $this->nome_organizacao], ['id_empresa', '===', (int) $this->id_empresa]]];
-            
-            $checar_existencia = (bool) model_check((string) $this->tabela(), (array) $filtro);
-            
-            if($checar_existencia == true){
-                return (array) ['titulo' => (string) 'ERRO NA OPERAÇÃO', 'mensagem' => (string) 'Erro ao salvar os dados da organização!', 'icon' => (string) 'error'];
-            }else{
-                $retorno_log = (bool) $objeto_log->salvar_dados((array) ['id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario, 'codigo_barras' => (string) $this->codigo_barras, 'modulo' => (string) 'ORGANIZACAO', 'descricao' => (string) 'Cadastrou a organização '.$this->nome_organizacao]);
-
-                $retorno_operacao = (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_organizacao' => (int) intval(model_next((string) $this->tabela(), 'id_organizacao', (array) ['id_empresa', '===', (int) $this->id_empresa]), 10), 'id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario,'nome_organizacao' => (string) $this->nome_organizacao, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
-
-                if($this->forma_visualizacao == 'PUBLICO'){
-                    $retorno_objeto_notificacao = (array) $objeto_notificacao->salvar_dados((array) ['titulo_notificacao' => (string) 'Cadastro de Nova organização!', 'mensagem_longa' => (string) 'A organização '.$this->nome_organizacao.' foi cadastrado no sistema, agora é possível cadastrar armários.', 'mensagem_curta' => (string) 'Cadastro de nova organização!']);
+                    $retorno_log_sistema = (bool) $objeto_log_sitema->salvar_dados(['id_empresa' => $this->id_empresa, 'usuario' => (string) $this->id_usuario, 'modulo' => 'ORGANIZACAO', 'descricao' => 'Usuario realizou a alteração da organizacao: ' . $this->nome_organizacao, 'tabela_acao' => (string) 'ALTERACAO']);
+                } else {
+                    return false;
                 }
+            } else {
+                $retorno = (bool) model_insert((string) $this->tabela(), (array) ['empresa' => $this->id_empresa, 'usuario' => $this->id_usuario, 'nome_organizacao' => (string) $this->nome_organizacao, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao, 'status_organizacao' => (string) $this->status_organizacao, 'data_cadastro' => $this->data_cadastro]);
+
+                $retorno_log_sistema = (bool) $objeto_log_sitema->salvar_dados(['id_empresa' => $this->id_empresa, 'usuario' => (string) $this->id_usuario, 'modulo' => 'ORGANIZACAO', 'descricao' => 'Usuario realizou o atualizacao da organizacao: ' . $this->nome_organizacao, 'tabela_acao' => (string) 'CADASTRO']);
             }
         }
-
-        if($retorno_operacao == true){
-            return (array) ['titulo' => (string)'SUCESSO NA OPERAÇÃO', 'mensagem' => (string) 'Dados da organização salvos co sucesso!', 'icone' => (string) 'success'];
-        }else{
-            return (array) ['titulo' => (string)'ERRO NA OPERAÇÃO', 'mensagem' => (string) 'Erro ao salvar dados da organização', 'icone' => (string) 'error'];
-        }
+        return $retorno;
     }
-    public function pesquisar($dados){
-        return (array) model_one($this->tabela(), $dados['filtro']);
+    public function pesquisar($filtro)
+    {
+        return (array) model_one($this->tabela(), $filtro['filtro']);
     }
 
-    public function pesquisar_todos($dados){
-        return (array) model_all($this->tabela(), $dados['filtro'], $dados['ordenacao'], $dados['limite']);
+    public function pesquisar_todos($filtro)
+    {
+        return (array) model_all($this->tabela(), $filtro['filtro'], $filtro['ordenacao'], $filtro['limite']);
     }
 
     /**
-     * Função responsável por receber o codigo_organizacao e realizar as validações necessárias para saber se pode realizar a exclusão das informações do banco de dados ou não.
-     * @param array $dados
-     * @return array 
+     * Função responsável por alteraar o status da organização (ATIVO/INATIVO)
+     * @param array $dados ['codigo_organizacao' => 'xxxx', 'status' => 'xxxx' ];
+     * @return bool
      */
-    public function excluir_organizacao($dados){
-        $objeto_log = new LogSistema();
-
+    public function alterar_status_organizacao($dados){
         $this->colocar_dados($dados);
-        
-        $filtro_pesquisa_armario = (array) ['filtro' => (array) ['id_organizacao', '===', (int) $this->id_organizacao]];
-        $objeto_armario = new Armario();
-        $retorno_pesquisa_armario = (array) $objeto_armario->pesquisar($filtro_pesquisa_armario);
 
-        if(empty($retorno_pesquisa_armario) == false){
-            return (array) ['titulo' => (string) 'ORGANIZAÇÃO CONTÉM ARMÁRIOS', 'mensagem' => (string) 'Não é possível excluir organização que contenha armários cadastrados', 'icone' => (string) 'error'];
+        if($this->status_organizacao == 'ATIVO'){
+            $this->status_organizacao = 'INATIVO';
         }else{
-            $retorno_exclusao =  (bool) model_delete((string) $this->tabela(), (array) ['id_organizacao', '===', (int) $this->id_organizacao]);
-            
-            if($retorno_exclusao == true){
-                $retorno_log = (bool) $objeto_log->salvar_dados((array) ['id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario, 'codigo_barras' => (string) $this->codigo_barras, 'modulo' => (string) 'ORGANIZACAO', 'descricao' => (string) 'excluiu a organização '.$this->nome_organizacao]);
-
-                return (array) ['titulo' => (string) 'EXCLUSÃO CONCLUÍDA', 'mensagem' => (string) 'Operação de exclusão foi realizada com sucesso!', 'icone' => (string) 'success'];
-            }else{
-                return (array) ['titulo' => (string) 'PROBLEMAS NA EXCLUSÃO', 'mensagem' => (string) 'Aconteceu um erro desconhecido durante o processo de exclusão da organização', 'icone' => (string) 'error'];
-            }
+            $this->status_organizacao = 'ATIVO';
         }
+
+        return (bool) model_update((string) $this->tabela(), (array) ['_id', '===', $this->id_organizacao], (array) ['status_organizacao' => (string) $this->status_organizacao]);
+    }
+
+    /**
+     * Função responsável por alteraar o tipo de organização (PÚBLICO/PRIVADO)
+     * @param array $dados ['codigo_organizacao' => 'xxxx', 'forma_visualizacao' => 'xxxx' ];
+     * @return bool
+     */
+    public function alterar_tipo_organizacao($dados){
+        $this->colocar_dados($dados);
+
+        if($this->forma_visualizacao == 'PUBLICO'){
+            $this->forma_visualizacao = 'PRIVADO';
+        }else{
+            $this->forma_visualizacao = 'PUBLICO';
+        }
+
+        return (bool) model_update((string) $this->tabela(), (array) ['_id', '===', $this->id_organizacao], (array) ['forma_visualizacao' => (string) $this->forma_visualizacao]);
     }
 }
-?>

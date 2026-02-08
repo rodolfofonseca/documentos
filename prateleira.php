@@ -6,36 +6,6 @@ require_once 'Modelos/Preferencia.php';
 require_once 'Modelos/Organizacao.php';
 
 /**
- * Função responsável por montar o array de retorno da forma como o front espera
- * @param array $retorno_pesquisa retorno com a pesquisa do banco de dados da tabela prateleira com os filtros passados pelo usuário
- * @param array $modelo Modelo que o front espera com as informações importantes
- * @param int $id_empresa identitificador da empresa no banco de dados
- * @param array $retorno Array de retorno que está sendo montando, normalmente este array já contém dados
- * @return array $retorno Array de retorno após a execução da função.
- */
-function validar_dados_pesquisa_prateleira($retorno_pesquisa, $modelo, $id_empresa, $retorno)
-{
-    if (empty($retorno_pesquisa) == false) {
-        foreach ($retorno_pesquisa as $retorno_pesquisa_prateleira) {
-            $retorno_temporario = (array) model_parse($modelo, $retorno_pesquisa_prateleira);
-
-            $objeto_armario = new Armario();
-            $dados_armario = (array) $objeto_armario->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['id_empresa', '===', $id_empresa], (array) ['id_armario', '===', (int) $retorno_pesquisa_prateleira['id_armario']]]]]);
-
-            if (empty($dados_armario) == false) {
-                if (array_key_exists('nome_armario', $dados_armario) == true) {
-                    $retorno_temporario['nome_armario'] = (string) $dados_armario['nome_armario'];
-                }
-            }
-
-            array_push($retorno, $retorno_temporario);
-        }
-    }
-
-    return (array) $retorno;
-}
-
-/**
  * Rota index, primeira rota que é executada dentro do sistema.
  */
 router_add('index', function () {
@@ -47,7 +17,7 @@ router_add('index', function () {
     $usuario_preferencia_quantidade_prateleira = (int) intval(25, 10);
 
     //MONTANDO FILTRO DE PESQUISA, PARA SABER SE O USUÁRIO QUE ESTÁ LOGADO NO SISTEMA, PREFERE VER O NOME COMPLETO DA PRATELEIRA OU NÃO.
-    $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval($_SESSION['id_sistema'], 10)], ['id_usuario', '===', (int) intval($_SESSION['id_usuario'], 10)], ['nome_preferencia', '===', (string) 'NOME_COMPLETO_PRATELEIRA']]];
+    $filtro_pesquisa = (array) ['and' => (array) [['sistema', '===', convert_id($_SESSION['id_sistema'])], ['usuario', '===', convert_id($_SESSION['id_usuario'])], ['nome_preferencia', '===', (string) 'NOME_COMPLETO_PRATELEIRA']]];
     $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
     if(empty($retorno_pesquisa_preferencia) == true){
@@ -55,7 +25,7 @@ router_add('index', function () {
     }
 
     //MONTANDO FILTRO DE PESQUISA PARA SABER SE O USUÁRIO LOGADO NO SISTEMA PREFERE PESQUISAR AS PRATELEIRAS AUTOMÁTICAMENTE AO ABRIR A PÁGINA.
-    $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval($_SESSION['id_sistema'], 10)], ['id_usuario', '===', (int) intval($_SESSION['id_usuario'], 10)], ['nome_preferencia', '===', (string) 'PESQUISAR_PRATELEIRA_AUTOMATICAMENTE']]];
+    $filtro_pesquisa = (array) ['and' => (array) [['sistema', '===', convert_id($_SESSION['id_sistema'])], ['usuario', '===', convert_id($_SESSION['id_usuario'])], ['nome_preferencia', '===', (string) 'PESQUISAR_PRATELEIRA_AUTOMATICAMENTE']]];
     $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
     if(empty($retorno_pesquisa_preferencia) == true){
@@ -63,11 +33,11 @@ router_add('index', function () {
     }
 
     //MONTANDO FILTRO DE PESQUISAR PARA SABER A QUANTIDADE DE PRATELEIRAS QUE O USUÁRIO QUE ESTÁ LOGADO NO SISTEMA PREFERE QUE O SISTEMA RETORNE DURANTE AS PESQUISAS.
-    $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval($_SESSION['id_sistema'], 10)], ['id_usuario', '===', (int) intval($_SESSION['id_usuario'], 10)], ['nome_preferencia', '===', (string) 'QUANTIDADE_LIMITE_PRATELEIRA']]];
+    $filtro_pesquisa = (array) ['and' => (array) [['sistema', '===', convert_id($_SESSION['id_sistema'])], ['usuario', '===', convert_id($_SESSION['id_usuario'])], ['nome_preferencia', '===', (string) 'QUANTIDADE_LIMITE_PRATELEIRA']]];
     $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
     if(empty($retorno_pesquisa_preferencia) == true){
-        $retorno_salvar_dados = (bool) $objeto_preferencia->salvar_dados((array) ['codigo_usuario' => (int) intval($_SESSION['id_usuario'], 10), 'codigo_sistema' => (int) intval($_SESSION['id_sistema'], 10), 'nome_preferencia' => (string) 'QUANTIDADE_LIMITE_PRATELEIRA', 'preferencia' => (string) $usuario_preferencia_quantidade_prateleira]);
+        $retorno_salvar_dados = (bool) $objeto_preferencia->salvar_dados((array) ['usuario' => convert_id($_SESSION['id_usuario']), 'sistema' => convert_id($_SESSION['id_sistema']), 'nome_preferencia' => (string) 'QUANTIDADE_LIMITE_PRATELEIRA', 'preferencia' => (string) $usuario_preferencia_quantidade_prateleira]);
     }else{
         if(array_key_exists('preferencia', $retorno_pesquisa_preferencia) == true){
             $usuario_preferencia_quantidade_prateleira = (int) intval($retorno_pesquisa_preferencia['preferencia'], 10);
@@ -75,14 +45,14 @@ router_add('index', function () {
     }    
     ?>
     <script>
-        const CODIGO_EMPRESA = <?php echo $_SESSION['id_empresa']; ?>;
-        const CODIGO_USUARIO = <?php echo $_SESSION['id_usuario']; ?>;
-        const CODIGO_SISTEMA = <?php echo $_SESSION['id_sistema']; ?>;
+        const CODIGO_EMPRESA = "<?php echo $_SESSION['id_empresa']; ?>";
+        const CODIGO_USUARIO = "<?php echo $_SESSION['id_usuario']; ?>";
+        const CODIGO_SISTEMA = "<?php echo $_SESSION['id_sistema']; ?>";
         const PREFERENCIA_QUANTIDADE_PRATELEIRA = <?php echo intval($usuario_preferencia_quantidade_prateleira, 10); ?>;
         const PRESQUISAR_PRATELEIRA_AUTOMATICAMENTE = "<?php echo $usuario_preferencia_pesquisar_prateleira_automaticamente; ?>";
 
-        let CODIGO_ORGANIZACAO = 0;
-        let CODIGO_ARMARIO = 0;
+        let CODIGO_ORGANIZACAO = '';
+        let CODIGO_ARMARIO = '';
 
         function cadastro_prateleira(codigo_prateleria) {
             window.location.href = sistema.url('/prateleira.php', {
@@ -92,32 +62,24 @@ router_add('index', function () {
         }
 
         function pesquisar_prateleiras() {
-            let codigo_prateleira = parseInt(document.querySelector('#codigo_prateleira').value, 10);
             let codigo_barras = document.querySelector('#codigo_barras').value;
             let nome_prateleira = document.querySelector('#nome_prateleira').value;
             let descricao = document.querySelector('#descricao').value;
             let forma_visualizacao = document.querySelector('#forma_visualizacao').value;
             let limite_retorno = sistema.int(document.querySelector('#limite_retorno').value);
+            let status = document.querySelector('#status').value;
             
-            if (isNaN(codigo_armario)) {
-                codigo_armario = 0;
-            }
-
-            if (isNaN(codigo_prateleira)) {
-                codigo_prateleira = 0;
-            }
-
             sistema.request.post('/prateleira.php', {
                 'rota': 'pesquisar_prateleira_todas',
-                'codigo_prateleira': codigo_prateleira,
-                'codigo_armario': CODIGO_ARMARIO,
-                'codigo_empresa': CODIGO_EMPRESA,
-                'codigo_usuario': CODIGO_USUARIO,
-                'codigo_sistema': CODIGO_SISTEMA,
+                'armario': CODIGO_ARMARIO,
+                'empresa': CODIGO_EMPRESA,
+                'usuario': CODIGO_USUARIO,
+                'sistema': CODIGO_SISTEMA,
                 'nome_prateleira': nome_prateleira,
                 'codigo_barras': codigo_barras,
                 'descricao': descricao,
-                'forma_visualizacao': forma_visualizacao,
+                'tipo': forma_visualizacao,
+                'status':status,
                 'limite_retorno':limite_retorno,
                 'preferencia_usuario_limite_retorno': PREFERENCIA_QUANTIDADE_PRATELEIRA
             }, function (retorno) {
@@ -135,28 +97,28 @@ router_add('index', function () {
                     sistema.each(retorno_prateleira, function (contador, prateleiras) {
                         let linha = document.createElement('tr');
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], prateleiras.id_prateleira, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-left'], prateleiras.nome_prateleira), 'inner');
                         linha.appendChild(sistema.gerar_td(['text-center'], prateleiras.descricao, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], prateleiras.nome_armario, 'inner'));
 
-                        if (prateleiras.forma_visualizacao == 'PUBLICO') {
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_informacao_' + prateleiras.id_prateleira, prateleiras.forma_visualizacao, ['btn', 'btn-primary'], function visualizar() { }), 'append'));
+                        if (prateleiras.tipo == 'PUBLICO') {
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_informacao_' + prateleiras._id.$oid, prateleiras.tipo, ['btn', 'btn-primary'], function visualizar() { }), 'append'));
                         } else {
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_informacao_' + prateleiras.id_prateleira, prateleiras.forma_visualizacao, ['btn', 'btn-secondary'], function visualizar() { }), 'append'));
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_informacao_' + prateleiras._id.$oid, prateleiras.tipo, ['btn', 'btn-secondary'], function visualizar() { }), 'append'));
                         }
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('imprimir_codigo_barras_prateleira_' + prateleiras.id_prateleira, prateleiras.codigo_barras, ['btn', 'btn-success'], function impressao() {
-                            imprimir_codigo_barras_prateleiras(prateleiras.id_prateleira)
+                        if (prateleiras.status == 'ATIVO') {
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_informacao_' + prateleiras._id.$oid, prateleiras.status, ['btn', 'btn-success'], function visualizar() { }), 'append'));
+                        } else {
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_informacao_' + prateleiras._id.$oid, prateleiras.status, ['btn', 'btn-danger'], function visualizar() { }), 'append'));
+                        }
+
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('imprimir_codigo_barras_prateleira_' + prateleiras._id.$oid, prateleiras.codigo_barras, ['btn', 'btn-success'], function impressao() {
+                            imprimir_codigo_barras_prateleiras(prateleiras._id.$oid)
                         }), 'append'));
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('excluir_prateleira_sistema_' + prateleiras.id_prateleira, 'EXCLUIR', ['btn', 'btn-danger'],
-                            function excluir_prateleira_sistema() {
-                                excluir_prateleira(prateleiras.id_prateleira);
-                            }), 'append'));
-
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_prateleira_' + prateleiras.id_prateleira, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar() {
-                            cadastro_prateleira(prateleiras.id_prateleira);
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_prateleira_' + prateleiras._id.$oid, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar() {
+                            cadastro_prateleira(prateleiras._id.$oid);
                         }), 'append'));
 
 
@@ -171,16 +133,6 @@ router_add('index', function () {
                 'rota': 'impressao_codigo_barras_prateleira',
                 'codigo_prateleira': codigo_prateleira
             }), 'Impressão de código de barras', 'width=740px, height=500px, scrollbars=yes');
-        }
-
-        /**
-         * Função responsável por chamar a rota de excluir prateleira do sistema e depois realizar a validação.
-         */
-        function excluir_prateleira(codigo_prateleira) {
-            sistema.request.post('/prateleira.php', { 'rota': 'excluir_prateleira', 'codigo_prateleira': codigo_prateleira }, function (retorno) {
-                validar_retorno(retorno, '', 1);
-                pesquisar_prateleiras();
-            });
         }
 
         /** 
@@ -232,16 +184,11 @@ router_add('index', function () {
                         <div class="row">
                             <div class="col-3">
                                 <button class="btn btn-secondary custom-radius btn-lg"
-                                    onclick="cadastro_prateleira(0);">Cadastrar Prateleira</button>
+                                    onclick="cadastro_prateleira('');">Cadastrar Prateleira</button>
                             </div>
                         </div>
                         <br />
                         <div class="row">
-                            <div class="col-2 text-center">
-                                <label class="text">Código</label>
-                                <input type="text" class="form-control custom-radius" id="codigo_prateleira"
-                                    placeholder="Código" sistema-mask="codigo" />
-                            </div>
                             <div class="col-6 text-center">
                                 <label class="text">Nome Prateleira</label>
                                 <input type="text" class="form-control custom-radius text-uppercase text-uppercase"
@@ -254,7 +201,15 @@ router_add('index', function () {
                                     onkeyup="pesquisar_prateleiras();" />
                             </div>
                             <div class="col-2 text-center">
-                                <label class="text">Forma de visualização</label>
+                                <label class="text">Status</label>
+                                <select class="form-control custom-radius" id="status">
+                                    <option value="TODOS">TODOS</option>
+                                    <option value="ATIVO">ATIVO</option>
+                                    <option value="INATIVO">INATIVO</option>
+                                </select>
+                            </div>
+                            <div class="col-2 text-center">
+                                <label class="text">Tipo</label>
                                 <select class="form-control custom-radius" id="forma_visualizacao">
                                     <option value="TODOS">TODOS</option>
                                     <option value="PUBLICO">PÚBLICO</option>
@@ -328,19 +283,18 @@ router_add('index', function () {
                                     <table class="table table-hover table-striped" id="tabela_prateleira">
                                         <thead class="bg-info text-white">
                                             <tr class="text-center">
-                                                <th scope="col">#</th>
                                                 <th scope="col">Nome</th>
                                                 <th scope="col">Descrição</th>
                                                 <th scope="col">Armário</th>
-                                                <th scope="col">Forma Visualização</th>
+                                                <th scope="col">Tipo</th>
+                                                <th scope="col">Status</th>
                                                 <th scope="col">Código Barras</th>
-                                                <th scope="col">Excluir</th>
                                                 <th scope="col">Ação</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="8" class="text-center">UTILIZE OS FILTROS PARA FACILITAR
+                                                <td colspan="7" class="text-center">UTILIZE OS FILTROS PARA FACILITAR
                                                     SUA PESQUISA</td>
                                             </tr>
                                         </tbody>
@@ -372,13 +326,13 @@ router_add('index', function () {
  * View Contendo o formulário de cadastro de prateleiras.
  */
 router_add('salvar_alterar_dados', function () {
-    $codigo_prateleira = (int) (isset($_REQUEST['codigo_prateleira']) ? (int) intval($_REQUEST['codigo_prateleira'], 10) : 0);
+    $codigo_prateleira = (string) (isset($_REQUEST['codigo_prateleira']) ? (string) $_REQUEST['codigo_prateleira'] : '');
     require_once 'includes/head.php';
     ?>
     <script>
-        let CODIGO_PRATELEIRA = <?php echo $codigo_prateleira; ?>;
-        const CODIGO_EMPRESA = <?php echo $_SESSION['id_empresa']; ?>;
-        const CODIGO_USUARIO = <?php echo $_SESSION['id_usuario']; ?>;
+        let CODIGO_PRATELEIRA = "<?php echo $codigo_prateleira; ?>";
+        const CODIGO_EMPRESA = "<?php echo $_SESSION['id_empresa']; ?>";
+        const CODIGO_USUARIO = "<?php echo $_SESSION['id_usuario']; ?>";
 
         /** 
          * Função responsável por pesquisar os todos os armários públicos cadastrados no banco de dados
@@ -402,18 +356,15 @@ router_add('salvar_alterar_dados', function () {
          * Função responsável por enviar as informações preenxidas pelo usuário para o back.
          */
         function salvar_dados() {
-            let codigo_prateleira = parseInt(document.querySelector('#codigo_prateleira').value, 10);
+            let codigo_prateleira = document.querySelector('#codigo_prateleira').value;
             let nome_prateleira = document.querySelector('#nome_prateleira').value;
             let descricao = document.querySelector('#descricao').value;
             let codigo_barras = document.querySelector('#codigo_barras').value;
-            let forma_visualizacao = document.querySelector('#forma_visualizacao').value;
-            let codigo_armario = parseInt(document.querySelector('#codigo_armario').value, 10);
+            let status = document.querySelector('#status').value;
+            let tipo = document.querySelector('#tipo').value;
+            let codigo_armario = document.querySelector('#codigo_armario').value;
 
-            if (isNaN(codigo_prateleira)) {
-                codigo_prateleira = 0;
-            }
-
-            if (codigo_armario != 0 && forma_visualizacao != '') {
+            if (status != '' && tipo != '') {
                 sistema.request.post('/prateleira.php', {
                     'rota': 'salvar_dados',
                     'codigo_prateleira': codigo_prateleira,
@@ -423,17 +374,14 @@ router_add('salvar_alterar_dados', function () {
                     'nome_prateleira': nome_prateleira,
                     'descricao': descricao,
                     'codigo_barras': codigo_barras,
-                    'forma_visualizacao': forma_visualizacao
+                    'status':status,
+                    'tipo': tipo
                 }, function (retorno) {
                     validar_retorno(retorno, '/prateleira.php');
                     limpar_campos();
                 });
             } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "O campo PRATELEIRA e FORMA VISUALIZAÇÃO não pode ser vazio!"
-                });
+                Swal.fire({icon: "error", title: "Oops...", text: "O campo STATUS e TIPO não pode ser vazio!"});
             }
 
         }
@@ -442,8 +390,9 @@ router_add('salvar_alterar_dados', function () {
             document.querySelector('#codigo_prateleira').value = '';
             document.querySelector('#nome_prateleira').value = '';
             document.querySelector('#descricao').value = '';
-            document.querySelector('#forma_visualizacao').value = '';
-            document.querySelector('#codigo_modal_armario').value = '0';
+            document.querySelector('#tipo').value = '';
+            document.querySelector('#codigo_armario').value = '';
+            document.querySelector('#codigo_organizacao').value = '';
 
             sistema.request.post('/index.php', {
                 'rota': 'buscar_codigo_barras'
@@ -465,20 +414,24 @@ router_add('salvar_alterar_dados', function () {
                     <div class="card-body">
                         <h4 class="card-title text-center">Cadastro de Prateleiras</h4>
                         <br />
+                        <input type="hidden" id="codigo_prateleira" value="<?php echo $codigo_prateleira; ?>">
                         <div class="row">
-                            <div class="col-1 text-center">
-                                <label class="text">Código</label>
-                                <input type="text" class="form-control custom-radius text-center" id="codigo_prateleira"
-                                    disabled="true" placeholder="Código" />
-                            </div>
-                            <div class="col-7 text-center">
+                            <div class="col-6 text-center">
                                 <label class="text">Nome Prateleira</label>
                                 <input type="text" class="form-control custom-radius text-uppercase" id="nome_prateleira"
                                     placeholder="Nome Prateleira" />
                             </div>
                             <div class="col-2 text-center">
-                                <label class="text">Forma Visualização</label>
-                                <select class="form-control custom-radius" id="forma_visualizacao">
+                                <label class="text">Status</label>
+                                <select class="form-control custom-radius" id="status">
+                                    <option value="">Selecione uma opção</option>
+                                    <option value="ATIVO">ATIVO</option>
+                                    <option value="INATIVO">INATIVO</option>
+                                </select>
+                            </div>
+                            <div class="col-2 text-center">
+                                <label class="text">Tipo</label>
+                                <select class="form-control custom-radius" id="tipo">
                                     <option value="">Selecione uma opção</option>
                                     <option value="PUBLICO">PÚBLICO</option>
                                     <option value="PRIVADO">PRIVADO</option>
@@ -534,18 +487,17 @@ router_add('salvar_alterar_dados', function () {
             validar_acesso_administrador('<?php echo $_SESSION['tipo_usuario']; ?>');
 
             window.setTimeout(function () {
-                if (CODIGO_PRATELEIRA != 0) {
+                if (CODIGO_PRATELEIRA != '') {
                     sistema.request.post('/prateleira.php', {
                         'rota': 'pesquisar_prateleira',
                         'codigo_prateleira': CODIGO_PRATELEIRA
                     }, function (retorno) {
-                        document.querySelector('#codigo_prateleira').value = retorno.dados.id_prateleira;
                         document.querySelector('#nome_prateleira').value = retorno.dados.nome_prateleira;
                         document.querySelector('#descricao').value = retorno.dados.descricao;
+                        document.querySelector('#status').value = retorno.dados.status;
+                        document.querySelector('#tipo').value = retorno.dados.tipo;
                         document.querySelector('#codigo_barras').value = retorno.dados.codigo_barras;
-                        document.querySelector('#forma_visualizacao').value = retorno.dados.forma_visualizacao;
-                        // document.querySelector('#codigo_organizacao').value = retorno.dados.id_organizacao;
-                        document.querySelector('#codigo_armario').value = retorno.dados.id_armario;
+                        document.querySelector('#codigo_armario').value = retorno.dados.armario.$oid;
                     });
                 }
             }, 500);
@@ -569,19 +521,17 @@ router_add('pesquisar_prateleira', function () {
     $objeto_prateleira = new Prateleira();
     $objeto_organizacao = new Organizacao();
 
-    $codigo_prateleira = (int) (isset($_REQUEST['codigo_prateleira']) ? (int) intval($_REQUEST['codigo_prateleira'], 10) : 0);
+    $codigo_prateleira = (string) (isset($_REQUEST['codigo_prateleira']) ? (string) $_REQUEST['codigo_prateleira'] : '');
     $filtro = (array) [];
     $dados = (array) [];
 
-    if ($codigo_prateleira != 0) {
-        array_push($filtro, ['id_prateleira', '===', (int) $codigo_prateleira]);
+    if ($codigo_prateleira != '') {
+        array_push($filtro, ['_id', '===', convert_id($codigo_prateleira)]);
     }
 
     $dados['filtro'] = (array) ['and' => (array) $filtro];
 
     $retorno_prateleira = (array) $objeto_prateleira->pesquisar($dados);
-
-
 
     echo json_encode(['dados' => (array) $retorno_prateleira], JSON_UNESCAPED_UNICODE);
     exit;
@@ -592,55 +542,47 @@ router_add('pesquisar_prateleira', function () {
  */
 router_add('pesquisar_prateleira_todas', function () {
     $objeto_prateleira = new Prateleira();
+    $objeto_preferencia = new Preferencia();
 
-    $id_prateleira = (int) (isset($_REQUEST['codigo_prateleira']) ? (int) intval($_REQUEST['codigo_prateleira'], 10) : 0);
-    $id_empresa = (int) (isset($_REQUEST['codigo_empresa']) ? (int) intval($_REQUEST['codigo_empresa'], 10) : 0);
-    $id_armario = (int) (isset($_REQUEST['codigo_armario']) ? (int) intval($_REQUEST['codigo_armario'], 10) : 0);
-    $id_usuario = (int) (isset($_REQUEST['codigo_usuario']) ? (int) intval($_REQUEST['codigo_usuario'], 10) : 0);
-    $id_sistema = (int) (isset($_REQUEST['codigo_sistema']) ? (int) intval($_REQUEST['codigo_sistema'], 10):0);
-
+    $empresa = (string) (isset($_REQUEST['empresa']) ? (string) $_REQUEST['empresa'] : '');
+    $armario = (string) (isset($_REQUEST['armario']) ? (string) $_REQUEST['armario'] : '');
+    $usuario = (string) (isset($_REQUEST['usuario']) ? (string) $_REQUEST['usuario'] : '');
+    $sistema = (string) (isset($_REQUEST['sistema']) ? (string) $_REQUEST['sistema']:'');
 
     $nome_prateleira = (string) (isset($_REQUEST['nome_prateleira']) ? (string) strtoupper($_REQUEST['nome_prateleira']) : '');
     $descricao = (string) (isset($_REQUEST['descricao']) ? (string) $_REQUEST['descricao'] : '');
     $codigo_barras = (string) (isset($_REQUEST['codigo_barras']) ? (string) $_REQUEST['codigo_barras'] : '');
-    $forma_visualizacao = (string) (isset($_REQUEST['forma_visualizacao']) ? (string) $_REQUEST['forma_visualizacao'] : 'TODOS');
-
+    $tipo = (string) (isset($_REQUEST['tipo']) ? (string) $_REQUEST['tipo'] : 'TODOS');
+    $status = (string) (isset($_REQUEST['status']) ? (string) $_REQUEST['status']:'TODOS');
+ 
     $limite_retorno = (int) (isset($_REQUEST['limite_retorno']) ? (int) intval($_REQUEST['limite_retorno'], 10):0);
     $usuario_preferencia_quantidade_prateleira = (int) (isset($_REQUEST['preferencia_usuario_limite_retorno']) ? (int) intval($_REQUEST['preferencia_usuario_limite_retorno'], 10):0);
 
     $filtro = (array) [];
     $filtro_todos_publico = (array) [];
     $filtro_todos_privado = (array) [];
-
     $dados = (array) ['filtro' => (array) [], 'ordenacao' => (array) ['nome_prateleira' => (bool) true], 'limite' => (int) $limite_retorno];
-    $modelo = (array) ['id_prateleria' => (int) 0, 'id_armario' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'nome_prateleira' => (string) '', 'nome_armario' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) ''];
 
     $retorno = (array) [];
 
-    if ($id_prateleira != 0) {
-        array_push($filtro, (array) ['id_prateleira', '===', (int) $id_prateleira]);
-        array_push($filtro_todos_publico, (array) ['id_prateleira', '===', (int) $id_prateleira]);
-        array_push($filtro_todos_privado, (array) ['id_prateleira', '===', (int) $id_prateleira]);
-    }
-
-    if ($id_empresa != 0) {
-        array_push($filtro, (array) ['id_empresa', '===', (int) $id_empresa]);
-        array_push($filtro_todos_publico, (array) ['id_empresa', '===', (int) $id_empresa]);
-        array_push($filtro_todos_privado, (array) ['id_empresa', '===', (int) $id_empresa]);
+    if ($empresa != '') {
+        array_push($filtro, (array) ['empresa', '===', convert_id($empresa)]);
+        array_push($filtro_todos_publico, (array) ['empresa', '===', convert_id($empresa)]);
+        array_push($filtro_todos_privado, (array) ['empresa', '===', convert_id($empresa)]);
 
     }
 
-    if ($id_armario != 0) {
-        array_push($filtro, (array) ['id_armario', '===', (int) $id_armario]);
-        array_push($filtro_todos_publico, (array) ['id_armario', '===', (int) $id_armario]);
-        array_push($filtro_todos_privado, (array) ['id_armario', '===', (int) $id_armario]);
+    if ($armario != '') {
+        array_push($filtro, (array) ['armario', '===', convert_id($armario)]);
+        array_push($filtro_todos_publico, (array) ['armario', '===', convert_id($armario)]);
+        array_push($filtro_todos_privado, (array) ['armario', '===', convert_id($armario)]);
         
     }
 
     if ($nome_prateleira != '') {
-        array_push($filtro, (array) ['nome_prateleria', '=', (string) $nome_prateleira]);
-        array_push($filtro_todos_publico, (array) ['nome_prateleria', '=', (string) $nome_prateleira]);
-        array_push($filtro_todos_privado, (array) ['nome_prateleria', '=', (string) $nome_prateleira]);
+        array_push($filtro, (array) ['nome_prateleria', '=', (string) strtoupper($nome_prateleira)]);
+        array_push($filtro_todos_publico, (array) ['nome_prateleria', '=', (string) strtoupper($nome_prateleira)]);
+        array_push($filtro_todos_privado, (array) ['nome_prateleria', '=', (string) strtoupper($nome_prateleira)]);
     }
 
     if ($descricao != '') {
@@ -654,19 +596,29 @@ router_add('pesquisar_prateleira_todas', function () {
         array_push($filtro_todos_publico, (array) ['codigo_barras', '=', (string) $codigo_barras]);
         array_push($filtro_todos_privado, (array) ['codigo_barras', '=', (string) $codigo_barras]);
     }
-
-    if ($forma_visualizacao == 'PRIVADO') {
-        array_push($filtro, (array) ['id_usuario', '===', (int) $id_usuario]);
+    
+    if($status != 'TODOS'){
+        array_push($filtro, (array) ['status', '===', (string) $status]);
+        array_push($filtro_todos_privado, (array) ['status', '===', (string) $status]);
+        array_push($filtro_todos_publico, (array) ['status', '===', (string) $status]);
     }
 
-    if ($forma_visualizacao == 'PRIVADO' || $forma_visualizacao == 'PUBLICO') {
-        array_push($filtro, ['forma_visualizacao', '===', (string) $forma_visualizacao]);
+    if ($tipo == 'PRIVADO') {
+        array_push($filtro, (array) ['usuario', '===', convert_id($usuario)]);
+    }
+
+
+    if ($tipo == 'PRIVADO' || $tipo == 'PUBLICO') {
+        array_push($filtro, ['tipo', '===', (string) $tipo]);
         $dados['filtro'] = (array) ['and' => (array) $filtro];
-        $retorno = (array) validar_dados_pesquisa_prateleira((array) $objeto_prateleira->pesquisar_todos($dados), (array) $modelo, (int) $id_empresa, (array) $retorno);
+        
+        $retorno_pesquisa_prateleira = (array) $objeto_prateleira->pesquisar_todos($dados);
+        $retorno = (array) $objeto_prateleira->validar_dados_pesquisa_prateleira($retorno_pesquisa_prateleira, $retorno);
+
     } else {
-        array_push($filtro_todos_privado, (array) ['id_usuario', '===', (int) $id_usuario]);
-        array_push($filtro_todos_privado, (array) ['forma_visualizacao', '===', (string) 'PRIVADO']);
-        array_push($filtro_todos_publico, (array) ['forma_visualizacao', '===', (string) 'PUBLICO']);
+        array_push($filtro_todos_privado, (array) ['usuario', '===', convert_id($usuario)]);
+        array_push($filtro_todos_privado, (array) ['tipo', '===', (string) 'PRIVADO']);
+        array_push($filtro_todos_publico, (array) ['tipo', '===', (string) 'PUBLICO']);
 
         $dados['filtro'] = (array) ['and' => (array) $filtro_todos_privado];
         $retorno_pesquisa_privado = (array) $objeto_prateleira->pesquisar_todos((array) $dados);
@@ -674,12 +626,11 @@ router_add('pesquisar_prateleira_todas', function () {
         $dados['filtro'] = (array) ['and' => (array) $filtro_todos_publico];
         $retorno_pesquisa_publico = (array) $objeto_prateleira->pesquisar_todos((array) $dados);
 
-        $retorno = (array) validar_dados_pesquisa_prateleira($retorno_pesquisa_privado, $modelo, $id_empresa, $retorno);
-        $retorno = (array) validar_dados_pesquisa_prateleira($retorno_pesquisa_publico, $modelo, $id_empresa, $retorno);
+        $retorno = (array) $objeto_prateleira->validar_dados_pesquisa_prateleira($retorno_pesquisa_privado, $retorno);
+        $retorno = (array) $objeto_prateleira->validar_dados_pesquisa_prateleira($retorno_pesquisa_publico, $retorno);
     }
 
-    $objeto_preferencia = new Preferencia();
-    $objeto_preferencia->alterar_quantidade_retorno($usuario_preferencia_quantidade_prateleira, $limite_retorno, 'QUANTIDADE_LIMITE_PRATELEIRA', $id_usuario, $id_sistema);
+    $objeto_preferencia->alterar_quantidade_retorno($usuario_preferencia_quantidade_prateleira, $limite_retorno, 'QUANTIDADE_LIMITE_PRATELEIRA', $usuario, $sistema);
 
     echo json_encode(['dados' => (array) $retorno], JSON_UNESCAPED_UNICODE);
     exit;
@@ -777,15 +728,5 @@ router_add('impressao_codigo_barras_prateleira', function () {
     </script>
     <?php
     require_once 'includes/footer_relatorio.php';
-});
-
-/**
- * Rota responsável por pegar as informações  vindas da model e converter para passar a modelo e então realizar a exclusão da prateleira.
- */
-router_add('excluir_prateleira', function () {
-    $objeto_prateleira = new Prateleira();
-
-    echo json_encode((array) $objeto_prateleira->excluir($_REQUEST), JSON_UNESCAPED_UNICODE);
-    exit;
 });
 ?>

@@ -1,59 +1,90 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
-require_once 'Modelos/Caixa.php';
-require_once 'Modelos/Usuario.php';
 require_once 'Modelos/LogSistema.php';
-require_once 'Modelos/Notificacoes.php';
+require_once 'Modelos/Interface.php';
+require_once 'Modelos/Armario.php';
 
-class Prateleira{
+class Prateleira implements InterfaceModelo{
     private $id_prateleira;
-    private $id_empresa;
-    private $id_usuario;
-    private $id_armario;
+    private $empresa;
+    private $usuario;
+    private $armario;
     private $nome_prateleira;
     private $descricao;
     private $codigo_barras;
-    private $forma_visualizacao;
+    private $tipo;
+    private $status;
+    private $data_cadastro;
 
-    private function tabela(){
-        return (string) 'prateleira';
+    public function tabela(){
+        return (string) 'prateleiras';
     }
 
-    private function modelo(){
-        return (array) ['id_prateleira' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'id_armario' => (int) 0, 'nome_prateleira' => (string) '', 'descricao' => (string) '','codigo_barras' => (string) '', 'forma_visualizacao' => (string) 'PUBLICO'];
+    public function modelo(){
+        return (array) ['_id' => convert_id(''), 'empresa' => convert_id(''), 'usuario' => convert_id(''), 'armario' => convert_id(''), 'nome_prateleira' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) codigo_barras(), 'tipo' => (string) 'PUBLICO', 'status' => (string) 'ATIVO', 'data_cadastro' => model_date()];
     }
 
-    private function colocar_dados($dados){
+    public function colocar_dados($dados){
         if(array_key_exists('codigo_prateleira', $dados) == true){
-            $this->id_prateleira = (int) intval($dados['codigo_prateleira'], 10);
+            if($dados['codigo_prateleira'] != ''){
+                $this->id_prateleira = convert_id($dados['codigo_prateleira']);
+            }else{
+                $this->id_prateleira = null;
+            }
         }
 
         if(array_key_exists('codigo_empresa', $dados) == true){
-            $this->id_empresa = (int) intval($dados['codigo_empresa'], 10);
+            if($dados['codigo_empresa'] != ''){
+                $this->empresa = convert_id($dados['codigo_empresa']);
+            }
         }
 
         if(array_key_exists('codigo_usuario', $dados) == true){
-            $this->id_usuario = (int) $dados['codigo_usuario'];
+            if($dados['codigo_usuario'] != ''){
+                $this->usuario = convert_id($dados['codigo_usuario']);
+            }
         }
 
         if(array_key_exists('codigo_armario', $dados) == true){
-            $this->id_armario = (int) intval($dados['codigo_armario'], 10);
+            if($dados['codigo_armario'] != ''){
+                $this->armario = convert_id($dados['codigo_armario']);
+            }
         }
 
         if(array_key_exists('nome_prateleira', $dados) == true){
             $this->nome_prateleira = (string) strtoupper($dados['nome_prateleira']);
+        }else{
+            $this->nome_prateleira = (string) '';
         }
 
         if(array_key_exists('descricao', $dados) == true){
             $this->descricao = (string) $dados['descricao'];
+        }else{
+            $this->descricao = (string) '';
         }
 
         if(array_key_exists('codigo_barras', $dados) == true){
             $this->codigo_barras = (string) $dados['codigo_barras'];
+        }else{
+            $this->codigo_barras = codigo_barras();
         }
 
-        if(array_key_exists('forma_visualizacao', $dados) == true){
-            $this->forma_visualizacao = (string) $dados['forma_visualizacao'];
+        if(array_key_exists('tipo', $dados) == true){
+            $this->tipo = (string) $dados['tipo'];
+        }else{
+            $this->tipo = (string) 'PUBLICO';
+        }
+
+        if(array_key_exists('status', $dados) == true){
+            $this->status = (string) $dados['status'];
+        }else{
+            $this->status = (string) 'ATIVO';
+        }
+
+        if(array_key_exists('data_cadastro', $dados) == true){
+            $this->data_cadastro = model_date($dados['data_cadastro']);
+        }else{
+            $this->data_cadastro = model_date();
         }
     }
 
@@ -64,39 +95,30 @@ class Prateleira{
      */
     public function salvar_dados($dados){
         $this->colocar_dados($dados);
+        $retorno_operacao = (bool) false;
+        $objeto_log_sistema = new LogSistema();
 
-        $objeto_usuario = new Usuario();
-        $objeto_log = new LogSistema();
-        $objeto_notificacao = new Notificacoes();
+        if($this->id_prateleira != null){
+            $retorno_checagem = (bool) model_check((string) $this->tabela(), (array) ['_id', '===', $this->id_prateleira]);
 
-        $filtro = (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_prateleira', '===', (int) $this->id_prateleira]]];
-        
-        $checar_existencia = (bool) model_check((string) $this->tabela(), (array) $filtro);
+            if($retorno_checagem == true){
+                $retorno_operacao = (bool) model_update((string) $this->tabela(), (array) ['_id', '===', $this->id_prateleira], (array) ['armario' => $this->armario, 'nome_prateleira' => (string) $this->nome_prateleira, 'descricao' => (string) $this->descricao, 'tipo' => (string) $this->tipo, 'status' => (string) $this->status]);
 
-        if($checar_existencia == true){
-            $retorno_pesquisa = (array) model_one((string) $this->tabela(), (array) $filtro);
-
-            if(empty($retorno_pesquisa) == false){
-                return (bool) model_update((string) $this->tabela(), (array) $filtro, (array) model_parse((array) $retorno_pesquisa, (array) ['id_armario' => (int) $this->id_armario, 'nome_prateleira' => (string) $this->nome_prateleira, 'descricao' => (string) $this->descricao, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
-            }else{
-                return (bool) false;
-            }
-
-        }else{
-            $retorno_cadastro = (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_prateleira' => (int) model_next((string) $this->tabela(), (string)'id_prateleira', (array) ['id_empresa', '===', (int) $this->id_empresa]), 'id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario, 'id_armario' => (int) $this->id_armario, 'nome_prateleira' => (string) $this->nome_prateleira, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
-
-            if($retorno_cadastro == true){
-                $retorno_usuario = (array) $objeto_usuario->pesquisar((array) ['filtro' => (array) ['id_usuario', '===', (int) intval($this->id_usuario, 10)]]);
-
-                if(empty($retorno_usuario) == false){
-                    $retorno_cadastro_log = (bool) $objeto_log->salvar_dados((array) ['id_empresa' => (int) $this->id_empresa, 'usuario' => (string) $retorno_usuario['login'], 'codigo_barras' => (string) $this->codigo_barras, 'modulo' => (string) 'PRATELEIRA', 'descricao' => (string) 'A prateleira '.$this->nome_prateleira.' foi cadastrado no sistema']);
+                if($retorno_operacao == true){
+                    $retorno_log_sistema = (bool) $objeto_log_sistema->salvar_dados((array) ['id_empresa' => (string) $this->empresa, 'usuario' => (string) $this->usuario, 'tabla_acao' => (string) 'ALTERACAO', 'modulo' => (string) 'PRATELEIRA', 'descricao' => (string) 'Usuário alterou o cadastro da prateleira '.$this->nome_prateleira]);
                 }
-
-                $objeto_notificacao->salvar_dados((array) ['id_usuario' => (int) $this->id_usuario, 'titulo_notificacao' => (string) 'Nova prateleira cadastrada', 'mensagem_curta' => (string) 'Uma prateleira foi cadastrada no sistema!', 'mensagem_longa' => (string) 'A prateleira '.$this->nome_prateleira.' foi cadastrado no sistema, sendo possível agora realizar o cadastro de novas caixas!']);
+            }else{
+                $retorno_operacao = (bool) false;
             }
+        }else{
+            $retorno_operacao = (bool) model_insert((string) $this->tabela(), (array) ['empresa' => $this->empresa, 'usuario' => $this->usuario, 'armario' => $this->armario, 'nome_prateleira' => (string) $this->nome_prateleira, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'tipo' => (string) $this->tipo, 'status' => (string) $this->status, 'data_cadastro' => $this->data_cadastro]);
 
-            return (bool) $retorno_cadastro;
+            if($retorno_operacao == true){
+                $retorno_log_sistema = (bool) $objeto_log_sistema->salvar_dados((array) ['id_empresa' => (string) $this->empresa, 'usuario' => (string) $this->usuario, 'tabla_acao' => (string) 'CADASTRAR', 'modulo' => (string) 'PRATELEIRA', 'descricao' => (string) 'Usuário cadastrou a prateleira '.$this->nome_prateleira]);
+            }
         }
+
+        return (bool) $retorno_operacao;
     }
 
     /**
@@ -118,41 +140,37 @@ class Prateleira{
     }
 
     /**
-     * Função responsável por excluir a prateleira do sistema
-     * @param mixed $dados contendo as informações da prateleira para montar o filtro de pesquisa
-     * @return array contendo a mensagem para apresentação ao usuário
+     * Função que valida o retorno do filtro e adiciona o norme do armário.
+     * @param (array) $retono_pesquisa retorno que vem do banco de dados
+     * @param (array) $retorno vazio, que será validado
+     * @return (array) $retorno corrigido
      */
-    public function excluir($dados){
-        $objeto_usuario = new Usuario();
-        $objeto_log = new LogSistema();
-        $objeto_caixa = new Caixa();
+    public function validar_dados_pesquisa_prateleira($retorno_pesquisa, $retorno){
+        $objeto_armario = new Armario();
 
-        $this->colocar_dados((array) $dados);
-        
-        $filtro_pesquisa_caixa = (array) ['filtro' => (array) ['id_prateleira', '===', (int) $this->id_prateleira]];
-        $retorno_pesquisa_caixa = (array) $objeto_caixa->pesquisar((array) $filtro_pesquisa_caixa);
+        if(empty($retorno_pesquisa) == false){
+            foreach($retorno_pesquisa as $retorno_corrigido){
+                if(array_key_exists('armario', $retorno_corrigido) == true){
+                    $filtro_armario = (array) ['filtro' => (array) ['_id', '===', convert_id($retorno_corrigido['armario'])]];
 
-        $retorno_prateleira = (array) $this->pesquisar($filtro_pesquisa_caixa);
+                    $retorno_armario = (array) $objeto_armario->pesquisar($filtro_armario);
 
-        if(empty($retorno_pesquisa_caixa) == false){
-            return (array) ['titulo' => (string) 'PRATELEIRA CONTÉM CAIXAS', 'mensagem' => (string) 'Não é possível excluir uma prateleira que contém caixas!', 'icone' => (string) 'error'];
-        }else{
-            $retorno_exclusao = (bool) model_delete((string) $this->tabela(), (array)  ['id_prateleira', '===', (int) $this->id_prateleira]);
+                    if(empty($retorno_armario) == false){
+                        if(array_key_exists('nome_armario', $retorno_armario) == true){
+                            $retorno_corrigido['nome_armario'] = (string) $retorno_armario['nome_armario'];
+                        }else{
+                            $retorno_corrigido['nome_armario'] = (string) '';
+                        }
+                    }else{
+                        $retorno_corrigido['nome_armario'] = (string) '';
+                    }
 
-            if(empty($retorno_prateleira) == false){
-                $retorno_usuario = (array) $objeto_usuario->pesquisar((array) ['filtro' => (array) ['id_usuario', '===', (int) intval($retorno_prateleira['id_usuario'], 10)]]);
-
-                if(empty($retorno_usuario) == false){
-                    $retorno_cadastro_log = (bool) $objeto_log->salvar_dados((array) ['id_empresa' => (int) $retorno_prateleira['id_empresa'], 'usuario' => (string) $retorno_usuario['login'], 'codigo_barras' => (string) $retorno_prateleira['codigo_barras'], 'modulo' => (string) 'PRATELEIRA', 'descricao' => (string) 'Excluiu a prateleira '.$retorno_prateleira['nome_prateleira']]);
+                    array_push($retorno, $retorno_corrigido);
                 }
             }
-
-            if($retorno_exclusao == true){
-                return (array) ['titulo' => (string) 'EXCLUSÃO CONCLUÍDA', 'mensagem' => (string) 'Operação realizada com sucesso!', 'icone' => (string) 'success'];
-            }else{
-                return (array) ['titulo' => (string) 'PROBLEMAS NA EXCLUSÃO', 'mensagem' => (string) 'Não foi possível excluir a prateleira, aconteceu algum erro desconhecido por favor tente mais tarde!', 'icone' => (string) 'error'];
-            }
         }
+
+        return (array) $retorno;
     }
 }
 ?>

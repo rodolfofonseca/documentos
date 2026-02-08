@@ -186,3 +186,12 @@ function convert_date($date_time, $format = 'Y-m-d'){
   }
   return (string) $date_time->toDateTime()->format($format);
 }
+
+/**
+ * Função responsável por converter uma string em ObjectId do MongoDB
+ * @param string $string_id
+ * @return MongoDB\BSON\ObjectId
+ */
+function convert_id($string_id){
+  return new MongoDB\BSON\ObjectId($string_id);
+}

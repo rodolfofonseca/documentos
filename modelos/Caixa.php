@@ -1,52 +1,54 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
-require_once 'Modelos/Prateleira.php';
-require_once 'Modelos/Documentos.php';
+require_once 'Modelos/Interface.php';
 require_once 'Modelos/LogSistema.php';
-require_once 'Modelos/Usuario.php';
-require_once 'Modelos/Notificacoes.php';
+require_once 'Modelos/Prateleira.php';
 
-class Caixa{
+class Caixa implements InterfaceModelo{
     private $id_caixa;
-    private $id_empresa;
-    private $id_usuario;
-    private $id_prateleira;
+    private $usuario;
+    private $prateleira;
+    private $empresa;
     private $nome_caixa;
     private $descricao;
     private $codigo_barras;
-    private $forma_visualizacao;
+    private $tipo;
+    private $status;
+    private $data_cadastro;
 
-    private function tabela(){
-        return (string) 'caixa';
+    public function tabela(){
+        return (string) 'caixas';
     }
 
-    private function modelo(){
-        return (array) ['id_caixa' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'id_prateleira' => (int) 0, 'nome_caixa' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) 'PUBLICO'];
+    public function modelo(){
+        return (array) ['_id' => convert_id(''), 'usuario' => convert_id(''), 'prateleira' => convert_id(''), 'empresa' => convert_id(''), 'nome_caixa' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'tipo' => (string) 'PUBLICO', 'status' => (string) 'ATIVO', 'data_cadastro' => model_date()];
     }
 
-    /**
-     * Função responsável por retornar o modelo que o front espera para os filtros de pesquisa
-     * @return array $modelo
-     */
-    private function modelo_validacao(){
-        return (array) ['id_caixa' => (int) 0, 'id_empresa' => (int) 0, 'id_usuario' => (int) 0, 'id_prateleira' => (int) 0, 'nome_caixa' => (string) '', 'nome_prateleira' => (string) '', 'descricao' => (string) '', 'codigo_barras' => (string) '', 'forma_visualizacao' => (string) 'PUBLICO'];
-    }
-
-    private function colocar_dados($dados){
+    public function colocar_dados($dados){
         if(array_key_exists('codigo_caixa', $dados) == true){
-            $this->id_caixa = (int) intval($dados['codigo_caixa'], 10);
-        }
-
-        if(array_key_exists('codigo_empresa', $dados) == true){
-            $this->id_empresa = (int) intval($dados['codigo_empresa'], 10);
+            if($dados['codigo_caixa'] != ''){
+                $this->id_caixa = convert_id($dados['codigo_caixa']);
+            }else{
+                $this->id_caixa = null;
+            }
         }
 
         if(array_key_exists('codigo_usuario', $dados) == true){
-            $this->id_usuario = (int) $dados['codigo_usuario'];
+            if($dados['codigo_usuario'] != ''){
+                $this->usuario = convert_id($dados['codigo_usuario']);
+            }
         }
 
         if(array_key_exists('codigo_prateleira', $dados) == true){
-            $this->id_prateleira = (int) intval($dados['codigo_prateleira'], 10);
+            if($dados['codigo_prateleira'] != ''){
+                $this->prateleira = convert_id($dados['codigo_prateleira']);
+            }
+        }
+
+        if(array_key_exists('codigo_empresa', $dados) == true){
+            if($dados['codigo_empresa'] != ''){
+                $this->empresa = convert_id($dados['codigo_empresa']);
+            }
         }
 
         if(array_key_exists('nome_caixa', $dados) == true){
@@ -59,53 +61,56 @@ class Caixa{
 
         if(array_key_exists('codigo_barras', $dados) == true){
             $this->codigo_barras = (string) $dados['codigo_barras'];
+        }else{
+            $this->codigo_barras = (string) codigo_barras();
         }
 
-        if(array_key_exists('forma_visualizacao', $dados) == true){
-            $this->forma_visualizacao = (string) $dados['forma_visualizacao'];
+        if(array_key_exists('tipo', $dados) == true){
+            $this->tipo = (string) $dados['tipo'];
+        }else{
+            $this->tipo = (string) 'PUBLICO';
+        }
+
+        if(array_key_exists('status', $dados) == true){
+            $this->status = (string) $dados['status'];
+        }else{
+            $this->status = (string) 'ATIVO';
+        }
+
+        if(array_key_exists('data_cadastro', $dados) == true){
+            $this->data_cadastro = model_date($dados['data_cadastro']);
+        }else{
+            $this->data_cadastro = model_date();
         }
     }
 
-    public function salvar($dados){
-        $objeto_log = new LogSistema();
-        $objeto_usuario = new Usuario();
-        $objeto_notificacao = new Notificacoes();
-
+    public function salvar_dados($dados){
         $retorno_operacao = (bool) false;
-        $descricao_log = (string) '';
+        $objeto_log_sistema = new LogSistema();
 
         $this->colocar_dados($dados);
 
-        $filtro = (array) ['and' => (array) [(array) ['id_caixa', '===', (int) $this->id_caixa], (array) ['id_empresa', '===', (int) $this->id_empresa]]];
-        $checar_existencia = (bool) model_check($this->tabela(), (array) $filtro);
+        if($this->id_caixa != null){
+            $retorno_checagem = (bool) model_check((string) $this->tabela(), (array) ['_id', '===', $this->id_caixa]);
 
-        if($checar_existencia == true){
-            $retorno_pesquisa_caixa = (array) model_one((string)$this->tabela(), (array) $filtro);
+            if($retorno_checagem == true){
+                $retorno_operacao = (bool) model_update((string) $this->tabela(), ['_id', '===', $this->id_caixa], (array) ['nome_caixa' => (string) $this->nome_caixa, 'descricao' => (string) $this->descricao, 'tipo' => (string) $this->tipo, 'status' => (string) $this->status]);
 
-            $retorno_operacao =  (bool) model_update((string) $this->tabela(), (array) $filtro, (array) model_parse((array) $retorno_pesquisa_caixa, (array) ['id_empresa' => (int) $this->id_empresa, 'id_prateleira' => (int) $this->id_prateleira, 'nome_caixa' => (string) $this->nome_caixa, 'descricao' => (string) $this->descricao, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
-
-            $descricao_log = (string) 'Alterou a caixa '.$this->nome_caixa;
-        }else{
-            $retorno_operacao = (bool) model_insert((string) $this->tabela(), (array) model_parse((array) $this->modelo(), (array) ['id_caixa' => (int) intval(model_next((string) $this->tabela(), 'id_caixa', (array) ['id_empresa', '===', (int) $this->id_empresa]), 10), 'id_empresa' => (int) $this->id_empresa, 'id_usuario' => (int) $this->id_usuario, 'id_prateleira' => (int) $this->id_prateleira, 'nome_caixa' => (string) $this->nome_caixa, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'forma_visualizacao' => (string) $this->forma_visualizacao]));
-
-            $descricao_log = (string) 'Cadastrou a caixa '.$this->nome_caixa;
-        }
-        
-        if($retorno_operacao == true){
-            $retorno_usuario = (array) $objeto_usuario->pesquisar((array) ['filtro' => (array) ['id_usuario', '===', (int) intval($this->id_usuario, 10)]]);
-
-            if(empty($retorno_usuario) == false){
-                $retorno_log = (bool) $objeto_log->salvar_dados((array) ['id_empresa' => (int) intval($this->id_empresa, 10), 'usuario' => (string) $retorno_usuario['login'], 'codigo_barras' => (string) $this->codigo_barras, 'modulo' => (string) 'CAIXA', 'descricao' => (string) $descricao_log]);
+                if($retorno_operacao == true){
+                    $retorno_log = (array) $objeto_log_sistema->salvar_dados(['empresa' => $this->empresa, 'usuario' => $this->usuario, 'tabela_acao' => (string) 'ALTERACAO', 'modulo' => (string) 'CAIXA', 'descricao' => 'Usuário alterou a caixa '.$this->nome_caixa]);
+                }
+            }else{
+                $retorno_operacao = (bool) false;
             }
-
-            if($this->forma_visualizacao == 'PUBLICO'){
-                $retorno_objeto_notificacao = (array) $objeto_notificacao->salvar_dados((array) ['titulo_notificacao' => (string) 'Cadastro de Nova Caixa', 'mensagem_longa' => (string) 'A caixa '.$this->nome_caixa.' foi cadastrada no sistema', 'mensagem_curta' => (string) 'Cadastro de nova caixa!']);
-            }
-
-            return (array) ['titulo' => (string) 'SUCESSO NA OPERACAÇÃO!', 'mensagem' => (string) 'Operação realizada com sucesso!', 'icone' => (string) 'success'];
         }else{
-            return (array) ['titulo' => (string) 'ERRO DURANTE O PROCESSO!', 'mensagem' => (string) 'Erro durante o processo!', 'icone' => (string) 'error'];
+            $retorno_operacao = (bool) model_insert((string) $this->tabela(), ['usuario' => $this->usuario, 'prateleira' => $this->prateleira, 'empresa' => $this->empresa, 'nome_caixa' => (string) $this->nome_caixa, 'descricao' => (string) $this->descricao, 'codigo_barras' => (string) $this->codigo_barras, 'tipo' => (string) $this->tipo, 'status' => (string) $this->status, 'data_cadastro' => $this->data_cadastro]);
+
+            if($retorno_operacao == true){
+                $retorno_log = (bool) $objeto_log_sistema->salvar_dados((array) ['empresa' => $this->empresa, 'usuario' => $this->usuario, 'tabela_acao' => (string) 'CADASTRO', 'modulo' => (string) 'CAIXA', 'descricao' => (string) 'Usuário cadastrou a caixa '.$this->nome_caixa]);
+            }
         }
+
+        return (bool) $retorno_operacao;
     }
 
     public function pesquisar($dados){
@@ -118,88 +123,36 @@ class Caixa{
 
     /**
      * Função responsável por montar o array de retorno da forma como o front do sistema espera.
-     * @param array $dados filtro montado de pesquisa
-     * @param int $id_empresa identificador da empresa.
-     * @param array $retorno variável utilizada para armazenar as informações para que possa ser retornado.
-     * @return array $retorno com as informações formatadas.
+     * @param array $filtro, informação daa forma que vem do banco de dados
+     * @param array $retorno, variável que armazena as informações corretas
+     * @return array retorno de dados.
      */
-    public function validar_dados_pesquisa_caixa($dados, $id_empresa, $retorno){
-        $retorno_pesquisa = (array) $this->pesquisar_todos($dados);
+    public function validar_dados_pesquisa_caixa($filtro, $retorno){
+        $objeto_prateleira = new Prateleira();
+        $retorno_caixa_pesquisa = (array) $this->pesquisar_todos($filtro);
 
-        if(empty($retorno_pesquisa) == false){
-            foreach($retorno_pesquisa as $caixa){
-                $retorno_temporario = (array) model_parse($this->modelo_validacao(), $caixa);
+        if(empty($retorno_caixa_pesquisa) == false){
+            foreach($retorno_caixa_pesquisa as $retorno_pesquisa){
+                if(array_key_exists('prateleira', $retorno_pesquisa) == true){
+                    $filtro_pesquisa_prateleira = (array) ['filtro' => (array) ['_id', '===', $retorno_pesquisa['prateleira']]];
+                    $retorno_prateleira = (array) $objeto_prateleira->pesquisar($filtro_pesquisa_prateleira);
 
-                $objeto_prateleira = new Prateleira();
-                $dados_prateleira = (array) $objeto_prateleira->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $id_empresa], (array) ['id_prateleira', '===', (int) $caixa['id_prateleira']]]]]);
-
-                if(empty($dados_prateleira) == false){
-                    if(array_key_exists('nome_prateleira', $dados_prateleira) == true){
-                        $retorno_temporario['nome_prateleira'] = (string) $dados_prateleira['nome_prateleira'];
+                    if(empty($retorno_prateleira) == false){
+                        if(array_key_exists('nome_prateleira', $retorno_prateleira) == true){
+                            $retorno_pesquisa['nome_prateleira'] = (string) $retorno_prateleira['nome_prateleira'];
+                        }else{
+                            $retorno_pesquisa['nome_prateleira'] = (string) '';
+                        }
+                    }else{
+                        $retorno_pesquisa['nome_prateleira'] = (string) '';
                     }
                 }
-                array_push($retorno, $retorno_temporario);
+
+                array_push($retorno, $retorno_pesquisa);
             }
         }
 
         return (array) $retorno;
-    }
-
-    /**
-     * Função responsável por verificar qual a forma de visualização atual da caixa e realizar a alteração de acordo com esta forma
-     * @param array $dados contendo todas as informações necessária para a relização da alteração
-     * @return bool contando true ou false de acordo com o resultado da função.
-     */
-    public function alterar_forma_visualizacao($dados){
-        $this->colocar_dados($dados);
-
-        $filtro = (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_caixa', '===', (int) $this->id_caixa]]];
-
-        if($this->forma_visualizacao == 'PUBLICO'){
-            return (bool) model_update((string) $this->tabela(), (array) $filtro, (array) ['forma_visualizacao' => (string) 'PRIVADO']);
-        }else{
-            return (bool) model_update((string) $this->tabela(), (array) $filtro, (array) ['forma_visualizacao' => (string) 'PUBLICO']);
-        }
-    }
-
-    /**
-     * Função responsável por realizar a pesquisa se é possível realizar a exclusão da caixa e caso seja possível exclui a mesma do banco de dados.
-     * @param mixed $dados
-     * @return array
-     */
-    public function excluir($dados){
-        $objeto_log = new LogSistema();
-        $objeto_usuario = new Usuario();
-        $objeto_documento = new Documentos();
-
-        $this->colocar_dados((array) $dados);
-
-        $array_filtro = (array) ['id_caixa', '===', (int) $this->id_caixa];
-
-        $filtro_pesquisa_documento = (array) ['filtro' => (array) $array_filtro];
-        $retorno_pesquisa = (array) $objeto_documento->pesquisar_documento($filtro_pesquisa_documento);
-
-        if(empty($retorno_pesquisa) == false){
-            return (array) mensagem_retorno('NÃO É POSSÍVEL EXCLUIR', 'Não é possível excluir uma caixa que contenha documentos cadastrados', 'error');
-        }else{
-            $retorno_caixa = (array) $this->pesquisar((array) ['filtro' => (array) ['id_caixa', '===', (int) intval($this->id_caixa, 10)]]);
-
-            if(empty($retorno_caixa) == false){
-                $retorno_usuario = (array) $objeto_usuario->pesquisar((array) ['filtro' => (array) ['id_usuario', '===', (int) intval($retorno_caixa['id_usuario'], 10)]]);
-
-                if(empty($retorno_usuario) == false){
-                    $retorno_log = (bool) $objeto_log->salvar_dados((array) ['id_empresa' => (int) intval($retorno_caixa['id_empresa'], 10), 'usuario' => (string) $retorno_usuario['login'], 'codigo_barras' => (string) $retorno_caixa['codigo_barras'], 'modulo' => (string) 'CAIXA', 'descricao' => (string) 'Excluiu a caixa '.$retorno_caixa['nome_caixa']]);
-                }
-            }
-
-            $retorno_operacao = (bool) model_delete($this->tabela(), $array_filtro);
-
-            if($retorno_operacao == true){
-                return (array) mensagem_retorno('SUCESSO NA OPERAÇÃO', 'Operação realizada com sucesso!', 'success');
-            }else{
-                return (array) mensagem_retorno('ERRO DESCONHECIDO', 'Aconteceu algum erro desconhecido \n no processo de exclusão!\n por favor tente mais tarde', 'error');
-            }
-        }
     }
 }
 ?>

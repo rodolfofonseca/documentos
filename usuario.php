@@ -388,22 +388,22 @@ router_add('alterar_informacoes_usuario_comum', function () {
     $preferencia_usuario_quantidade_documentos_por_extensao = (string) 'CHECKED';
     $preferencia_usuario_tamanho_total_arquivos = (string) 'CHECKED';
 
-    //MONTANDO FILTRO DE PESQUISA PARA SABER SE O USUÁRIO LOGADO NO SISTEMA PREFERE VER O RELATÓRIO DE QUANTIDADE DE DOCUMENTOS POR TIPO DE ARQUIVO
-    $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval(CODIGO_SISTEMA, 10)], ['id_usuario', '===', (int) intval(CODIGO_USUARIO, 10)], ['nome_preferencia', '===', (string) 'USUARIO_PREFERENCIA_RELATORIO_QUANTIDADE_DOCUMENTOS_POR_EXTENSAO']]];
-    $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
+    // //MONTANDO FILTRO DE PESQUISA PARA SABER SE O USUÁRIO LOGADO NO SISTEMA PREFERE VER O RELATÓRIO DE QUANTIDADE DE DOCUMENTOS POR TIPO DE ARQUIVO
+    // $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval(CODIGO_SISTEMA, 10)], ['id_usuario', '===', (int) intval(CODIGO_USUARIO, 10)], ['nome_preferencia', '===', (string) 'USUARIO_PREFERENCIA_RELATORIO_QUANTIDADE_DOCUMENTOS_POR_EXTENSAO']]];
+    // $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
-    if(empty($retorno_pesquisa_preferencia) == true){
-        $preferencia_usuario_quantidade_documentos_por_extensao = (string) '';
-    }
+    // if(empty($retorno_pesquisa_preferencia) == true){
+    //     $preferencia_usuario_quantidade_documentos_por_extensao = (string) '';
+    // }
 
-    //MONTANDO FILTRO DE PESQUISA PARA SABER SE O USUÁRIO LOGADO NO SISTEMA PREFERE VER O RELATÓRIO DE TAMANHO TOTAL DE ARQUIVOS CADASTRADOS NO SISTEMA
+    // //MONTANDO FILTRO DE PESQUISA PARA SABER SE O USUÁRIO LOGADO NO SISTEMA PREFERE VER O RELATÓRIO DE TAMANHO TOTAL DE ARQUIVOS CADASTRADOS NO SISTEMA
 
-    $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) CODIGO_SISTEMA], ['id_usuario', '===', (int) CODIGO_USUARIO], ['nome_preferencia', '===', (string) 'USUARIO_PREFRENCIA_RELATORIO_TAMANHO_TOTAL_ARQUIVO']]];
-    $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
+    // $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) CODIGO_SISTEMA], ['id_usuario', '===', (int) CODIGO_USUARIO], ['nome_preferencia', '===', (string) 'USUARIO_PREFRENCIA_RELATORIO_TAMANHO_TOTAL_ARQUIVO']]];
+    // $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
-    if(empty($retorno_pesquisa_preferencia) == true){
-        $preferencia_usuario_tamanho_total_arquivos = (string) '';
-    }
+    // if(empty($retorno_pesquisa_preferencia) == true){
+    //     $preferencia_usuario_tamanho_total_arquivos = (string) '';
+    // }
 
     ?>
     <script>
@@ -428,27 +428,27 @@ router_add('alterar_informacoes_usuario_comum', function () {
         }
 
         function salvar_dados() {
-            let codigo_usuario = sistema.int(document.querySelector('#codigo_usuario').value);
-            let nome_usuario = document.querySelector('#nome_usuario').value;
-            let login = document.querySelector('#login').value;
-            let senha = document.querySelector('#senha_usuario').value;
+            // let codigo_usuario = sistema.int(document.querySelector('#codigo_usuario').value);
+            // let nome_usuario = document.querySelector('#nome_usuario').value;
+            // let login = document.querySelector('#login').value;
+            // let senha = document.querySelector('#senha_usuario').value;
 
-            if (senha == '') {
-                Swal.fire('Erro', 'Para salvar as informações do usuário a senha não pode ser vazia!', 'error');
-            } else {
-                sistema.request.post('/usuario.php', {
-                    'rota': 'salvar_dados_usuario',
-                    'codigo_usuario': codigo_usuario,
-                    'codigo_empresa': ID_EMPRESA,
-                    'nome_usuario': nome_usuario,
-                    'login': login,
-                    'senha_usuario': senha
-                }, function(retorno) {
-                    sistema.verificar_status(retorno.status, sistema.url('/usuario.php', {
-                        'rota': 'index'
-                    }));
-                });
-            }
+            // if (senha == '') {
+            //     Swal.fire('Erro', 'Para salvar as informações do usuário a senha não pode ser vazia!', 'error');
+            // } else {
+            //     sistema.request.post('/usuario.php', {
+            //         'rota': 'salvar_dados_usuario',
+            //         'codigo_usuario': codigo_usuario,
+            //         'codigo_empresa': ID_EMPRESA,
+            //         'nome_usuario': nome_usuario,
+            //         'login': login,
+            //         'senha_usuario': senha
+            //     }, function(retorno) {
+            //         sistema.verificar_status(retorno.status, sistema.url('/usuario.php', {
+            //             'rota': 'index'
+            //         }));
+            //     });
+            // }
         }
 
         /** 
@@ -559,23 +559,23 @@ router_add('alterar_informacoes_usuario_comum', function () {
 
 /**
  * Rota responsável por receber as informaçõs de vem do front e enviar para o back para que seja validada e alterada.
- */
-router_add('alterar_status_usuario', function () {
-    $objeto_usuario = new Usuario();
+//  */
+// router_add('alterar_status_usuario', function () {
+//     $objeto_usuario = new Usuario();
 
-    echo json_encode(['status' => (bool) $objeto_usuario->alterar_status($_REQUEST)]);
-    exit;
-});
+//     echo json_encode(['status' => (bool) $objeto_usuario->alterar_status($_REQUEST)]);
+//     exit;
+// });
 
-/**
- * Rota responsável por alterar a senha do usuário.
- * Esta rota recebe a nova senha e então envia para o back para que seja validada e alterada.
- */
-router_add('alterar_senha_usuario', function () {
-    $objeto_usuario = new Usuario();
-    echo json_encode(['status' => (bool) $objeto_usuario->alterar_senha($_REQUEST)], JSON_UNESCAPED_UNICODE);
-    exit;
-});
+// /**
+//  * Rota responsável por alterar a senha do usuário.
+//  * Esta rota recebe a nova senha e então envia para o back para que seja validada e alterada.
+//  */
+// router_add('alterar_senha_usuario', function () {
+//     $objeto_usuario = new Usuario();
+//     echo json_encode(['status' => (bool) $objeto_usuario->alterar_senha($_REQUEST)], JSON_UNESCAPED_UNICODE);
+//     exit;
+// });
 
 /**
  * Rota responsável por pesquisar as informações do usuário do sistema.

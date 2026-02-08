@@ -14,7 +14,7 @@ router_add('index', function () {
     $usuario_preferencia_pesquisar_caixa_automaticamente = (string) 'CHECKED';
     $usuario_preferencia_quantidade_caixa = (int) intval(25, 10);
 
-    $array_filtro_preferencia_usuario = (array) ['codigo_usuario' => (int) CODIGO_USUARIO, 'codigo_sistema' => (int) CODIGO_SISTEMA, 'nome_preferencia' => (string) 'NOME_COMPLETO_CAIXA'];
+    $array_filtro_preferencia_usuario = (array) ['usuario' => convert_id(CODIGO_USUARIO), 'sistema' => convert_id(CODIGO_SISTEMA), 'nome_preferencia' => (string) 'NOME_COMPLETO_CAIXA'];
 
     $usuario_preferencia_nome_caixa = (string) $objeto_preferencia->pesquisar_preferencia_usuario($array_filtro_preferencia_usuario);
     
@@ -27,9 +27,9 @@ router_add('index', function () {
     ?>
     <script>
         
-        const CODIGO_EMPRESA = <?php echo CODIGO_EMPRESA; ?>;
-        const CODIGO_USUARIO = <?php echo CODIGO_USUARIO;?>;
-        const CODIGO_SISTEMA = <?php echo CODIGO_SISTEMA; ?>;
+        const CODIGO_EMPRESA = "<?php echo CODIGO_EMPRESA; ?>";
+        const CODIGO_USUARIO = "<?php echo CODIGO_USUARIO;?>";
+        const CODIGO_SISTEMA = "<?php echo CODIGO_SISTEMA; ?>";
         const PREFERENCIA_QUANTIDADE_CAIXA = <?php echo $usuario_preferencia_quantidade_caixa; ?>;
         const PESQUISAR_CAIXA_AUTOMATICAMENTE = "<?php echo $usuario_preferencia_pesquisar_caixa_automaticamente; ?>";
 
@@ -38,15 +38,15 @@ router_add('index', function () {
             
             sistema.request.post('/caixa.php', {
                 'rota': 'pesquisar_caixa_todas',
-                'codigo_caixa': sistema.int(document.querySelector('#codigo_caixa').value),
-                'codigo_empresa':CODIGO_EMPRESA,
-                'codigo_usuario':CODIGO_USUARIO,
-                'codigo_sistema': CODIGO_SISTEMA,
-                'codigo_prateleira': sistema.int(document.querySelector('#codigo_prateleira').value),
+                'empresa':CODIGO_EMPRESA,
+                'usuario':CODIGO_USUARIO,
+                'sistema': CODIGO_SISTEMA,
+                'prateleira': document.querySelector('#codigo_prateleira').value,
                 'nome_caixa': sistema.string(document.querySelector('#nome_caixa').value),
                 'descricao': sistema.string(document.querySelector('#descricao').value),
                 'codigo_barras': sistema.string(document.querySelector('#codigo_barras').value),
-                'forma_visualizacao':sistema.string(document.querySelector('#forma_visualizacao').value),
+                'tipo':sistema.string(document.querySelector('#tipo').value),
+                'status':document.querySelector('#status').value,
                 'limite_retorno': PREFERENCIA_QUANTIDADE_CAIXA,
                 'preferencia_usuario': sistema.int(document.querySelector('#limite_retorno').value)
             }, function(retorno) {
@@ -58,15 +58,13 @@ router_add('index', function () {
 
                 if (tamanho_retorno == 0) {
                     let linha = document.createElement('tr');
-                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA CAIXA ENCONTRADA COM OS FILTROS INFORMADOS', 'inner', true, 8));
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA CAIXA ENCONTRADA COM OS FILTROS INFORMADOS', 'inner', true, 7));
                     tabela.appendChild(linha);
                 } else {
                     sistema.each(caixas, function(index, caixa) {
                         let linha = document.createElement('tr');
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], str_pad(caixa.id_caixa, 3, '0'), 'inner'));
-
-                        if(visualizar_nome_completo.checked == true){
+                        if(visualizar_nome_completo.checked == false){
                             linha.appendChild(sistema.gerar_td(['text-left'], caixa.nome_caixa.substring(0,15), 'inner'));
                             linha.appendChild(sistema.gerar_td(['text-left'], caixa.descricao.substring(0,40), 'inner'));
                         }else{
@@ -76,44 +74,24 @@ router_add('index', function () {
 
                         linha.appendChild(sistema.gerar_td(['text-center'], caixa.nome_prateleira, 'inner'));
 
-                        if(caixa.forma_visualizacao == 'PUBLICO'){
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_forma_visualizacao_caixa_' + caixa.id_caixa, caixa.forma_visualizacao, ['btn', 'btn-primary'], function visualizar_caixa_tipo() {}), 'append'));
+                        if(caixa.tipo == 'PUBLICO'){
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_forma_visualizacao_caixa_' + caixa._id.$oid, caixa.tipo, ['btn', 'btn-primary'], function visualizar_caixa_tipo() {}), 'append'));
                         }else{
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_forma_visualizacao_caixa_' + caixa.id_caixa, caixa.forma_visualizacao, ['btn', 'btn-secondary'], function visualizar_caixa_tipo() {}), 'append'));
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_forma_visualizacao_caixa_' + caixa._id.$oid, caixa.tipo, ['btn', 'btn-secondary'], function visualizar_caixa_tipo() {}), 'append'));
+                        }
+                        if(caixa.status == 'ATIVO'){
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_forma_visualizacao_caixa_' + caixa._id.$oid, caixa.status, ['btn', 'btn-success'], function visualizar_caixa_status() {}), 'append'));
+                        }else{
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_forma_visualizacao_caixa_' + caixa._id.$oid, caixa.status, ['btn', 'btn-danger'], function visualizar_caixa_status() {}), 'append'));
                         }
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('imprimir_codigo_barra_' + caixa.id_caixa, caixa.codigo_barras, ['btn', 'btn-success'], function imprimir_caixa() {caixa_imprimir_codigo_barras(caixa.id_caixa);}), 'append'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('alterar_tipo_caixa_'+caixa.id_caixa, 'ALTERAR', ['btn', 'btn-info'], function alterar_tipo_caixa(){alterar_forma_visualizacao_caixa(caixa.id_caixa, caixa.id_empresa, caixa.forma_visualizacao)}), 'append'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('excluir_caixa_banco_dados_'+caixa.id_caixa, 'EXCLUIR', ['btn', 'btn-danger'], function excluir_caixa_banco_dados(){excluir_caixa(caixa.id_caixa)}), 'append'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_caixa_' + caixa.id_caixa, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar_caixa() {cadastrar_caixa(caixa.id_caixa);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('imprimir_codigo_barra_' + caixa.id_caixa, caixa.codigo_barras, ['btn', 'btn-success'], function imprimir_caixa() {caixa_imprimir_codigo_barras(caixa._id.$oid);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('visualizar_caixa_' + caixa._id.$oid, 'VISUALIZAR', ['btn', 'btn-info'], function visualizar_caixa() {cadastrar_caixa(caixa._id.$oid);}), 'append'));
 
                         tabela.appendChild(linha);
                     });
                 }
             }, false);
-        }
-
-        /**
-         * Função responsável por excluir a caixa do banco de dados.
-        */
-        function excluir_caixa(id_caixa){
-            sistema.request.post('/caixa.php', {'rota':'excluir_caixa', 'codigo_caixa':id_caixa}, function(retorno){
-                validar_retorno(retorno, '', 1);
-                pesquisar_caixa();
-            });
-        }
-
-        /** 
-         * Função responsável por alterar a forma de visulização da caixa de pública para privada e deprivada para público.
-         * @param {int} id_caixa
-         * #param {int} id_empresa
-         * @param {string} forma_visualizacao
-         */
-        function alterar_forma_visualizacao_caixa(id_caixa, id_empresa, forma_visualizacao){
-            sistema.request.post('/caixa.php', {'rota': 'alterar_tipo_caixa', 'codigo_caixa': id_caixa, 'codigo_empresa': id_empresa, 'forma_visualizacao': forma_visualizacao}, function(retorno){
-                validar_retorno(retorno);
-                pesquisar_caixa();
-            });
         }
 
         /** 
@@ -185,16 +163,12 @@ router_add('index', function () {
                         <br />
                         <div class="row">
                             <div class="col-3">
-                                <button class="btn btn-secondary custom-radius btn-lg" onclick="cadastrar_caixa(0);">Cadastrar Caixa</button>
+                                <button class="btn btn-secondary custom-radius btn-lg" onclick="cadastrar_caixa('');">Cadastrar Caixa</button>
                             </div>
                         </div>
                         <br />
                         <div class="row">
-                            <div class="col-1 text-center">
-                                <label class="text">Código</label>
-                                <input type="text" sistema-mask="codigo" id="codigo_caixa" class="form-control custom-radius" placeholder="Código" />
-                            </div>
-                            <div class="col-6 text-center">
+                            <div class="col-5 text-center">
                                 <label class="text">Nome Caixa</label>
                                 <input type="text" class="form-control custom-radius text-uppercase" id="nome_caixa" placeholder="Nome Caixa"/>
                             </div>
@@ -203,11 +177,19 @@ router_add('index', function () {
                                 <input type="text" class="form-control custom-radius" sistema-mask="codigo" maxlength="13" placeholder="Código Barras" id="codigo_barras"/>
                             </div>
                             <div class="col-2 text-center">
-                                <label class="text">forma Visualização</label>
-                                <select class="form-control custom-radius" id="forma_visualizacao">
+                                <label class="text">Tipo</label>
+                                <select class="form-control custom-radius" id="tipo">
                                     <option value="TODOS">TODOS</option>
                                     <option value="PUBLICO">PÚBLICO</option>
                                     <option value="PRIVADO">PRIVADO</option>
+                                </select>
+                            </div>
+                            <div class="col-2 text-center">
+                                <label class="text">Status</label>
+                                <select class="form-control custom-radius" id="status">
+                                    <option value="TODOS">TODOS</option>
+                                    <option value="ATIVO">ATIVO</option>
+                                    <option value="INATIVO">INATIVO</option>
                                 </select>
                             </div>
                         </div>
@@ -265,20 +247,18 @@ router_add('index', function () {
                                     <table class="table table-hover table-striped" id="tabela_caixa">
                                         <thead class="bg-info text-white">
                                             <tr class="text-center">
-                                                <th scope="col">#</th>
                                                 <th scope="col">Nome</th>
                                                 <th scope="col">Descrição</th>
                                                 <th scope="col">Prateleira</th>
                                                 <th scope="col">Tipo</th>
+                                                <th scope="col">Status</th>
                                                 <th scope="col">Código de barras</th>
-                                                <th scope="col">Alt. Tipo</th>
-                                                <th scope="col">Excluir</th>
                                                 <th scope="col">Ação</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="9" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                                <td colspan="7" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -399,39 +379,41 @@ router_add('impressao_codigo_barra_caixa', function () {
  * Rota responsável por capturar as variáveis que o ususário informa das caixas para cadastro dentro do sistema.
  */
 router_add('salvar_dados_caixa', function () {
-    $codigo_caixa = (int) (isset($_REQUEST['codigo_caixa']) ? (int) intval($_REQUEST['codigo_caixa'], 10) : 0);
+    $codigo_caixa = (string) (isset($_REQUEST['codigo_caixa']) ? (string) $_REQUEST['codigo_caixa'] : '');
     require_once 'includes/head.php';
     ?>
     <script>
-        const CODIGO_EMPRESA = <?php echo CODIGO_EMPRESA; ?>;
-        const CODIGO_USUARIO = <?php echo CODIGO_USUARIO;?>;
-        const CODIGO_SISTEMA = <?php echo CODIGO_SISTEMA; ?>;
+        const CODIGO_EMPRESA = "<?php echo CODIGO_EMPRESA; ?>";
+        const CODIGO_USUARIO = "<?php echo CODIGO_USUARIO;?>";
+        const CODIGO_SISTEMA = "<?php echo CODIGO_SISTEMA; ?>";
 
-        let CODIGO_CAIXA = <?php echo $codigo_caixa; ?>;
+        let CODIGO_CAIXA = "<?php echo $codigo_caixa; ?>";
 
         /** 
          * Função responsável por validar os dados e enviar para o back acionar a rota de cadastro de caixas.
          */
         function salvar_dados() {
-            let codigo_caixa = sistema.int(document.querySelector('#codigo_caixa').value);
-            let codigo_prateleira = sistema.int(document.querySelector('#codigo_prateleira').value);
+            let codigo_caixa = document.querySelector('#codigo_caixa').value;
+            let codigo_prateleira = document.querySelector('#codigo_prateleira').value;
             let nome_caixa = sistema.string(document.querySelector('#nome_caixa').value);
             let descricao = sistema.string(document.querySelector('#descricao').value);
             let codigo_barras = sistema.string(document.querySelector('#codigo_barras').value);
-            let forma_visualizacao = sistema.string(document.querySelector('#forma_visualizacao').value);
+            let tipo = sistema.string(document.querySelector('#tipo').value);
+            let status = document.querySelector('#status').value;
 
             sistema.request.post('/caixa.php', {
                 'rota': 'salvar_dados',
-                'codigo_caixa': codigo_caixa,
+                'codigo_caixa': CODIGO_CAIXA,
                 'codigo_empresa': CODIGO_EMPRESA,
                 'codigo_usuario': CODIGO_USUARIO,
                 'codigo_prateleira': codigo_prateleira,
                 'nome_caixa': nome_caixa,
                 'descricao': descricao,
                 'codigo_barras': codigo_barras,
-                'forma_visualizacao': forma_visualizacao
+                'tipo': tipo,
+                'status':status
             }, function(retorno) {
-                validar_retorno(retorno, '/caixa.php', 1);
+                validar_retorno(retorno, '/caixa.php');
             });
         }
 
@@ -452,8 +434,9 @@ router_add('salvar_dados_caixa', function () {
             document.querySelector('#nome_caixa').value = '';
             document.querySelector('#codigo_prateleira').value = '';
             document.querySelector('#codigo_prateleira').value = '';
-            document.querySelector('#forma_visualizacao').value = '';
+            document.querySelector('#tipo').value = '';
             document.querySelector('#descricao').value = '';
+            document.querySelector('#status').value = '';
 
             sistema.request.post('/index.php', {'rota': 'buscar_codigo_barras'}, function(retorno){
                 document.querySelector('#codigo_barras').value = retorno.codigo_barras;
@@ -468,17 +451,22 @@ router_add('salvar_dados_caixa', function () {
                         <h4 class="card-title text-center">Cadastro de Caixa</h4>
                         <br />
                         <div class="row">
-                            <div class="col-1 text-center">
-                                <label class="text">Código</label>
-                                <input type="text" sistema-mask="codigo" id="codigo_caixa" class="form-control custom-radius text-center" placeholder="Código" disabled="true" />
-                            </div>
-                            <div class="col-7 text-center">
+                            <input type="hidden" id="codigo_caixa" class="form-control custom-radius text-center" placeholder="Código" disabled="true" />
+                            <div class="col-6 text-center">
                                 <label class="text">Nome Caixa</label>
                                 <input type="text" class="form-control custom-radius text-uppercase" id="nome_caixa" placeholder="Nome Caixa" />
                             </div>
                             <div class="col-2 text-center">
-                                <label class="text">Forma Visualização</label>
-                                <select class="form-control custom-radius" id="forma_visualizacao">
+                                <label class="text">Status</label>
+                                <select class="form-control custom-radius" id="status">
+                                    <option value="">Selecione uma opção</option>
+                                    <option value="ATIVO">ATIVO</option>
+                                    <option value="INATIVO">INATIVO</option>
+                                </select>
+                            </div>
+                            <div class="col-2 text-center">
+                                <label class="text">Tipo</label>
+                                <select class="form-control custom-radius" id="tipo">
                                     <option value="">Selecione uma opção</option>
                                     <option value="PUBLICO">PÚBLICO</option>
                                     <option value="PRIVADO">PRIVADO</option>
@@ -487,6 +475,12 @@ router_add('salvar_dados_caixa', function () {
                             <div class="col-2 text-center">
                                 <label class="text">Código Barras</label>
                                 <input type="text" class="form-control custom-radius text-center" sistema-mask="codigo" maxlength="13" placeholder="Código Barras" value="<?php echo codigo_barras(); ?>" disabled="true" id="codigo_barras" />
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-12">
+                                <textarea class="form-control custom-radius" id="descricao" placeholder="Descrição"></textarea>
                             </div>
                         </div>
                         <br/>
@@ -501,12 +495,6 @@ router_add('salvar_dados_caixa', function () {
                             ?>
                         </div>
                         <br/>
-                        <div class="row">
-                            <div class="col-12">
-                                <textarea class="form-control custom-radius" id="descricao" placeholder="Descrição"></textarea>
-                            </div>
-                        </div>
-                        <br />
                         <?php
                         require_once 'includes/botao_cadastro.php';
                         ?>
@@ -520,17 +508,18 @@ router_add('salvar_dados_caixa', function () {
             validar_acesso_administrador('<?php echo $_SESSION['tipo_usuario']; ?>');
 
             window.setTimeout(function() {
-                if (CODIGO_CAIXA != 0) {
+                if (CODIGO_CAIXA != '') {
                     sistema.request.post('/caixa.php', {
                         'rota': 'pesquisar_caixa',
                         'codigo_caixa': CODIGO_CAIXA
                     }, function(retorno) {
-                        document.querySelector('#codigo_caixa').value = retorno.dados.id_caixa;
-                        document.querySelector('#codigo_prateleira').value = retorno.dados.id_prateleira;
+                        document.querySelector('#codigo_caixa').value = retorno.dados._id.$oid;
+                        document.querySelector('#codigo_prateleira').value = retorno.dados.prateleira.$oid;
                         document.querySelector('#nome_caixa').value = retorno.dados.nome_caixa;
                         document.querySelector('#descricao').value = retorno.dados.descricao;
                         document.querySelector('#codigo_barras').value = retorno.dados.codigo_barras;
-                        document.querySelector('#forma_visualizacao').value = retorno.dados.forma_visualizacao;
+                        document.querySelector('#tipo').value = retorno.dados.tipo;
+                        document.querySelector('#status').value = retorno.dados.status;
                     }, false);
                 }
             }, 500);
@@ -545,19 +534,19 @@ router_add('salvar_dados_caixa', function () {
 router_add('salvar_dados', function () {
     $objeto_caixa = new Caixa();
 
-    echo json_encode((array) $objeto_caixa->salvar($_REQUEST), JSON_UNESCAPED_UNICODE);
+    echo json_encode((array) ['status' => (bool) $objeto_caixa->salvar_dados($_REQUEST)], JSON_UNESCAPED_UNICODE);
     exit;
 });
 
 //@audit pesquisar_caixa
 router_add('pesquisar_caixa', function () {
-    $id_caixa = (int) (isset($_REQUEST['codigo_caixa']) ? (int) intval($_REQUEST['codigo_caixa'], 10) : 0);
+    $id_caixa = (string) (isset($_REQUEST['codigo_caixa']) ? (string) $_REQUEST['codigo_caixa'] : '');
     $objeto_caixa = new Caixa();
     $filtro = (array) [];
     $dados = (array) ['filtro' => (array) []];
 
     if ($id_caixa != '') {
-        array_push($filtro, ['id_caixa', '===', (int) $id_caixa]);
+        array_push($filtro, ['_id', '===', convert_id($id_caixa)]);
         $dados['filtro'] = (array) ['and' => (array) $filtro];
     }
 
@@ -569,16 +558,19 @@ router_add('pesquisar_caixa', function () {
  * Rota responsável por realizar a pesquisa de todas as caixas cadastradas no sistema e retornar as informações para a rota que realizou o chamado
  */
 router_add('pesquisar_caixa_todas', function () {
-    $id_caixa = (int) (isset($_REQUEST['codigo_caixa']) ? (int) intval($_REQUEST['codigo_caixa'], 10) : 0);
-    $id_prateleira = (int) (isset($_REQUEST['codigo_prateleira']) ? (int) intval($_REQUEST['codigo_prateleira'], 10) : 0);
-    $id_empresa = (int) (isset($_REQUEST['codigo_empresa']) ? (int) intval($_REQUEST['codigo_empresa'], 10):0);
-    $id_usuario = (int) (isset($_REQUEST['codigo_usuario']) ? (int) intval($_REQUEST['codigo_usuario'], 10):0);
-    $id_sistema = (int) (isset($_REQUEST['codigo_sistema']) ? (int) intval($_REQUEST['codigo_sistema'], 10):0);
+    $objeto_caixa = new Caixa();
+    $objeto_preferencia = new Preferencia();
+
+    $prateleira = (string) (isset($_REQUEST['prateleira']) ? (string) $_REQUEST['prateleira'] : '');
+    $empresa = (string) (isset($_REQUEST['empresa']) ? (string) $_REQUEST['empresa']:'');
+    $usuario = (string) (isset($_REQUEST['usuario']) ? (string) $_REQUEST['usuario']:'');
+    $sistema = (string) (isset($_REQUEST['sistema']) ? (string) $_REQUEST['sistema']:'');
     
     $nome_caixa = (string) (isset($_REQUEST['nome_caixa']) ? (string) strtoupper($_REQUEST['nome_caixa']) : '');
     $codigo_barras = (string) (isset($_REQUEST['codigo_barras']) ? (string) $_REQUEST['codigo_barras'] : '');
     $descricao = (string) (isset($_REQUEST['descricao']) ? (string) $_REQUEST['descricao']:'');
-    $forma_visualizacao = (string) (isset($_REQUEST['forma_visualizacao']) ? (string) $_REQUEST['forma_visualizacao']:'');
+    $tipo = (string) (isset($_REQUEST['tipo']) ? (string) $_REQUEST['tipo']:'TODOS');
+    $status = (string) (isset($_REQUEST['status']) ? (string) $_REQUEST['status']:'TODOS');
 
     $limite_retorno = (int) (isset($_REQUEST['limite_retorno']) ? (int) intval($_REQUEST['limite_retorno'], 10):0);
     $preferencia_usuario = (int) (isset($_REQUEST['preferencia_usuario']) ? (int) intval($_REQUEST['preferencia_usuario'], 10):0);
@@ -590,31 +582,18 @@ router_add('pesquisar_caixa_todas', function () {
     $dados = (array) ['filtro' => (array) [], 'ordenacao' => (array) ['nome_caixa' => (bool) true], 'limite' => (int) $limite_retorno];
     $retorno = (array) [];
 
-    $objeto_caixa = new Caixa();
-
-    if ($id_caixa != 0) {
-        array_push($filtro, (array) ['id_caixa', '===', (int) $id_caixa]);
-        array_push($filtro_todos_publico, (array) ['id_caixa', '===', (int) $id_caixa]);
-        array_push($filtro_todos_privado, (array) ['id_caixa', '===', (int) $id_caixa]);
+    if($prateleira != ''){
+        array_push($filtro, (array) ['prateleira', '===', convert_id($prateleira)]);
+        array_push($filtro_todos_publico, (array) ['prateleira', '===', convert_id($prateleira)]);
+        array_push($filtro_todos_privado, (array) ['prateleira', '===', convert_id($prateleira)]);
     }
 
-    if($id_prateleira != 0){
-        array_push($filtro, (array) ['id_prateleira', '===', (int) $id_prateleira]);
-        array_push($filtro_todos_publico, (array) ['id_prateleira', '===', (int) $id_prateleira]);
-        array_push($filtro_todos_privado, (array) ['id_prateleira', '===', (int) $id_prateleira]);
+    if($empresa != ''){
+        array_push($filtro, (array) ['empresa', '===', convert_id($empresa)]);
+        array_push($filtro_todos_publico, (array) ['empresa', '===', convert_id($empresa)]);
+        array_push($filtro_todos_privado, (array) ['empresa', '===', convert_id($empresa)]);
     }
 
-    if($id_empresa != 0){
-        array_push($filtro, (array) ['id_empresa', '===', (int) $id_empresa]);
-        array_push($filtro_todos_publico, (array) ['id_empresa', '===', (int) $id_empresa]);
-        array_push($filtro_todos_privado, (array) ['id_empresa', '===', (int) $id_empresa]);
-    }
-
-    if($id_usuario != 0){
-        array_push($filtro, (array) ['id_usuario', '===', (int) $id_usuario]);
-        array_push($filtro_todos_publico, (array) ['id_usuario', '===', (int) $id_usuario]);
-        array_push($filtro_todos_privado, (array) ['id_usuario', '===', (int) $id_usuario]);
-    }
     if($nome_caixa != ''){
         array_push($filtro, (array) ['nome_caixa', '=', (string) $nome_caixa]);
         array_push($filtro_todos_publico, (array) ['nome_caixa', '=', (string) $nome_caixa]);
@@ -633,50 +612,37 @@ router_add('pesquisar_caixa_todas', function () {
         array_push($filtro_todos_privado, (array) ['descricao', '=', (string) $descricao]);
     }
 
-    if($forma_visualizacao == 'PRIVADO'){
-        array_push($filtro, (array) ['id_usuario', '===', (int) $id_usuario]);
+    if($status != 'TODOS'){
+        array_push($filtro, (array) ['status', '===', (string) $status]);
+        array_push($filtro_todos_privado, ['status', '===', (string) $status]);
+        array_push($filtro_todos_publico, ['status', '===', (string) $status]);
     }
 
-    if($forma_visualizacao == 'PRIVADO' || $forma_visualizacao == 'PUBLICO'){
-        array_push($filtro, (array) ['forma_visualizacao', '===', (string) $forma_visualizacao]);
+    if($tipo == 'PRIVADO'){
+        array_push($filtro, (array) ['usuario', '===', convert_id($usuario)]);
+    }
+
+    if($tipo == 'PRIVADO' || $tipo == 'PUBLICO'){
+        array_push($filtro, (array) ['tipo', '===', (string) $tipo]);
         $dados['filtro'] = (array) ['and' => (array) $filtro];
 
-        $retorno = (array) $objeto_caixa->validar_dados_pesquisa_caixa($dados, $id_empresa, $retorno);
+        $retorno = (array) $objeto_caixa->validar_dados_pesquisa_caixa($dados, $retorno);
     }else{
-        array_push($filtro_todos_privado, (array) ['id_usuario', '===', (int) $id_usuario]);
-        array_push($filtro_todos_privado, (array) ['forma_visualizacao', '===', (string) 'PRIVADO']);
-        array_push($filtro_todos_publico, (array) ['forma_visualizacao', '===', (string) 'PUBLICO']);
+        array_push($filtro_todos_privado, (array) ['usuario', '===', convert_id($usuario)]);
+        array_push($filtro_todos_privado, (array) ['tipo', '===', (string) 'PRIVADO']);
+        array_push($filtro_todos_publico, (array) ['tipo', '===', (string) 'PUBLICO']);
 
         $dados['filtro'] = (array) ['and' => (array) $filtro_todos_privado];
-        $retorno = (array) $objeto_caixa->validar_dados_pesquisa_caixa($dados, $id_empresa, $retorno);
+        $retorno = (array) $objeto_caixa->validar_dados_pesquisa_caixa($dados, $retorno);
 
         $dados['filtro'] = (array) ['and' => (array) $filtro_todos_publico];
-        $retorno = (array) $objeto_caixa->validar_dados_pesquisa_caixa($dados, $id_empresa, $retorno);
+        $retorno = (array) $objeto_caixa->validar_dados_pesquisa_caixa($dados, $retorno);
     }
 
-    $objeto_preferencia = new Preferencia();
-    $objeto_preferencia->alterar_quantidade_retorno($preferencia_usuario, $limite_retorno, 'QUANTIDADE_LIMITE_CAIXA', $id_usuario, $id_sistema);
+    
+    $objeto_preferencia->alterar_quantidade_retorno($preferencia_usuario, $limite_retorno, 'QUANTIDADE_LIMITE_CAIXA', $usuario, $sistema);
 
     echo json_encode(['dados' => (array) $retorno], JSON_UNESCAPED_UNICODE);
-    exit;
-});
-
-/**
- * Rota responsável por realizar a transição entre o front e back da alteração de forma de visualização.
- */
-router_add('alterar_tipo_caixa', function(){
-    $objeto_caixa = new Caixa();
-    
-    echo json_encode(['status' => (bool) $objeto_caixa->alterar_forma_visualizacao($_REQUEST)], JSON_UNESCAPED_UNICODE);
-    exit;
-});
-
-/**
- * Rota responsável por realizar a exclusão da caixa no banco de dados, quando a mesma não possuir documentos.
- */
-router_add('excluir_caixa', function(){
-    $objeto_caixa = new Caixa();
-    echo json_encode((array) $objeto_caixa->excluir($_REQUEST), JSON_UNESCAPED_UNICODE);
     exit;
 });
 ?>

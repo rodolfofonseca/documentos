@@ -10,15 +10,15 @@ if ((!isset($_SESSION['login']) == true) && (!isset($_SESSION['senha']) == true)
 $objeto_notificacao = new Notificacoes();
 
 //CONSTANTES UTILIZADAS EM TODO O SISTEMA
-define('CODIGO_USUARIO', (int) intval($_SESSION['id_usuario'], 10));
-define('CODIGO_SISTEMA', (int) intval($_SESSION['id_sistema'], 10));
-define('CODIGO_EMPRESA', (int) intval($_SESSION['id_empresa'], 10));
+define('CODIGO_USUARIO', convert_id($_SESSION['id_usuario']));
+define('CODIGO_SISTEMA', convert_id($_SESSION['id_sistema']));
+define('CODIGO_EMPRESA', convert_id($_SESSION['id_empresa']));
 define('TIPO_USUARIO', (string) $_SESSION['tipo_usuario']);
 define('NOME_USUARIO', (string) $_SESSION['login']);
 define('VERSAO_SISTEMA', (string) $_SESSION['versao_sistema']);
-define('ATIVACAO_EMPRESA', (bool) $_SESSION['ativacao_empresa']);
 
-$quantidade_notificacao = (int) $objeto_notificacao->contar_notificacoes((array) ['id_usuario' => (int) CODIGO_USUARIO]);
+// $quantidade_notificacao = (int) $objeto_notificacao->contar_notificacoes((array) ['id_usuario' => (int) CODIGO_USUARIO]);
+$quantidade_notificacao = (int) 0;
 $notificacoes = (array) [];
 $retorno = (bool) false;
 
@@ -148,15 +148,15 @@ if($quantidade_notificacao != 0){
                             </a>
                             <div class="dropdown-menu dropdown-menu-right user-dd animated flipInY">
                                 <a class="dropdown-item" href="usuario.php?rota=alterar_informacoes_usuario_comum"> <i data-feather="user" class="svg-icon mr-2 ml-1"></i>Meu Perfil</a>
-                                <a class="dropdown-item" href="#"> <i data-feather="credit-card" class="svg-icon mr-2 ml-1"> </i>caixa</a>
-                                <a class="dropdown-item" href="#"><i data-feather="mail" class="svg-icon mr-2 ml-1"></i>Mensagens</a>
+                                <!-- <a class="dropdown-item" href="#"> <i data-feather="credit-card" class="svg-icon mr-2 ml-1"> </i>caixa</a>
+                                <a class="dropdown-item" href="#"><i data-feather="mail" class="svg-icon mr-2 ml-1"></i>Mensagens</a> -->
                                 <?php
                                     if(TIPO_USUARIO == 'ADMINISTRADOR'){
                                         ?>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="usuario.php"><i data-feather="settings" class="svg-icon mr-2 ml-1"></i>Configurações de Usuários</a>
+                                            <!-- <a class="dropdown-item" href="usuario.php"><i data-feather="settings" class="svg-icon mr-2 ml-1"></i>Configurações de Usuários</a> -->
                                             <a class="dropdown-item" href="sistema.php"><i data-feather="settings" class="svg-icon mr-2 ml-1"></i>Configurações do Sistema</a>
-                                            <a class="dropdown-item" href="empresa.php"><i data-feather="settings" class="svg-icon mr-2 ml-1"></i>Configurações da Empresa</a>
+                                            <!-- <a class="dropdown-item" href="empresa.php"><i data-feather="settings" class="svg-icon mr-2 ml-1"></i>Configurações da Empresa</a> -->
                                         <?php
                                     }
                                 ?>
@@ -196,11 +196,11 @@ if($quantidade_notificacao != 0){
                                     <li class="sidebar-item"><a href="tipo_despesa.php" class="sidebar-link"><span class="hide-menu">Tipo Despesa / tipo Contas</span></a></li> -->
                                 </ul>
                             </li>
-                            <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="book" class="feather-icon"></i><span class="hide-menu">Log Sistema</span></a>
+                            <!-- <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="book" class="feather-icon"></i><span class="hide-menu">Log Sistema</span></a>
                                 <ul aria-expanded="false" class="collapse first-level base-level-line">
                                     <li class="sidebar-item"><a href="log_sistema.php" class="sidebar-link"><span class="hide-menu">Visualizar Log do Sistema</span></a></li>
                                 </ul>
-                            </li>
+                            </li> -->
                             <!-- <li class="sidebar-item"><a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false"><i data-feather="book-open" class="feather-icon"></i><span class="hide-menu">Contas</span></a>
                                 <ul aria-expanded="false" class="collapse first-level base-level-line">
                                     <li class="sidebar-item"><a href="contas.php" class="sidebar-link"><span class="hide-menu">Contas</span></a></li>
@@ -217,24 +217,6 @@ if($quantidade_notificacao != 0){
                             </li> -->
                             </li>
                         <?php
-                        }
-
-                        if(ATIVACAO_EMPRESA == true){
-                            ?>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
-                                    <i data-feather="book" class="feather-icon"></i>
-                                    <span class="hide-menu">Suporte</span>
-                                </a>
-                                <ul aria-expanded="flase" class="collapse first-level base-level-line">
-                                    <li class="sidebar-item">
-                                        <a href="suporte.php" class="sidebar-link">
-                                            <span class="hide-menu">Suporte</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <?php
                         }
                         ?>
                     </ul>

@@ -113,7 +113,7 @@ class DB {
   }
 
   static function tables() {
-    $i = self::use('empresa');
+    $i = self::use('table');
     $collections = [];
     $validacao = [];
 
@@ -262,14 +262,18 @@ class DB {
 
   function one($filters=[], $order=[]) {
     $filtros = self::filter($filters);
-    $options = [
-      'projection' => ['_id' => 0],
-      'sort' => $this->order($order)
-    ];
+    // $options = [
+    //   'projection' => ['_id' => 1],
+    //   'sort' => $this->order($order)
+    // ];
+    $options = ['sort' => $this->order($order)];
+    $result = $this->connection->findOne($filtros, $options);
+    
+    if($result && isset($result['_id'])){
+      $result['_id'] = (string) $result['_id'];
+    }
 
-    return $this
-      ->connection
-      ->findOne($filtros, $options) ?? [];
+    return $result;
   }
 
   /**
@@ -283,10 +287,15 @@ class DB {
     $filtros = self::filter($filters);
 
     if($limit == 0){
-      $options = ['projection' => ['_id' => 0], 'sort' => $this->order($order)];
+      $options = ['sort' => $this->order($order)];
     }else{
-      $options = ['projection' => ['_id' => 0], 'sort' => $this->order($order), 'limit' => $limit];
+      $options = ['sort' => $this->order($order), 'limit' => $limit];
     }
+    // if($limit == 0){
+    //   $options = ['projection' => ['_id' => 0], 'sort' => $this->order($order)];
+    // }else{
+    //   $options = ['projection' => ['_id' => 0], 'sort' => $this->order($order), 'limit' => $limit];
+    // }
 
     return $this->connection->find($filtros, $options)->toArray();
   }

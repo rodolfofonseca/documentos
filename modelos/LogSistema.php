@@ -15,9 +15,8 @@ class LogSistema{
 
     private $id_log;
     private $id_empresa;
-    private $id_usuario;
     private $usuario;
-    private $codigo_barras;
+    private $tabela_acao;
     private $modulo;
     private $descricao;
     private $data_log;
@@ -27,40 +26,28 @@ class LogSistema{
     }
 
     private function modelo(){
-        return (array) ['id_log' => (int) 0, 'id_empresa' => (int) 0,'usuario' => (string) '', 'codigo_barras' => (string) codigo_barras(), 'modulo' => (string) '', 'descricao' => (string) '', 'data_log' => 'date'];
+        return (array) ['_id' => convert_id(''), 'empresa' => convert_id(''),'usuario' => (string) '', 'tabela_acao' => (string) '', 'modulo' => (string) '', 'descricao' => (string) '', 'data_log' => 'date'];
     }
 
     private function colocar_dados($dados){
         date_default_timezone_set('America/Sao_Paulo');
 
         if(array_key_exists('id_log', $dados) == true){
-            $this->id_log = (int) intval($dados['id_log'], 10);
-        }else{
-            $this->id_log = (int) 0;
+            $this->id_log = convert_id($dados['id_log']);
         }
         
         if(array_key_exists('id_empresa', $dados) == true){
-            $this->id_empresa = (int) intval($dados['id_empresa'], 10);
-        }else{
-            $this->id_empresa = (int) 0;
-        }
-
-        if(array_key_exists('id_usuario', $dados) == true){
-            $this->id_usuario = (int) intval($dados['id_usuario'], 10);
-        }else{
-            $this->id_usuario = (int) 0;
+            $this->id_empresa = convert_id($dados['id_empresa']);
         }
 
         if(array_key_exists('usuario', $dados) == true){
-            $this->usuario = (string) $dados['usuario'];
-        }else{
-            $this->usuario = (string) '';
+            $this->usuario = convert_id($dados['usuario']);
         }
 
-        if(array_key_exists('codigo_barras', $dados) == true){
-            $this->codigo_barras = (string) $dados['codigo_barras'];
+        if(array_key_exists('tabela_acao', $dados) == true){
+            $this->tabela_acao = (string) $dados['tabela_acao'];
         }else{
-            $this->codigo_barras = codigo_barras();
+            $this->tabela_acao = (string) '';
         }
 
         if(array_key_exists('modulo', $dados) == true){
@@ -76,27 +63,25 @@ class LogSistema{
         }
 
         if(array_key_exists('data_log', $dados) == true){
-            $this->data_log = (string) $dados['data_log'];
+            $this->data_log = model_date($dados['data_log']);
         }else{
-            $this->data_log = (string) date('Y-m-d');
+            $this->data_log = model_date();
         }
     }
 
     public function salvar_dados($dados){
+        $objeto_usuario = new Usuario();
         $this->colocar_dados($dados);
 
-        if($this->id_usuario != 0){
-            $objeto_usuario = new Usuario();
-            $retorno_usuario = (array) $objeto_usuario->pesquisar((array) ['filtro' => (array) ['id_usuario', '===', (int) $this->id_usuario]]);
-            
-            if(empty($retorno_usuario) == false){
-                if(array_key_exists('login', $retorno_usuario) == true){
-                    $this->usuario = (string) $retorno_usuario['login'];
-                }
+        $retorno_usuario = (array) $objeto_usuario->pesquisar((array) ['filtro' => (array) ['_id', '===', $dados['usuario']]]);
+
+        if(empty($retorno_usuario) == false){
+            if(array_key_exists('login_usuario', $retorno_usuario) == true){
+                $this->usuario = (string) $retorno_usuario['login_usuario'];
             }
         }
 
-        return (bool) model_insert((string) $this->tabela(), model_parse((array) $this->modelo(), (array) ['id_log' => (int) intval(model_next((string) $this->tabela(), (string) 'id_log'), 10), 'id_empresa' => (int) intval($this->id_empresa, 10), 'usuario' => (string) $this->usuario, 'codigo_barras' => (string) $this->codigo_barras, 'modulo' => (string) $this->modulo, 'descricao' => (string) $this->descricao, 'data_log' => model_date((string) $this->data_log)]));
+        return (bool) model_insert((string) $this->tabela(), (array) ['empresa' => $this->id_empresa, 'usuario' => (string) $this->usuario, 'tabela_acao' => (string) $this->tabela_acao, 'modulo' => (string) $this->modulo, 'descricao' => (string) $this->descricao, 'data_log' => $this->data_log]);
     }
 
     public function deletar($dados){

@@ -1,8 +1,0 @@
-    dashboard.php ->
-        Correção do relatório de tamanho_arquivo, para não contabilizar informações com identificador zerado.
-    
-    empresa.php ->
-        Criação de um novo módulo onde o usuário pode cadastrar as chaves compradas para possuir suporte ao usuário.
-
-    suporte.php ->
-        Módulo onde o usuário cadastra e visualiza os tickets que foram abertos.

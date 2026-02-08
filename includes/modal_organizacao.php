@@ -24,16 +24,15 @@
 
             if (tamanho_retorno < 1) {
                 let linha = document.createElement('tr');
-                linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA ORGANIZAÇÃO ENCONTRADA!', 'inner', true, 3));
+                linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA ORGANIZAÇÃO ENCONTRADA!', 'inner', true, 2));
                 tabela.appendChild(linha);
             } else {
                 sistema.each(organizacoes, function (index, organizacao) {
                     let linha = document.createElement('tr');
 
-                    linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(organizacao.id_organizacao, 3, '0'), 'inner'));
                     linha.appendChild(sistema.gerar_td(['text-left'], organizacao.nome_organizacao, 'inner'));
                     linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_organizacao_' + organizacao.id_organizacao, 'SELECIONAR', ['btn', 'btn-success'], function selecionar_organizacao() {
-                        selecionar_informacao_organizacao(organizacao.id_organizacao);
+                        selecionar_informacao_organizacao(organizacao._id.$oid);
                     }), 'append'));
 
                     tabela.appendChild(linha);
@@ -56,8 +55,7 @@
     <label class="text">Organização</label>
     <div class="row">
         <div class="col-6">
-            <input type="text" class="form-control custom-radius tex-center" id="codigo_organizacao" value="0"
-                readonly="true" />
+            <input type="text" class="form-control custom-radius tex-center" id="codigo_organizacao" value=""readonly="true" />
         </div>
         <div class="col-6">
             <button class="btn btn-info custom-radius botao_grande btn-lg" data-toggle="modal" data-target="#modal_pesquisar_organizacao" onclick="abri_modal(event, false, '<?php echo $abrir_modal_organizacao; ?>');">Pesquisar</button>
@@ -78,12 +76,8 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-2 text-center">
-                        <label class="text" for="codigo_modal_caixa">Código</label>
-                        <input type="text" class="form-control custom-radius text-center" id="codigo_modal_organizacao"
-                            placeholder="Código" sistema-mask="codigo" onkeyup="pesquisar_organizacao();" />
-                    </div>
-                    <div class="col-2 text-center">
+                    <input type="hidden" class="form-control custom-radius text-center" id="codigo_modal_organizacao" placeholder="Código" sistema-mask="codigo" onkeyup="pesquisar_organizacao();" />
+                    <div class="col-4 text-center">
                         <label class="text" for="nome_modal_organizacao">Nome</label>
                         <input type="text" class="form-control custom-radius" id="nome_modal_organizacao"
                             placeholder="Nome" onkeyup="pesquisar_organizacao();" />
@@ -113,14 +107,13 @@
                             <table class="table table-hover table-striped" id="tabela_modal_organizacao">
                                 <thead class="bg-info text-white">
                                     <tr class="text-center">
-                                        <th scope="col">#</th>
                                         <th scope="col">Nome</th>
                                         <th scope="col">Ação</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colspan="3" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                        <td colspan="2" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
                                     </tr>
                                 </tbody>
                             </table>

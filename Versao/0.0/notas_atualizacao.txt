@@ -1,2 +1,0 @@
-    <strong>Instalação concluída com sucesso!</strong>
-    . Sucesso no processo de instalação, agora você pode realizar logins no sistema.

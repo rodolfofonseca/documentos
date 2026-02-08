@@ -25,31 +25,31 @@ router_add('index', function () {
     $cadastro_documento = (string) (isset($_REQUEST['cadastro_documento']) ? (string) $_REQUEST['cadastro_documento'] : 'false');
     $mensagem = (string) (isset($_REQUEST['retorno']) ? (string) $_REQUEST['retorno'] : 'false');
 
-    //MONTANDO O FILTRO E PESQUISANDO PARA SABER SE O USUÁRIO QUE ESTÁ LOGADO PREFERE VER O NOME COMPLETO DOS DOCUMENTOS OU NÃO.
-    $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval($_SESSION['id_sistema'], 10)], ['id_usuario', '===', (int) intval($_SESSION['id_usuario'], 10)], ['nome_preferencia', '===', (string) 'NOME_COMPLETO_DOCUMENTO']]];
-    $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
+    // //MONTANDO O FILTRO E PESQUISANDO PARA SABER SE O USUÁRIO QUE ESTÁ LOGADO PREFERE VER O NOME COMPLETO DOS DOCUMENTOS OU NÃO.
+    // $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval($_SESSION['id_sistema'], 10)], ['id_usuario', '===', (int) intval($_SESSION['id_usuario'], 10)], ['nome_preferencia', '===', (string) 'NOME_COMPLETO_DOCUMENTO']]];
+    // $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
-    if (empty($retorno_pesquisa_preferencia) == true) {
-        $usuario_preferencia_nome_documento = (string) '';
-    }
+    // if (empty($retorno_pesquisa_preferencia) == true) {
+    //     $usuario_preferencia_nome_documento = (string) '';
+    // }
 
-    //MONTANDO O FILTRO E PESQUISANDO PARA SABER A QUANTIDADE DE DOCUMENTOS QUE O USUÁRIO QUE ESTÁ LOGADO NO SISTEMA PREFERE VER.
-    $filtro_pesquisa = (array) ['filtro' => (array) ['and' => (array) [['id_sistema', '===', (int) intval($_SESSION['id_sistema'], 10)], ['id_usuario', '===', (int) intval($_SESSION['id_usuario'], 10)], ['nome_preferencia', '===', (string) 'QUANTIDADE_LIMITE_DOCUMENTO']]]];
-    $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) $filtro_pesquisa);
+    // //MONTANDO O FILTRO E PESQUISANDO PARA SABER A QUANTIDADE DE DOCUMENTOS QUE O USUÁRIO QUE ESTÁ LOGADO NO SISTEMA PREFERE VER.
+    // $filtro_pesquisa = (array) ['filtro' => (array) ['and' => (array) [['id_sistema', '===', (int) intval($_SESSION['id_sistema'], 10)], ['id_usuario', '===', (int) intval($_SESSION['id_usuario'], 10)], ['nome_preferencia', '===', (string) 'QUANTIDADE_LIMITE_DOCUMENTO']]]];
+    // $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) $filtro_pesquisa);
 
-    if (empty($retorno_pesquisa_preferencia) == true) {
-        $retorno_salvar_dados = (bool) $objeto_preferencia->salvar_dados((array) ['codigo_usuario' => (int) intval($_SESSION['id_usuario'], 10), 'codigo_sistema' => (int) intval($_SESSION['id_sistema'], 10), 'nome_preferencia' => (string) 'QUANTIDADE_LIMITE_DOCUMENTO', 'preferencia' => (string) $usuario_preferencia_quantidade_documentos]);
-    } else {
-        $usuario_preferencia_quantidade_documentos = (int) intval($retorno_pesquisa_preferencia['preferencia'], 10);
-    }
+    // if (empty($retorno_pesquisa_preferencia) == true) {
+    //     $retorno_salvar_dados = (bool) $objeto_preferencia->salvar_dados((array) ['codigo_usuario' => (int) intval($_SESSION['id_usuario'], 10), 'codigo_sistema' => (int) intval($_SESSION['id_sistema'], 10), 'nome_preferencia' => (string) 'QUANTIDADE_LIMITE_DOCUMENTO', 'preferencia' => (string) $usuario_preferencia_quantidade_documentos]);
+    // } else {
+    //     $usuario_preferencia_quantidade_documentos = (int) intval($retorno_pesquisa_preferencia['preferencia'], 10);
+    // }
 
     //MONTANDO FILTRO PARA SABER SE O USUÁRIO QUE ESTÁ LOGADO NO SISTEMA, PREFERE PESQUISAR OS DOCUMENTOS QUANDO ABRIR A PÁGINA DE FORMA AUTOMÁTICA, OU PREFERE INSERIR UM FILTRO E DEPOIS PESQUISAR.
-    $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval($_SESSION['id_sistema'], 10)], ['id_usuario', '===', (int) intval($_SESSION['id_usuario'], 10)], ['nome_preferencia', '===', (string) 'PESQUISAR_DOCUMENTOS_AUTOMATICAMENTE']]];
-    $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
+    // $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval($_SESSION['id_sistema'], 10)], ['id_usuario', '===', (int) intval($_SESSION['id_usuario'], 10)], ['nome_preferencia', '===', (string) 'PESQUISAR_DOCUMENTOS_AUTOMATICAMENTE']]];
+    // $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
-    if(empty($retorno_pesquisa_preferencia) == true){
-        $preferencia_pesquisar_documento_automaticamente = (string) '';
-    }
+    // if(empty($retorno_pesquisa_preferencia) == true){
+    //     $preferencia_pesquisar_documento_automaticamente = (string) '';
+    // }
     ?>
     <script>
         let CADASTRO_DOCUMENTO = "<?php echo $cadastro_documento; ?>";
@@ -57,9 +57,9 @@ router_add('index', function () {
         let PREFERENCIA_QUANTIDADE_DOCUMENTOS = <?php echo $usuario_preferencia_quantidade_documentos; ?>;
         let PESQUISAR_DOCUMENTOS_AUTOMATICAMENTE = "<?php echo $preferencia_pesquisar_documento_automaticamente; ?>";
         
-        const CODIGO_EMPRESA = <?php echo $_SESSION['id_empresa']; ?>;
-        const CODIGO_SISTEMA = <?php echo $_SESSION['id_sistema'] ?>;
-        const CODIGO_USUARIO = <?php echo $_SESSION['id_usuario'] ?>;
+        const CODIGO_EMPRESA = "<?php echo $_SESSION['id_empresa']; ?>";
+        const CODIGO_SISTEMA = "<?php echo $_SESSION['id_sistema'] ?>";
+        const CODIGO_USUARIO = "<?php echo $_SESSION['id_usuario'] ?>";
 
         function cadastro_documentos(codigo_documento) {
             window.location.href = sistema.url('/documentos.php', {
@@ -124,7 +124,6 @@ router_add('index', function () {
         }
 
         function pesquisar_documento() {
-            let codigo_documento = sistema.int(document.querySelector('#codigo_documento').value);
             let nome_documento = sistema.string(document.querySelector('#nome_documento').value);
             let descricao = sistema.string(document.querySelector('#descricao').value);
             let codigo_barras = sistema.string(document.querySelector('#codigo_barras').value);
@@ -132,16 +131,15 @@ router_add('index', function () {
             let tipo_arquivo = sistema.string(document.querySelector('#tipo_arquivo').value);
 
             //INFORMAÇÕES DA LOCALIZAÇÃO DO DOCUMENTO
-            let codigo_organizacao = sistema.int(document.querySelector('#codigo_organizacao').value);
-            let codigo_armario = sistema.int(document.querySelector('#codigo_armario').value);
-            let codigo_prateleira = sistema.int(document.querySelector('#codigo_prateleira').value);
-            let codigo_caixa = sistema.int(document.querySelector('#codigo_caixa').value);
+            let codigo_organizacao = document.querySelector('#codigo_organizacao').value;
+            let codigo_armario = document.querySelector('#codigo_armario').value;
+            let codigo_prateleira = document.querySelector('#codigo_prateleira').value;
+            let codigo_caixa = document.querySelector('#codigo_caixa').value;
 
             let flexSwitchCheckChecked = document.querySelector('#flexSwitchCheckChecked');
 
             sistema.request.post('/documentos.php', {
                 'rota': 'pesquisar_documentos_todos',
-                'codigo_documento': codigo_documento,
                 'codigo_empresa': CODIGO_EMPRESA,
                 'codigo_sistema': CODIGO_SISTEMA,
                 'codigo_usuario': CODIGO_USUARIO,
@@ -156,6 +154,7 @@ router_add('index', function () {
                 'tipo_arquivo': tipo_arquivo,
                 'preferencia_usuario_retorno': PREFERENCIA_QUANTIDADE_DOCUMENTOS
             }, function (retorno) {
+
                 let documentos = retorno.dados;
                 let tamanho_retorno = documentos.length;
                 let tabela = document.querySelector('#tabela_documentos tbody');
@@ -195,22 +194,22 @@ router_add('index', function () {
                             baixar_codigo_barras(documento.codigo_barras);
                         }), 'append'));
 
-                        if(documento.tipo_arquivo == 'DOCUMENTO' || documento.tipo_arquivo == undefined || documento.tipo_arquivo == ''){
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento, 'EXCLUIR', ['btn', 'btn-danger'], function alterar() {
-                                excluir_documentos(documento.id_documento);
+                        if(documento.tipo_documento == 'DOCUMENTO' || documento.tipo_documento == undefined || documento.tipo_documento == ''){
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento.$oid, 'EXCLUIR', ['btn', 'btn-danger'], function alterar() {
+                                excluir_documentos(documento.id_documento.$oid);
                             }), 'append'));
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento, 'ALTERAR', ['btn', 'btn-info'], function alterar() {
-                                cadastro_documentos(documento.id_documento);
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento.$oid, 'ALTERAR', ['btn', 'btn-info'], function alterar() {
+                                cadastro_documentos(documento.id_documento.$oid);
                             }), 'append'));
                         }else{
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento, 'EXCLUIR', ['btn', 'btn-danger', 'disabled'], function alterar() {
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento.$oid, 'EXCLUIR', ['btn', 'btn-danger', 'disabled'], function alterar() {
                             }), 'append'));
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento, 'ALTERAR', ['btn', 'btn-info', 'disabled'], function alterar() {
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento.$oid, 'ALTERAR', ['btn', 'btn-info', 'disabled'], function alterar() {
                             }), 'append'));
                         }
                         
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento, 'BAIXAR', ['btn', 'btn-success'], function alterar() {
-                            baixar_documento(documento.endereco, documento.id_documento);
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_selecionar_' + documento.id_documento.$oid, 'BAIXAR', ['btn', 'btn-success'], function alterar() {
+                            baixar_documento(documento.endereco, documento.id_documento.$oid);
                         }), 'append'));
 
                         tabela.appendChild(linha);
@@ -280,7 +279,7 @@ router_add('index', function () {
                         <div class="row">
                             <div class="col-3">
                                 <button class="btn btn-secondary btn-lg botao_grande custom-radius"
-                                    onclick="cadastro_documentos(0);">Cadastro de Documentos</button>
+                                    onclick="cadastro_documentos('');">Cadastro de Documentos</button>
                             </div>
                         </div>
                         <br />
@@ -430,28 +429,28 @@ router_add('index', function () {
 router_add('salvar_dados_documentos', function () {
     require_once 'includes/head.php';
 
-    $codigo_documento = (int) (isset($_REQUEST['codigo_documento']) ? (int) intval($_REQUEST['codigo_documento'], 10) : 0);
-    $codigo_empresa = (int) 0;
-    $codigo_usuario = (int) 0;
+    $codigo_documento = (string) (isset($_REQUEST['codigo_documento']) ? (string) $_REQUEST['codigo_documento'] : '');
+    $codigo_empresa = (string) '';
+    $codigo_usuario = (string) '';
 
     if (isset($_SESSION['id_empresa'])) {
-        $codigo_empresa = (int) intval($_SESSION['id_empresa'], 10);
+        $codigo_empresa = (string) $_SESSION['id_empresa'];
     }
 
     if (isset($_SESSION['id_usuario'])) {
-        $codigo_usuario = (int) intval($_SESSION['id_usuario'], 10);
+        $codigo_usuario = (string) $_SESSION['id_usuario'];
     }
 
     ?>
     <script>
-        let CODIGO_ORGANIZACAO = 0;
-        let CODIGO_ARMARIO = 0;
-        let CODIGO_PRATELEIRA = 0;
-        let CODIGO_CAIXA = 0;
+        let CODIGO_ORGANIZACAO = '';
+        let CODIGO_ARMARIO = '';
+        let CODIGO_PRATELEIRA = '';
+        let CODIGO_CAIXA = '';
 
-        let CODIGO_DOCUMENTO = <?php echo $codigo_documento; ?>;
-        let CODIGO_USUARIO = <?php echo $codigo_usuario; ?>;
-        let CODIGO_EMPRESA = <?php echo $codigo_empresa; ?>;
+        let CODIGO_DOCUMENTO = "<?php echo $codigo_documento; ?>";
+        let CODIGO_USUARIO = "<?php echo $codigo_usuario; ?>";
+        let CODIGO_EMPRESA = "<?php echo $codigo_empresa; ?>";
 
         function valor(parametro, sair) {
             parametro.preventDefault();
@@ -474,22 +473,14 @@ router_add('salvar_dados_documentos', function () {
                         <br />
                         <!-- onsubmit="valor(0); return false;" -->
                         <form method="POST" accept="documentos.php" enctype="multipart/form-data">
-                            <input type="hidden" name="login_usuario" id="login_usuario"
-                                value="<?php echo $nome_usuario; ?>" />
+                            <input type="hidden" name="login_usuario" id="login_usuario" value="<?php echo $nome_usuario; ?>" />
                             <input type="hidden" name="rota" id="rota" value="salvar_dados" />
-                            <input type="hidden" name="codigo_empresa" id="codigo_empresa"
-                                value="<?php echo $codigo_empresa; ?>" />
-                            <input type="hidden" name="codigo_usuario" id="codigo_usuario"
-                                value="<?php echo $codigo_usuario; ?>" />
+                            <input type="hidden" name="codigo_empresa" id="codigo_empresa" value="<?php echo $codigo_empresa; ?>" />
+                            <input type="hidden" name="codigo_usuario" id="codigo_usuario" value="<?php echo $codigo_usuario; ?>" />
                             <input type="hidden" name="quantidade_downloads" id="quantidade_downloads" />
                             <input type="hidden" name="tipo_documento" id="tipo_documento" value="DOCUMENTO"/>
+                            <input type="hidden" id="codigo_documento" name="codigo_documento" />
                             <div class="row">
-                                <div class="col-1 text-center">
-                                    <label class="text">Código</label>
-                                    <input type="text" class="form-control custom-radius text-center" id="codigo_documento"
-                                        sistema-mask="codigo" placeholder="Código" readonly="true"
-                                        name="codigo_documento" />
-                                </div>
                                 <div class="col-7 text-center">
                                     <label class="text">Nome</label>
                                     <input type="text" class="form-control custom-radius text-uppercase" id="nome_documento"
@@ -504,7 +495,7 @@ router_add('salvar_dados_documentos', function () {
                                         <option value="PRIVADO">PRIVADO</option>
                                     </select>
                                 </div>
-                                <div class="col-2 text-center">
+                                <div class="col-3 text-center">
                                     <label class="text">Código Barras</label>
                                     <input type="text" class="form-control custom-radius text-center " id="codigo_barras"
                                         sistema-mask="codigo" placeholder="Código Barras" maxlength="13" readonly="true"
@@ -570,17 +561,19 @@ router_add('salvar_dados_documentos', function () {
                         'rota': 'pesquisar_documentos',
                         'codigo_documento': CODIGO_DOCUMENTO
                     }, function (retorno) {
-                        document.querySelector('#codigo_documento').value = retorno.dados.id_documento;
-                        document.querySelector('#codigo_prateleira').value = retorno.dados.id_prateleira;
-                        document.querySelector('#codigo_organizacao').value = retorno.dados.id_organizacao;
-                        document.querySelector('#codigo_caixa').value = retorno.dados.id_caixa;
-                        document.querySelector('#codigo_armario').value = retorno.dados.id_armario;
+                        let documento = retorno.dados;
 
-                        document.querySelector('#nome_documento').value = retorno.dados.nome_documento;
-                        document.querySelector('#descricao').value = retorno.dados.descricao;
-                        document.querySelector('#codigo_barras').value = retorno.dados.codigo_barras;
-                        document.querySelector('#quantidade_downloads').value = retorno.dados.quantidade_downloads;
-                        document.querySelector('#forma_visualizacao').value = retorno.dados.forma_visualizacao;
+                        document.querySelector('#codigo_documento').value = documento._id.$oid;
+                        document.querySelector('#codigo_prateleira').value = documento.prateleira.$oid;
+                        document.querySelector('#codigo_organizacao').value = documento.organizacao.$oid;
+                        document.querySelector('#codigo_caixa').value = documento.caixa.$oid;
+                        document.querySelector('#codigo_armario').value = documento.armario.$oid;
+
+                        document.querySelector('#nome_documento').value = documento.nome_documento;
+                        document.querySelector('#descricao').value = documento.descricao;
+                        document.querySelector('#codigo_barras').value = documento.codigo_barras;
+                        document.querySelector('#quantidade_downloads').value = documento.quantidade_downloads;
+                        document.querySelector('#forma_visualizacao').value = documento.forma_visualizacao;
                     }), false;
                 }
             }, 500);
@@ -606,34 +599,34 @@ router_add('imprimir_codigo_barra_documento', function () {
     $nome_caixa = (string) '';
 
     $objeto_documento = new Documentos();
-    $retorno_documento = (array) $objeto_documento->pesquisar_documento((array) ['filtro' => (array) ['codigo_barras', '===', (string) $codigo_barras]]);
+    $retorno_documento = (array) $objeto_documento->pesquisar((array) ['filtro' => (array) ['codigo_barras', '===', (string) $codigo_barras]]);
 
     if (empty($retorno_documento) == false) {
         $nome_documento = (string) $retorno_documento['nome_documento'];
 
         $objeto_organizacao = new Organizacao();
-        $retorno_organizacao = (array) $objeto_organizacao->pesquisar((array) ['filtro' => (array) ['and' => [(array) ['id_organizacao', '===', $retorno_documento['id_organizacao']], (array) ['id_empresa', '===', (int) $retorno_documento['id_empresa']]]]]);
+        $retorno_organizacao = (array) $objeto_organizacao->pesquisar((array) ['filtro' => (array) ['and' => [(array) ['_id', '===', $retorno_documento['organizacao']], (array) ['empresa', '===', $retorno_documento['empresa']]]]]);
 
         if (empty($retorno_organizacao) == false) {
             $nome_organizacao = (string) $retorno_organizacao['nome_organizacao'];
         }
 
         $objeto_armario = new Armario();
-        $retorno_armario = (array) $objeto_armario->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['id_armario', '===', (int) $retorno_documento['id_armario']], (array) ['id_empresa', '===', (int) $retorno_documento['id_empresa']]]]]);
+        $retorno_armario = (array) $objeto_armario->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['_id', '===', $retorno_documento['armario']], (array) ['empresa', '===', $retorno_documento['empresa']]]]]);
 
         if (empty($retorno_armario) == false) {
             $nome_armario = (string) $retorno_armario['nome_armario'];
         }
 
         $objeto_prateleira = new Prateleira();
-        $retorno_prateleira = (array) $objeto_prateleira->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['id_prateleira', '===', (int) $retorno_documento['id_prateleira']], (array) ['id_empresa', '===', (int) $retorno_documento['id_empresa']]]]]);
+        $retorno_prateleira = (array) $objeto_prateleira->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['_id', '===', $retorno_documento['prateleira']], (array) ['empresa', '===', $retorno_documento['empresa']]]]]);
 
         if (empty($retorno_prateleira) == false) {
             $nome_prateleira = (string) $retorno_prateleira['nome_prateleira'];
         }
 
         $objeto_caixa = new Caixa();
-        $retorno_caixa = (array) $objeto_caixa->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['id_caixa', '===', (int) $retorno_documento['id_caixa']], (array) ['id_empresa', '===', (int) $retorno_documento['id_empresa']]]]]);
+        $retorno_caixa = (array) $objeto_caixa->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['_id', '===', $retorno_documento['caixa']], (array) ['empresa', '===', $retorno_documento['empresa']]]]]);
 
         if (empty($retorno_caixa) == false) {
             $nome_caixa = (string) $retorno_caixa['nome_caixa'];
@@ -735,16 +728,15 @@ router_add('imprimir_codigo_barra_documento', function () {
  * Rota responsável por pesquisar todos os documentos do banco de dados e retornar ao front.
  */
 router_add('pesquisar_documentos_todos', function () {
-    $id_empresa = (int) (isset($_REQUEST['codigo_empresa']) ? (int) intval($_REQUEST['codigo_empresa'], 10) : 0);
-    $id_sistema = (int) (isset($_REQUEST['codigo_sistema']) ? (int) intval($_REQUEST['codigo_sistema'], 10) : 0);
-    $id_usuario = (int) (isset($_REQUEST['codigo_usuario']) ? (int) intval($_REQUEST['codigo_usuario'], 10) : 0);
-    $codigo_documento = (int) (isset($_REQUEST['codigo_documento']) ? (int) intval($_REQUEST['codigo_documento'], 10) : 0);
-
+    $id_empresa = (string) (isset($_REQUEST['codigo_empresa']) ? (string) $_REQUEST['codigo_empresa'] : '');
+    $id_sistema = (string) (isset($_REQUEST['codigo_sistema']) ? (string) $_REQUEST['codigo_sistema'] : '');
+    $id_usuario = (string) (isset($_REQUEST['codigo_usuario']) ? (string) $_REQUEST['codigo_usuario'] : '');
+    
     //CODIGOS DA LOCALIZACAÇÃO DO DOCUMENTO, PARA MONTAGEM DO FILTRO DE PESQUISA.
-    $id_organizacao = (int) (isset($_REQUEST['codigo_organizacao']) ? (int) intval($_REQUEST['codigo_organizacao'], 10):0);
-    $id_armario = (int) (isset($_REQUEST['codigo_armario']) ? (int) intval($_REQUEST['codigo_armario'], 10):0);
-    $id_prateleira = (int) (isset($_REQUEST['codigo_prateleira']) ? (int) intval($_REQUEST['codigo_prateleira'], 10):0);
-    $id_caixa = (int) (isset($_REQUEST['codigo_caixa']) ? (int) intval($_REQUEST['codigo_caixa'], 10):0);
+    $id_organizacao = (string) (isset($_REQUEST['codigo_organizacao']) ? (string) $_REQUEST['codigo_organizacao']:'');
+    $id_armario = (string) (isset($_REQUEST['codigo_armario']) ? (string) $_REQUEST['codigo_armario']:'');
+    $id_prateleira = (string) (isset($_REQUEST['codigo_prateleira']) ? (string) $_REQUEST['codigo_prateleira']:'');
+    $id_caixa = (string) (isset($_REQUEST['codigo_caixa']) ? (string) $_REQUEST['codigo_caixa']:'');
 
     $nome_documento = (string) (isset($_REQUEST['nome_documento']) ? (string) $_REQUEST['nome_documento'] : '');
     $descricao = (string) (isset($_REQUEST['descricao']) ? (string) $_REQUEST['descricao'] : '');
@@ -759,12 +751,8 @@ router_add('pesquisar_documentos_todos', function () {
 
     $objeto_documento = new Documentos();
 
-    if ($id_empresa != 0) {
-        array_push($filtro, (array) ['id_empresa', '===', (int) $id_empresa]);
-    }
-
-    if ($codigo_documento != 0) {
-        array_push($filtro, (array) ['id_documento', '===', (int) $codigo_documento]);
+    if ($id_empresa != '') {
+        array_push($filtro, (array) ['empresa', '===', convert_id($id_empresa)]);
     }
 
     if ($nome_documento != '') {
@@ -781,36 +769,36 @@ router_add('pesquisar_documentos_todos', function () {
 
     //CODLOCANDO NO ARRAY DE FILTRO, INFORMAÇÕES SOBRE A LOCALIZAÇÃO DO DOCUMENTO.
 
-    if($id_organizacao != 0){
-        array_push($filtro, (array) ['id_organizacao', '===', (int) $id_organizacao]);
+    if($id_organizacao != ''){
+        array_push($filtro, (array) ['organizacao', '===', convert_id($id_organizacao)]);
     }
 
-    if($id_armario != 0){
-        array_push($filtro, (array) ['id_prateleira', '===', (int) $id_prateleira]);
+    if($id_armario != ''){
+        array_push($filtro, (array) ['prateleira', '===', convert_id($id_prateleira)]);
     }
 
-    if($id_armario != 0){
-        array_push($filtro, (array) ['id_armario', '===', (int) $id_armario]);
+    if($id_armario != ''){
+        array_push($filtro, (array) ['armario', '===', convert_id($id_armario)]);
     }
 
-    if($id_prateleira != 0){
-        array_push($filtro, (array) ['id_prateleira', '===', (int) $id_prateleira]);
+    if($id_prateleira != ''){
+        array_push($filtro, (array) ['prateleira', '===', convert_id($id_prateleira)]);
     }
 
-    if($id_caixa != 0){
-        array_push($filtro, (array) ['id_caixa', '===', (int)  $id_caixa]);
+    if($id_caixa != ''){
+        array_push($filtro, (array) ['caixa', '===', convert_id($id_caixa)]);
     }
 
     $filtro_pesquisa['filtro'] = (array) ['and' => (array) $filtro];
 
 
-    $retorno_documentos_banco = (array) $objeto_documento->pesquisar_documentos_todos($filtro_pesquisa);
+    $retorno_documentos_banco = (array) $objeto_documento->pesquisar_todos($filtro_pesquisa);
 
     if (empty($retorno_documentos_banco) == false) {
         foreach ($retorno_documentos_banco as $documento) {
-            $modelo = (array) ['id_documento' => (int) 0, 'nome_documento' => (string) '', 'descricao' => (string) '', 'tipo' => (string) '', 'nome_armario' => (string) '', 'nome_prateleira' => (string) '', 'nome_caixa' => (string) '', 'quantidade_downloads' => (int) 0, 'codigo_barras' => (string) ''];
+            $modelo = (array) [];
 
-            $modelo['id_documento'] = (int) $documento['id_documento'];
+            $modelo['id_documento'] = $documento['_id'];
             $modelo['nome_documento'] = (string) $documento['nome_documento'];
             $modelo['descricao'] = (string) $documento['descricao'];
             $modelo['tipo'] = (string) $documento['forma_visualizacao'];
@@ -825,21 +813,21 @@ router_add('pesquisar_documentos_todos', function () {
             }
 
             $objeto_armario = new Armario();
-            $retorno_armario = (array) $objeto_armario->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['id_armario', '===', (int) $documento['id_armario']], (array) ['id_empresa', '===', (int) $id_empresa]]]]);
+            $retorno_armario = (array) $objeto_armario->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['_id', '===', $documento['armario']], (array) ['empresa', '===', convert_id($id_empresa)]]]]);
 
             if (empty($retorno_armario) == false) {
                 $modelo['nome_armario'] = (string) $retorno_armario['nome_armario'];
             }
 
             $objeto_prateleira = new Prateleira();
-            $retorno_prateleira = (array) $objeto_prateleira->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['id_prateleira', '===', (int) $documento['id_prateleira']], (array) ['id_empresa', '===', (int) $id_empresa]]]]);
+            $retorno_prateleira = (array) $objeto_prateleira->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['_id', '===', $documento['prateleira']], (array) ['empresa', '===', convert_id($id_empresa)]]]]);
 
             if (empty($retorno_prateleira) == false) {
                 $modelo['nome_prateleira'] = (string) $retorno_prateleira['nome_prateleira'];
             }
 
             $objeto_caixa = new Caixa();
-            $retorno_caixa = (array) $objeto_caixa->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['id_caixa', '===', (int) $documento['id_caixa']], (array) ['id_empresa', '===', (int) $id_empresa]]]]);
+            $retorno_caixa = (array) $objeto_caixa->pesquisar((array) ['filtro' => (array) ['and' => (array) [(array) ['_id', '===', $documento['caixa']], (array) ['empresa', '===', convert_id($id_empresa)]]]]);
 
             if (empty($retorno_caixa) == false) {
                 $modelo['nome_caixa'] = (string) $retorno_caixa['nome_caixa'];
@@ -849,11 +837,11 @@ router_add('pesquisar_documentos_todos', function () {
         }
     }
 
-    if ($preferencia_usuario_retorno != $limite_retorno) {
-        $objeto_preferencia = new Preferencia();
-        $retorno_prefenrencia = (bool) $objeto_preferencia->excluir((array) ['nome_preferencia' => (string) 'QUANTIDADE_LIMITE_DOCUMENTO', 'codigo_usuario' => (int) $id_usuario, 'codigo_sistema' => (int) $id_sistema]);
-        $retorno_prefenrencia = (bool) $objeto_preferencia->salvar_dados((array) ['codigo_usuario' => (int) $id_usuario, 'codigo_sistema' => (int) $id_sistema, 'nome_preferencia' => (string) 'QUANTIDADE_LIMITE_DOCUMENTO', 'preferencia' => (string) $limite_retorno]);
-    }
+    // if ($preferencia_usuario_retorno != $limite_retorno) {
+    //     $objeto_preferencia = new Preferencia();
+    //     $retorno_prefenrencia = (bool) $objeto_preferencia->excluir((array) ['nome_preferencia' => (string) 'QUANTIDADE_LIMITE_DOCUMENTO', 'codigo_usuario' => convert_id($id_usuario), 'codigo_sistema' => convert_id($id_sistema)]);
+    //     $retorno_prefenrencia = (bool) $objeto_preferencia->salvar_dados((array) ['codigo_usuario' => convert_id($id_sistema), 'codigo_sistema' => convert_id($id_sistema), 'nome_preferencia' => (string) 'QUANTIDADE_LIMITE_DOCUMENTO', 'preferencia' => (string) $limite_retorno]);
+    // }
 
     echo json_encode(['dados' => $retorno], JSON_UNESCAPED_UNICODE);
     exit;
@@ -862,11 +850,11 @@ router_add('pesquisar_documentos_todos', function () {
 //@audit pesquisar_documentos
 router_add('pesquisar_documentos', function () {
     $objeto_documento = new Documentos();
-    $id_documento = (int) (isset($_REQUEST['codigo_documento']) ? intval($_REQUEST['codigo_documento'], 10) : 0);
+    $id_documento = (isset($_REQUEST['codigo_documento']) ? convert_id($_REQUEST['codigo_documento']) : null);
 
-    $dados['filtro'] = (array) ['and' => [['id_documento', '===', (int) $id_documento]]];
+    $dados['filtro'] = (array) ['and' => [['_id', '===', $id_documento]]];
 
-    echo json_encode(['dados' => (array) $objeto_documento->pesquisar_documento($dados)], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['dados' => (array) $objeto_documento->pesquisar($dados)], JSON_UNESCAPED_UNICODE);
     exit;
 });
 
@@ -877,13 +865,14 @@ router_add('baixar_documento', function () {
     $endereco = (string) (isset($_REQUEST['endereco']) ? (string) $_REQUEST['endereco'] : '');
     $arquivo = (string) file_get_contents($endereco);
     $nome_documento = (string) 'nome_padrao';
+    $extensao = (array) [];
 
     if (array_key_exists('nome_documento', $informacoes_documento) == true) {
         $nome_documento = (string) $informacoes_documento['nome_documento'];
     }
 
-    if (array_key_exists('id_tipo_arquivo', $informacoes_documento) == true) {
-        $extensao = (array) model_one('tipo_arquivo', ['id_tipo_arquivo', '===', (int) intval($informacoes_documento['id_tipo_arquivo'], 10)]);
+    if (array_key_exists('tipo_arquivo', $informacoes_documento) == true) {
+        $extensao = (array) model_one('tipo_arquivo', ['_id', '===', convert_id($informacoes_documento['tipo_arquivo'])]);
 
         if (empty($extensao) == false) {
             if (array_key_exists('tipo_arquivo', $extensao) == true) {

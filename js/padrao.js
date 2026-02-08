@@ -753,7 +753,7 @@ function validarCpfCnpj(elemento, mensagem) {
     }
 
     if (mensagem === true) {
-      alert("CPF/CNPJ inválido!");
+      Swal.fire({ title: "FALHA NA OPERAÇÃO!", text: "CPF/CNPJ inválido!", icon: "error" });
     }
 
     elemento.value = "";

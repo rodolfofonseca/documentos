@@ -15,7 +15,7 @@ router_add('index', function(){
     $usuario_preferencia_pesquisar_log_automaticamente = (string) 'CHECKED';
 
     //MONTANDO O FILTRO DE PESQUISA PARA SABER SE O USUÁRIO QUE ESTÁ LOGADO NO SISTEMA PREFERE PESQUISAR OS LOGS AUTOMATICAMENTE AO ABRIR A PÁGINA
-    $filtro_pesquisa = (array) ['and' => (array) [['id_sistema', '===', (int) intval(CODIGO_SISTEMA, 10)], ['id_usuario', '===', (int) intval(CODIGO_USUARIO, 10)], ['nome_preferencia', '===', (string) 'PESQUISAR_LOG_AUTOMATICAMENTE']]];
+    $filtro_pesquisa = (array) ['and' => (array) [['sistema', '===', convert_id(CODIGO_SISTEMA)], ['usuario', '===', convert_id(CODIGO_USUARIO)], ['nome_preferencia', '===', (string) 'PESQUISAR_LOG_AUTOMATICAMENTE']]];
     $retorno_pesquisa_preferencia = (array) $objeto_preferencia->pesquisar((array) ['filtro' => (array) $filtro_pesquisa]);
 
     if(empty($retorno_pesquisa_preferencia) == true){
@@ -24,8 +24,8 @@ router_add('index', function(){
 
     ?>
     <script>
-        const CODIGO_EMPRESA = <?php echo CODIGO_EMPRESA; ?>;
-        const CODIGO_USUARIO = <?php echo CODIGO_USUARIO; ?>;
+        const CODIGO_EMPRESA = "<?php echo CODIGO_EMPRESA; ?>;"
+        const CODIGO_USUARIO = "<?php echo CODIGO_USUARIO; ?>;"
         const NOME_USUARIO = "<?php echo NOME_USUARIO; ?>";
         const CODIGO_SISTEMA = "<?php echo CODIGO_SISTEMA; ?>";
         const PESQUISAR_LOG_AUTOMATICAMENTE = "<?php echo $usuario_preferencia_pesquisar_log_automaticamente; ?>";

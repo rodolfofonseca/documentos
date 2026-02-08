@@ -3,17 +3,15 @@ require_once 'Classes/bancoDeDados.php';
 require_once 'Modelos/Sistema.php';
 require_once 'Modelos/TipoArquivo.php';
 require_once 'Modelos/Cloudinary.php';
+require_once 'Modelos/TipoArquivoSistema.php';
 
 router_add('index', function () {
     require_once 'includes/head.php';
-
-    $id_sistema = (int) intval($_SESSION['id_sistema'], 10);
-    $id_empresa = (int) intval($_SESSION['id_empresa'], 10);
 ?>
     <script>
-        const ID_EMPRESA = <?php echo $id_empresa; ?>;
-        const CODIGO_SISTEMA = <?php echo CODIGO_SISTEMA; ?>;
-        var ID_CLOUDINARY = 0;
+        const ID_EMPRESA = "<?php echo CODIGO_EMPRESA; ?>";
+        const CODIGO_SISTEMA = "<?php echo CODIGO_SISTEMA; ?>";
+        var ID_CLOUDINARY = "";
         /**
          * Função responsável por realizar o salvamento dos dados básico do sistema
          */
@@ -42,9 +40,7 @@ router_add('index', function () {
          * Função responsável por retornar a dashboard do sistema
          */
         function voltar_dashboard() {
-            window.location.href = sistema.url('/dashboard.php', {
-                'rota': 'index'
-            });
+            window.location.href = sistema.url('/dashboard.php', {'rota': 'index'});
         }
 
         /**
@@ -60,7 +56,7 @@ router_add('index', function () {
                 tipo_documento = sistema.remover_option(tipo_documento);
 
                 for (let cont = 0; cont < tamanho; cont++) {
-                    tipo_documento.appendChild(sistema.gerar_option(retorno[cont].tipo, "(" + retorno[cont].tipo + ") " + retorno[cont].descricao));
+                    tipo_documento.appendChild(sistema.gerar_option(retorno[cont].tipo, "(" + retorno[cont].tipo + ") " + retorno[cont].nome_tipo_arquivo));
                 }
             }, false);
         }
@@ -73,7 +69,7 @@ router_add('index', function () {
             let endereco_documento = document.querySelector('#endereco_documento').value;
             let descricao = document.querySelector('#descricao').value;
 
-            if (ID_EMPRESA != 0) {
+            if (ID_EMPRESA != '') {
                 sistema.request.post('/sistema.php', {
                     'rota': 'enviar_dados_tipo_arquivo',
                     'id_empresa': ID_EMPRESA,
@@ -86,7 +82,7 @@ router_add('index', function () {
                     } else {
                         Swal.fire('Erro', 'Erro durante a operação!', 'error');
                     }
-                    pesquisar_tipo_arquivo();
+                    window.location.href = sistema.url('/sistema.php', {'rota': 'index'});
                 });
             }
         }
@@ -94,7 +90,7 @@ router_add('index', function () {
         function pesquisar_tipo_arquivo() {
             sistema.request.post('/sistema.php', {
                 'rota': 'pesquisar_todos_tipos_arquivos',
-                'id_empresa': ID_EMPRESA
+                'empresa': ID_EMPRESA
             }, function(retorno) {
                 let tipo_arquivo = retorno.dados;
                 let tamanho = tipo_arquivo.length;
@@ -107,17 +103,16 @@ router_add('index', function () {
 
                 if (tamanho < 1) {
                     let linha = document.createElement('tr');
-                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA CONFIGURAÇÃO TIPO DE ARQUIVO ENCONTRADO!', 'inner', true, 5));
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUMA CONFIGURAÇÃO TIPO DE ARQUIVO ENCONTRADO!', 'inner', true, 4));
                     tabela.appendChild(linha);
                 } else {
                     sistema.each(tipo_arquivo, function(contador, arquivo) {
                         let linha = document.createElement('tr');
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(arquivo.id_tipo_arquivo, 2, "0"), 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], arquivo.tipo_arquivo, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], arquivo.descricao, 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], arquivo.endereco_documento, 'inner'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('excluir_tipo_arquivo_' + arquivo.id_tipo_arquivo, 'EXCLUIR', ['btn', 'btn-danger'], function excluir_tipo_arquivo_function() {
-                            excluir_tipo_arquivo(arquivo.id_tipo_arquivo);
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('excluir_tipo_arquivo_' + arquivo._id.$oid, 'EXCLUIR', ['btn', 'btn-danger'], function excluir_tipo_arquivo_function() {
+                            excluir_tipo_arquivo(arquivo._id.$oid);
                         }), 'append'));
 
                         tabela.appendChild(linha);
@@ -173,7 +168,7 @@ router_add('index', function () {
             let dns = document.querySelector('#dns').value;
             let usar = document.querySelector('#usar').value;
 
-            if(ID_EMPRESA != 0){
+            if(ID_EMPRESA != ""){
                 sistema.request.post('/sistema.php', {
                     'rota':'enviar_dados_cloudinary',
                     'id_cloudinary': ID_CLOUDINARY,
@@ -201,24 +196,23 @@ router_add('index', function () {
 
                 if(tamanho < 1){
                     let linha = document.createElement('tr');
-                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM CLOUDINARY ENCONTRADO!', 'inner', true, 6));
+                    linha.appendChild(sistema.gerar_td(['text-center'], 'NENHUM CLOUDINARY ENCONTRADO!', 'inner', true, 5));
                     tabela.appendChild(linha);
                 }else{
                     sistema.each(cloudinary, function(contador, dados){
                         linha = document.createElement('tr');
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.str_pad(dados.id_cloudinary, 2, "0"), 'inner'));
                         linha.appendChild(sistema.gerar_td(['text-center'], dados.dns, 'inner'));
 
                         if(dados.usar == 'S'){
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_usar_sim_'+dados.id_cloudinary, 'SIM', ['btn', 'btn-success', 'custom-radius'], function usar(){}), 'append'));
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_usar_sim_'+dados._id.$oid, 'SIM', ['btn', 'btn-success', 'custom-radius'], function usar(){}), 'append'));
                         }else{
-                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_usar_sim_'+dados.id_cloudinary, 'NÃO', ['btn', 'btn-danger', 'custom-radius'], function usar(){}), 'append'));
+                            linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_usar_sim_'+dados._id.$oid, 'NÃO', ['btn', 'btn-danger', 'custom-radius'], function usar(){}), 'append'));
                         }
 
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_cloudinary_'+dados.id_cloudinary, 'ALTERAR TIPO', ['btn', 'btn-info', 'custom-radius'], function alterar_usar_cloudinary(){alterar_cloudinary(dados.id_cloudinary, dados.usar);}), 'append'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_dns_cloudinary_'+dados.id_cloudinary, 'ALTERAR DNS', ['btn', 'btn-info', 'custom-radius'], function alterar_cloudinary_dns(){alterar_dns(dados.id_cloudinary, dados.dns, dados.usar);}), 'append'));
-                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_excluir_cloudinary_'+dados.id_cloudinary, 'EXCLUIR',['btn', 'btn-danger', 'custom-radius'], function excluir_cloudinary_sistema(){excluir_cloudinary(dados.id_cloudinary);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_cloudinary_'+dados._id.$oid, 'ALTERAR TIPO', ['btn', 'btn-info', 'custom-radius'], function alterar_usar_cloudinary(){alterar_cloudinary(dados._id.$oid, dados.usar);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_alterar_dns_cloudinary_'+dados._id.$oid, 'ALTERAR DNS', ['btn', 'btn-info', 'custom-radius'], function alterar_cloudinary_dns(){alterar_dns(dados._id.$oid, dados.dns, dados.usar);}), 'append'));
+                        linha.appendChild(sistema.gerar_td(['text-center'], sistema.gerar_botao('botao_excluir_cloudinary_'+dados._id.$oid, 'EXCLUIR',['btn', 'btn-danger', 'custom-radius'], function excluir_cloudinary_sistema(){excluir_cloudinary(dados._id.$oid);}), 'append'));
 
                         tabela.appendChild(linha);
                     });
@@ -323,7 +317,7 @@ router_add('index', function () {
                         </div>
                     </div>
                     <div class="card-body">
-                        <input type="hidden" name="id_sistema" id="id_sistema" value="<?php echo $id_sistema; ?>" />
+                        <input type="hidden" name="id_sistema" id="id_sistema" value="<?php echo CODIGO_SISTEMA; ?>" />
                         <div class="row">
                             <div class="col-2 text-center">
                                 <label>VERSÃO SISTEMA ATUAL</label>
@@ -429,7 +423,6 @@ router_add('index', function () {
                                     <table class="table table-hover table-striped" id="tabela_tipo_arquivo">
                                         <thead class="bg-info text-white">
                                             <tr class="text-center">
-                                                <th scope="col">#</th>
                                                 <th scope="col">EXTENSÃO</th>
                                                 <th scope="col">DESCRICAO</th>
                                                 <th scope="col">ENDEREÇO</th>
@@ -438,7 +431,7 @@ router_add('index', function () {
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="5" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
+                                                <td colspan="4" class="text-center">UTILIZE OS FILTROS PARA FACILITAR SUA PESQUISA</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -486,7 +479,6 @@ router_add('index', function () {
                                 <table class="table table-hover table-striped" id="tabela_cloudinary">
                                     <thead class="bg-info text-white">
                                         <tr class="text-center">
-                                            <th scope="col">#</th>
                                             <th scope="col">DNS</th>
                                             <th scope="col">USAR</th>
                                             <th scope="col">ALTERAR TIPO</th>
@@ -496,7 +488,7 @@ router_add('index', function () {
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td colspan="6" class="text-center">NENHUM CLOUDINARY ENCONTRADO!</td>
+                                            <td colspan="5" class="text-center">NENHUM CLOUDINARY ENCONTRADO!</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -510,26 +502,24 @@ router_add('index', function () {
 
     <script>
         window.onload = function() {
-            validar_acesso_administrador('<?php echo $_SESSION['tipo_usuario']; ?>');
-
-            let id_sistema = document.querySelector('#id_sistema').value;
+            validar_acesso_administrador('<?php echo TIPO_USUARIO; ?>');
 
             sistema.request.post('/sistema.php', {
                 'rota': 'pesquisar_dados_sistema',
-                'codigo_sistema': id_sistema
+                'codigo_sistema': CODIGO_SISTEMA
             }, function(retorno) {
                 let dados_sistema = retorno.dados;
-                document.querySelector('#id_sistema').value = retorno.dados.id_sistema;
-                document.querySelector('#versao_sistema').value = retorno.dados.versao_sistema;
-                document.querySelector('#chave_api').value = retorno.dados.chave_api;
-                document.querySelector('#cidade').value = retorno.dados.cidade;
-                document.querySelector('#tamanho_arquivo_sistema').value = retorno.dados.tamanho_arquivo;
+                document.querySelector('#id_sistema').value = dados_sistema._id.$oid;
+                document.querySelector('#versao_sistema').value = dados_sistema.versao_sistema;
+                document.querySelector('#chave_api').value = dados_sistema.chave_api;
+                document.querySelector('#cidade').value = dados_sistema.cidade;
+                document.querySelector('#tamanho_arquivo_sistema').value = dados_sistema.tamanho_arquivo;
 
                 montar_select_tipo_arquivo();
+                pesquisar_tipo_arquivo();
+                pesquisar_cloudinary();
             });
 
-            pesquisar_tipo_arquivo();
-            pesquisar_cloudinary();
         }
     </script>
 <?php
@@ -568,9 +558,9 @@ router_add('enviar_dados_cloudinary', function(){
  * Rota responsável por realizar a pesquisa das informações do sistema para o usuário visualizar
  */
 router_add('pesquisar_dados_sistema', function () {
-    $id_sistema = (isset($_REQUEST['codigo_sistema']) ? (int) intval($_REQUEST['codigo_sistema'], 10) : 0);
+    $id_sistema = (string) (isset($_REQUEST['codigo_sistema']) ? (string) $_REQUEST['codigo_sistema'] : '');
 
-    $filtro = (array) ['filtro' => (array) ['id_sistema', '===', (int) $id_sistema]];
+    $filtro = (array) ['filtro' => (array) ['_id', '===', convert_id($id_sistema)]];
 
     $objeto_sistema = new Sistema();
 
@@ -582,10 +572,10 @@ router_add('pesquisar_dados_sistema', function () {
  * Rota responsável por pesquisar todos os tipos de arquivo de acordo com os filtros passados.
  */
 router_add('pesquisar_todos_tipos_arquivos', function () {
-    $id_empresa = (isset($_REQUEST['id_empresa']) ? (int) intval($_REQUEST['id_empresa'], 10) : 0);
+    $id_empresa =(string) (isset($_REQUEST['empresa']) ? (string) $_REQUEST['empresa'] : '');
     $objeto_tipo_arquivo = new TipoArquivo();
 
-    $filtro = (array) ['condicao' => (array) ['id_empresa', '===', (int) $id_empresa], 'ordenacao' => (array) [], 'limite' => (int) intval(10, 10)];
+    $filtro = (array) ['condicao' => (array) ['empresa', '===', convert_id($id_empresa)], 'ordenacao' => (array) [], 'limite' => (int) intval(10, 10)];
 
     echo json_encode((array) ['dados' => (array) $objeto_tipo_arquivo->pesquisar_todos($filtro)]);
 
@@ -596,23 +586,23 @@ router_add('pesquisar_todos_tipos_arquivos', function () {
  * Rota responsável por pesquisar os cloudinary cadastrados no sistema para empresa.
  */
 router_add('pesquisar_cloudinary_empresa', function(){
-    $id_empresa = (isset($_REQUEST['codigo_empresa']) ? (int) intval($_REQUEST['codigo_empresa'], 10) : 0);
+    $id_empresa = (isset($_REQUEST['codigo_empresa']) ? (string) $_REQUEST['codigo_empresa'] : '');
     $objeto_cloudinary = new Cloudinary();
 
-    echo json_encode(['dados' => (array) $objeto_cloudinary->pesqusiar_todos((array) ['filtro' => (array) ['id_empresa', '===', (int) intval($id_empresa, 10)], 'ordenacao' => (array) [], 'limite' => (int) 0])], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['dados' => (array) $objeto_cloudinary->pesquisar_todos((array) ['filtro' => (array) ['empresa', '===', convert_id($id_empresa)], 'ordenacao' => (array) [], 'limite' => (int) 0])], JSON_UNESCAPED_UNICODE);
     exit;
 });
 
 router_add('montar_array_tipo_arquivo', function () {
-    $objeto_tipo_arquivo = new TipoArquivo();
-    echo json_encode((array) $objeto_tipo_arquivo->montar_array_tipo_arquivo(), JSON_UNESCAPED_UNICODE);
+    $objeto_tipo_arquivo = new TipoArquivoSistema();
+    echo json_encode((array) $objeto_tipo_arquivo->pesquisar_todos((array) ['filtro' => (array) [], 'ordenacao' => (array) ['nome_tipo_arquivo' => (bool) true], 'limite' => (int) 0]), JSON_UNESCAPED_UNICODE);
 });
 
 /**
  * Rota responsável por deletar o tipo de arquivo do sistema.
  */
 router_add('excluir_tipo_arquivo', function () {
-    $id_tipo_arquivo = (isset($_REQUEST['id_tipo_arquivo']) ? (int) intval($_REQUEST['id_tipo_arquivo'], 10) : 0);
+    $id_tipo_arquivo = (string) (isset($_REQUEST['id_tipo_arquivo']) ? (string) $_REQUEST['id_tipo_arquivo'] : '');
     $objeto_tipo_arquivo = new TipoArquivo();
 
     echo json_encode((array) ['status' => (bool) $objeto_tipo_arquivo->deletar((array) ['id_tipo_arquivo' => $id_tipo_arquivo])]);

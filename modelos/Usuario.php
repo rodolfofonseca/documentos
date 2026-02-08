@@ -1,7 +1,8 @@
 <?php
 require_once 'Classes/bancoDeDados.php';
+require_once 'Interface.php';
 
-class Usuario{
+class Usuario implements InterfaceModelo{
     private $id_usuario;
     private $id_empresa;
     private $nome_usuario;
@@ -12,25 +13,25 @@ class Usuario{
     private $email;
     private $opcao = ['const' => 8];
 
-    private function tabela(){
-        return (string) 'usuario';
+    public function tabela(){
+        return (string) 'usuarios';
     }
 
-    private function modelo(){
-        return (array) ['id_usuario' => (int) 0, 'id_empresa' => (int) 0, 'nome_usuario' => (string) '', 'login' => (string) '', 'senha_usuario' => (string) '', 'tipo' => (string)'COMUM', 'status' => (string) 'ATIVO', 'email' => (string) ''];
+    public function modelo(){
+        return (array) ['_id' => convert_id(''), 'empresa' => convert_id(''), 'nome_usuario' => (string) '', 'login_usuario' => (string) '', 'senha_usuario' => (string) '', 'tipo_usuario' => (string)'COMUM', 'status' => (string) 'ATIVO', 'data_cadastro' => 'date', 'ultimo_login' => 'date'];
     }
 
-    private function colocar_dados($dados){
+    public function colocar_dados($dados){
         if(array_key_exists('codigo_usuario', $dados) == true){
-            $this->id_usuario = (int) intval($dados['codigo_usuario'], 10);
-        }else{
-            $this->id_usuario = (int) 0;
+            if($dados['codigo_usuario'] != ''){
+                $this->id_usuario = convert_id($dados['codigo_usuario']);
+            }
         }
 
         if(array_key_exists('codigo_empresa', $dados) == true){
-            $this->id_empresa = (int) intval($dados['codigo_empresa'], 10);
-        }else{
-            $this->id_empresa = (int) 0;
+            if($dados['codigo_empresa'] != ''){
+                $this->id_empresa = convert_id($dados['codigo_empresa']);
+            }
         }
 
         if(array_key_exists('nome_usuario', $dados) == true){
@@ -56,64 +57,37 @@ class Usuario{
         }else{
             $this->status = (string) 'ATIVO';
         }
-
-        if(array_key_exists('email', $dados) == true){
-            $this->email = (string) $dados['email'];
-        }else{
-            $this->email = (string) '';
-        }
     }
 
     public function salvar_dados($dados){
         $this->colocar_dados($dados);
         $senha_vazia = (string) password_hash('', PASSWORD_DEFAULT, $this->opcao);
+        $retorno_operacao = (bool) false;
 
-        $checar_existencia = (bool) ravf_corp_model_check($this->tabela(), ['id_usuario', '===', (int) $this->id_usuario]);
+        $retorno_checagem = (bool) model_check((string) $this->tabela(), (array) ['login_usuario', '===', (string) $this->login]);
 
-        $retorno_vazio = (bool) password_verify($this->senha_usuario, $senha_vazia);
+        if($retorno_checagem == true){
+            $retorno_pesquisa = (array) model_one((string) $this->tabela(), (array) ['login_usuario', '===', (string) $this->login]);
 
-        if($retorno_vazio == true){
-            return (bool) false;
-        }
-        
-        if($checar_existencia == true){
-            $retorno_usuario = (array) model_one($this->tabela(), ['id_usuario', '===', (int) $this->id_usuario]);
-
-            $retorno_usuario['id_empresa'] = (int) $this->id_empresa;
-            $retorno_usuario['senha_usuario'] = (string) $this->senha_usuario;
-            $retorno_usuario['nome_usuario'] = (string) $this->nome_usuario;
-            $retorno_usuario['login'] = (string) $this->login;
-            $retorno_usuario['email'] = (string) $this->email;
-
-            $array_dados = (array) model_parse($this->modelo(), $retorno_usuario);
-
-            $retorno_array_corp = (bool) ravf_corp_model_update($this->tabela(), ['id_usuario', '===', (int) $this->id_usuario], (array) $array_dados);
-
-            return (bool) model_update($this->tabela(), ['id_usuario', '===', (int) $this->id_usuario], (array) $array_dados);
-        }else{
-            $retorno_login = (bool) ravf_corp_model_check($this->tabela(), ['login', '===', (string) $this->login]);
-
-            if($retorno_login == true){
-                return (bool) false;
+            if(empty($retorno_pesquisa) == true){
             }
-
-            $array_dados = (array) model_parse($this->modelo(), ['id_usuario' => (int) ravf_corp_model_next($this->tabela(), 'id_usuario'), 'id_empresa' => (int) $this->id_empresa,'nome_usuario' => (string) $this->nome_usuario, 'login' => (string) $this->login, 'senha_usuario' => (string) $this->senha_usuario, 'tipo' => (string) $this->tipo, 'status' => (string) $this->status, 'email' => (string) $this->email]);
-
-            $retorno_ravf_corp = (bool) ravf_corp_model_insert($this->tabela(), (array) $array_dados);
-
-            return (bool) model_insert($this->tabela(), (array) $array_dados);
+            $retorno_operacao = (bool) model_update((string) $this->tabela(), (array) ['login_usuario', '===', (string) $this->login], (array) ['nome_usuario' => (string) $this->nome_usuario, 'tipo_usuario' => (string) $this->tipo, 'status' => (string) $this->status]);
+        }else{
+            $retorno_operacao = (bool) model_insert((string) $this->tabela(), (array) ['empresa' => $this->id_empresa, 'nome_usuario' => (string) $this->nome_usuario, 'login_usuario' => (string) $this->login, 'senha_usuario' => (string) $this->senha_usuario, 'tipo_usuario' => (string) $this->tipo, 'status' => (string) $this->status, 'data_cadastro' => model_date(), 'ultimo_login' => model_date()]);
         }
+
+        return (bool) $retorno_operacao;
     }
 
     /**
      * Função responsável por realizar o login do usuário no sistema. Esta função recebe como parâmetro atrávés de array o login e senha e retorna o código se existir login e senha compatíveis senão retorna 0.
-     * @param array $dados ['login' => 'xxxx', 'senha_usuario' => (string) 'xxxxxx' ];
+     * @param array $dados ['login_usuario' => 'xxxx', 'senha_usuario' => (string) 'xxxxxx' ];
      * @return array 
      */
     public function login_sistema($dados){
         $this->colocar_dados($dados);
 
-        $retorno_usuario = (array) model_one($this->tabela(), ['login', '===', (string) $this->login]);
+        $retorno_usuario = (array) model_one($this->tabela(), ['login_usuario', '===', (string) $this->login]);
 
         if(empty($retorno_usuario) == false){
             $retorno_senha =  (bool) password_verify($dados['senha_usuario'], $retorno_usuario['senha_usuario']);
@@ -137,35 +111,22 @@ class Usuario{
     }
 
     /**
-     * Função responsável por verificar qual o status atual do usuário e realizar a alteração de acordo com o status.
-     * @param array contendo os dados do usuário
-     * @return bool com o status da operação
+     * Função responsáel por pesquisar o login_usuario no banco de e retornar essa informação
+     * @param (ObjectfId) id_usuario identificador do usuário do tipo _id
+     * @param (string) login_usuario retorna o login do usuário
      */
-    public function alterar_status($dados){
-        $this->colocar_dados($dados);
+    public function retornar_usuario($id_usuario){
+        $retorno_usuario = (array) $this->pesquisar((array) ['filtro' => (array) ['_id', '===', $id_usuario]]);
 
-        if($this->status == 'ATIVO'){
-            $retorno_ravf_corp = (bool) ravf_corp_model_update((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_usuario', '===', (int) $this->id_usuario]]], (array) ['status' => (string) 'INATIVO']);
-
-            return (bool) model_update((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_usuario', '===', (int) $this->id_usuario]]], (array) ['status' => (string) 'INATIVO']);
-        }else if($this->status == 'INATIVO'){
-            $retorno_ravf_corp = (bool) ravf_corp_model_update((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_usuario', '===', (int) $this->id_usuario]]], (array) ['status' => (string) 'ATIVO']);
-            return (bool) model_update((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_usuario', '===', (int) $this->id_usuario]]], (array) ['status' => (string) 'ATIVO']);
+        if(empty($retorno_usuario) == false){
+            if(array_key_exists('login_usuario', $retorno_usuario) == true){
+                return (string) $retorno_usuario['login_usuario'];
+            }else{
+                return (string) '';
+            }
         }else{
-            return (bool) false;
+            return (string) '';
         }
-    }
-
-    /**
-     * Função responsável por realizar apenas a troca da senha do usuário
-     * @param array contendo as informações do usuário que será realizado a troca da senha
-     * @return bool contendo o resultado da troca da senha.
-     */
-    public function alterar_senha($dados){
-        $this->colocar_dados($dados);
-
-        $retorno_ravf_corp = (bool) ravf_corp_model_update((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_usuario', '===', (int) $this->id_usuario]]], (array) ['senha_usuario' => (string) $this->senha_usuario]);
-        return (bool) model_update((string) $this->tabela(), (array) ['and' => (array) [(array) ['id_empresa', '===', (int) $this->id_empresa], (array) ['id_usuario', '===', (int) $this->id_usuario]]], (array) ['senha_usuario' => (string) $this->senha_usuario]);
     }
 }
 ?>

@@ -4,7 +4,6 @@ ini_set('memory_limit', '-1');
 set_time_limit(0);
 error_reporting(E_ALL & ~E_DEPRECATED);
 require_once 'funcoes.php';
-require_once 'ravf_corp_funcoes.php';
 require_once 'UserFunctions.php';
 require_once 'bootstrap.php';
 require_once 'Cloudinary/vendor/autoload.php';
